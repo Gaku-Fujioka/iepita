@@ -1,0 +1,3768 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>いえぴた！</title>
+    <meta name="description" content="調布市の空き家探しは「いえぴた！」で。診断であなたにぴったりの暮らしを見つけよう。">
+    
+    <!-- PWA用メタタグ -->
+    <meta name="theme-color" content="#f59e0b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="いえぴた！">
+    <meta name="msapplication-TileColor" content="#f59e0b">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Leaflet.js for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Leaflet Locate Control -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol@0.78.0/dist/L.Control.Locate.min.css" />
+    <script src="https://unpkg.com/leaflet.locatecontrol@0.78.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+    
+    <!-- Leaflet MarkerCluster -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+    <style>
+        /* Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap');
+        
+        /* 基本スタイル */
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ページ遷移アニメーション */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s;
+            overflow-y: auto;
+            background-color: #f8fafc; /* bg-slate-50 */
+        }
+        .page-enter {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        .page-exit {
+            transform: translateX(-20%);
+            opacity: 0;
+        }
+        .page-active {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .page-hidden {
+            display: none !important;
+        }
+
+        /* スケルトンローディング */
+        .skeleton {
+            background-color: #e2e8f0; /* bg-slate-200 */
+            border-radius: 0.5rem;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            50% { opacity: .5; }
+        }
+
+        /* カードUI */
+        .property-card {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .property-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+
+        /* 固定CTAバー */
+        .cta-bar {
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* スワイプギャラリー */
+        .gallery-container {
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+        }
+        .gallery-item {
+            scroll-snap-align: center;
+        }
+
+        /* カスタムカラー */
+        .bg-brand-50 { background-color: #fefce8; }
+        .bg-brand-100 { background-color: #fef9c3; }
+        .bg-brand-500 { background-color: #eab308; }
+        .bg-brand-600 { background-color: #ca8a04; }
+        .text-brand-600 { color: #ca8a04; }
+        .border-brand-500 { border-color: #eab308; }
+        .ring-brand-500 { --tw-ring-color: #eab308; }
+
+        /* いえっぴのアニメーション */
+        .iepita-bounce {
+            animation: iepitaBounce 2s ease-in-out infinite;
+        }
+        @keyframes iepitaBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* 吹き出しのアニメーション */
+        .speech-bubble {
+            animation: speechBubble 0.6s ease-out;
+        }
+        @keyframes speechBubble {
+            0% { 
+                opacity: 0; 
+                transform: scale(0.8) translateY(20px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1) translateY(0); 
+            }
+        }
+
+        /* トースト通知のアニメーション */
+        .toast-show {
+            animation: toastSlideIn 0.3s ease-out;
+        }
+        @keyframes toastSlideIn {
+            0% { 
+                opacity: 0; 
+                transform: translateY(-20px) scale(0.9); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        /* スワイプ成功時のエフェクト */
+        .swipe-success {
+            animation: swipeSuccess 0.4s ease-out;
+        }
+        @keyframes swipeSuccess {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Leaflet Mapの高さ */
+        #map {
+            height: 250px;
+            border-radius: 0.75rem; /* rounded-xl */
+        }
+
+        /* トースト通知 */
+        #toast {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* いえっぴトースト通知 */
+        .iepita-toast {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .iepita-speech-bubble {
+            position: relative;
+            background: white;
+            border-radius: 15px;
+            padding: 12px 16px;
+            margin-left: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .iepita-speech-bubble::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 8px solid white;
+        }
+
+        /* いえっぴアニメーション */
+        .iepita-bounce {
+            animation: iepitaBounce 2s infinite;
+        }
+
+        @keyframes iepitaBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .iepita-wiggle {
+            animation: iepitaWiggle 0.5s ease-in-out;
+        }
+
+        @keyframes iepitaWiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        /* 診断中のいえっぴ */
+        .quiz-iepita {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+            animation: iepitaBounce 3s infinite;
+        }
+
+        .quiz-iepita img {
+            width: 60px;
+            height: 60px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+
+        /* マッチングモード用スタイル */
+        .swipe-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.2s ease-out;
+            overflow: hidden;
+        }
+        .swipe-card:active {
+            cursor: grabbing;
+        }
+        .swipe-card.swiping {
+            transition: none;
+        }
+        .swipe-card.swipe-left {
+            transform: translateX(-100%) rotate(-30deg);
+            opacity: 0;
+        }
+        .swipe-card.swipe-right {
+            transform: translateX(100%) rotate(30deg);
+            opacity: 0;
+        }
+        .swipe-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .swipe-overlay.show {
+            opacity: 0.8;
+        }
+        .swipe-overlay.like {
+            color: #ef4444;
+            background: linear-gradient(45deg, rgba(239, 68, 68, 0.1), transparent);
+        }
+        .swipe-overlay.star {
+            color: #eab308;
+            background: linear-gradient(45deg, rgba(234, 179, 8, 0.1), transparent);
+        }
+        .swipe-overlay.dislike {
+            color: #64748b;
+            background: linear-gradient(45deg, rgba(100, 116, 139, 0.1), transparent);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased overflow-hidden">
+
+    <div id="app-container" class="relative mx-auto max-w-lg h-screen overflow-hidden">
+
+        <!-- ===== 開始/診断ページ ===== -->
+        <div id="page-start" class="page page-active p-6 pt-12 flex flex-col items-center justify-center text-center">
+            <div class="mascot text-8xl mb-4">
+                <img src="iepita.png" alt="いえっぴ" class="w-28 h-28 mx-auto drop-shadow-lg object-contain">
+            </div>
+            <h1 class="text-4xl font-extrabold text-brand-600">いえぴた！</h1>
+            <p class="mt-2 text-slate-600">あなたの"ぴたっ"とくる空き家、見つけます。</p>
+            <p class="mt-6 text-sm text-slate-500">簡単な診断で、理想の暮らしを提案します。<br>さあ、始めましょう！</p>
+            <button id="start-quiz-btn" class="mt-10 bg-brand-500 text-white font-bold py-4 px-12 rounded-full shadow-lg hover:bg-brand-600 transition-all duration-300 transform hover:scale-105">
+                診断をはじめる
+            </button>
+        </div>
+
+        <!-- ===== 診断質問ページ ===== -->
+        <div id="page-quiz" class="page page-hidden p-6 flex flex-col justify-between">
+            <div>
+                <div class="pt-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span id="quiz-progress-text" class="text-sm font-medium text-slate-500"></span>
+                        <button id="quiz-back-btn" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fas fa-arrow-left mr-1"></i> 戻る</button>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5">
+                        <div id="quiz-progress-bar" class="bg-brand-500 h-2.5 rounded-full transition-all duration-500"></div>
+                    </div>
+                </div>
+                <div id="quiz-content" class="mt-8">
+                    <!-- 質問がここに挿入されます -->
+                </div>
+            </div>
+            <div id="quiz-nav" class="flex justify-center gap-4 mt-8 pb-4">
+                 <!-- ナビゲーションボタンがここに挿入されます -->
+            </div>
+            
+            <!-- 診断中のいえっぴ -->
+            <div class="quiz-iepita">
+                <img src="iepita.png" alt="いえっぴ" class="iepita-bounce">
+            </div>
+        </div>
+        
+        <!-- ===== 物件リストページ ===== -->
+        <div id="page-list" class="page page-hidden flex flex-col">
+            <header class="p-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-xl font-bold text-brand-600">診断結果</h1>
+                    <div class="flex gap-2">
+                        <button id="toggle-map-btn" class="p-2 rounded-full hover:bg-slate-100" title="マップ表示">
+                            <i class="fas fa-map text-slate-600 text-lg"></i>
+                        </button>
+                        <button id="open-filter-btn" class="p-2 rounded-full hover:bg-slate-100">
+                            <i class="fas fa-sliders text-slate-600 text-lg"></i>
+                        </button>
+                        <button id="seller-page-btn" class="p-2 rounded-full hover:bg-slate-100" title="売り手ページ">
+                            <i class="fas fa-plus text-slate-600 text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 診断結果表示エリア（headerの直下で固定） -->
+                <div id="result-type-display" class="mt-3 bg-white/95 backdrop-blur-sm border-b border-brand-200 p-2 rounded-lg">
+                    <div class="max-w-sm mx-auto">
+                        <p class="text-xs text-slate-500 text-center mb-1">あなたのタイプは...</p>
+                        <p class="font-bold text-brand-600 text-sm text-center"></p>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- マップ表示エリア -->
+            <div id="map-container" class="hidden bg-white border-b border-slate-200">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-lg font-bold text-slate-700">物件マップ</h2>
+                        <button id="close-map-btn" class="p-1 rounded-full hover:bg-slate-100">
+                            <i class="fas fa-times text-slate-600"></i>
+                        </button>
+                    </div>
+                    <div id="map" class="w-full z-0"></div>
+                </div>
+            </div>
+            
+            <main id="property-list-container" class="flex-grow p-4 space-y-4 pb-20">
+                <!-- 物件カードまたはスケルトンがここに挿入されます -->
+            </main>
+            
+            <!-- フィルターモーダル -->
+            <div id="filter-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-end">
+                <div id="filter-panel" class="w-4/5 max-w-sm h-full bg-white shadow-2xl p-6 flex flex-col transform translate-x-full transition-transform duration-300">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold">絞り込み・並び替え</h2>
+                        <button id="close-filter-btn" class="p-2"><i class="fas fa-times text-2xl text-slate-400"></i></button>
+                    </div>
+
+                    <div class="flex-grow overflow-y-auto pr-2 -mr-2">
+                        <!-- 並び替え -->
+                        <div class="mb-6">
+                            <label class="font-bold text-slate-700">並び替え</label>
+                            <select id="sort-select" class="w-full mt-2 p-2 border rounded-lg bg-slate-50">
+                                <option value="match_desc">マッチ度順</option>
+                                <option value="new_desc">新着順</option>
+                                <option value="price_asc">価格が安い順</option>
+                                <option value="price_desc">価格が高い順</option>
+                                <option value="distance_asc">距離が近い順</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 地域フィルター -->
+                        <div class="mb-6">
+                            <label class="font-bold text-slate-700">地域</label>
+                            <div class="mt-2 space-y-3">
+                                <!-- 地域検索ボックス -->
+                                <div>
+                                    <label class="text-sm text-slate-600">地域検索</label>
+                                    <input id="region-search" type="text" placeholder="都道府県・市区町村で検索" 
+                                           class="w-full mt-1 p-2 border rounded-lg bg-slate-50 text-sm">
+                                    <div id="region-suggestions" class="hidden absolute bg-white border rounded-lg shadow-lg mt-1 w-full z-50 max-h-48 overflow-y-auto">
+                                        <!-- 候補リスト -->
+                                    </div>
+                                </div>
+                                
+                                <!-- 都道府県選択 (検索補助) -->
+                                <div>
+                                    <label class="text-sm text-slate-600">都道府県を選択</label>
+                                    <select id="prefecture-select" class="w-full mt-1 p-2 border rounded-lg bg-slate-50 text-sm">
+                                        <option value="">すべて</option>
+                                        <!-- 都道府県オプションはJavaScriptで動的に追加 -->
+                                    </select>
+                                </div>
+                                
+                                <!-- 市区町村選択 (検索補助) -->
+                                <div>
+                                    <label class="text-sm text-slate-600">市区町村を選択</label>
+                                    <select id="city-select" class="w-full mt-1 p-2 border rounded-lg bg-slate-50 text-sm">
+                                        <option value="">すべて</option>
+                                        <!-- 市区町村オプションはJavaScriptで動的に追加 -->
+                                    </select>
+                                </div>
+                                
+                                <!-- 選択地域のクイック選択 -->
+                                <div>
+                                    <label class="text-sm text-slate-600">人気エリア</label>
+                                    <div id="popular-regions" class="flex flex-wrap gap-1 mt-2">
+                                        <!-- 人気エリアボタンはJavaScriptで動的に追加 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- タグ検索 -->
+                        <div class="mb-6">
+                            <label class="font-bold text-slate-700">特徴</label>
+                            <div class="flex items-center justify-end mt-1 mb-2">
+                                <span class="text-xs text-slate-500 mr-2">検索タイプ</span>
+                                <div class="flex items-center text-xs p-0.5 bg-slate-200 rounded-full">
+                                    <button data-type="AND" class="filter-tag-mode-btn bg-white rounded-full px-2 py-0.5 shadow">AND</button>
+                                    <button data-type="OR" class="filter-tag-mode-btn px-2 py-0.5 text-slate-500">OR</button>
+                                </div>
+                            </div>
+                            <div id="filter-tags" class="flex flex-wrap gap-2">
+                                <!-- タグボタンがここに挿入されます -->
+                            </div>
+                        </div>
+                        
+                        <!-- 賃料フィルター -->
+                        <div class="mb-6">
+                            <label for="price-range" class="font-bold text-slate-700">賃料</label>
+                            <input id="price-range" type="range" min="30000" max="150000" step="10000" value="150000" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer mt-2">
+                            <div class="text-right text-sm text-slate-500 mt-1">〜 <span id="price-range-value">15</span>万円</div>
+                        </div>
+
+                        <!-- 築年数フィルター -->
+                        <div class="mb-6">
+                            <label for="age-range" class="font-bold text-slate-700">築年数</label>
+                            <input id="age-range" type="range" min="0" max="100" step="5" value="100" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer mt-2">
+                            <div class="text-right text-sm text-slate-500 mt-1">〜 <span id="age-range-value">100</span>年以内</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto pt-4 flex gap-2">
+                        <button id="reset-filter-btn" class="w-1/3 py-3 rounded-lg border border-slate-300 text-slate-600">リセット</button>
+                        <button id="apply-filter-btn" class="w-2/3 py-3 rounded-lg bg-brand-500 text-white font-bold">この条件で絞り込む</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 物件詳細ページ ===== -->
+        <div id="page-details" class="page page-hidden pb-24">
+            <!-- 詳細コンテンツはJSで生成 -->
+        </div>
+
+        <!-- ===== お気に入りページ ===== -->
+        <div id="page-favorites" class="page page-hidden flex flex-col">
+             <header class="p-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
+                <h1 class="text-xl font-bold text-brand-600">お気に入り</h1>
+            </header>
+            <main id="favorites-list-container" class="flex-grow p-4 space-y-4 pb-20">
+                <!-- お気に入り物件がここに挿入されます -->
+            </main>
+        </div>
+
+        <!-- ===== スターマークページ ===== -->
+        <div id="page-stars" class="page page-hidden flex flex-col">
+             <header class="p-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
+                <h1 class="text-xl font-bold text-brand-600">スターマーク</h1>
+            </header>
+            <main id="stars-list-container" class="flex-grow p-4 space-y-4 pb-20">
+                <!-- スターマーク物件がここに挿入されます -->
+            </main>
+        </div>
+
+        <!-- ===== 興味なしページ ===== -->
+        <div id="page-dislikes" class="page page-hidden flex flex-col">
+             <header class="p-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
+                <h1 class="text-xl font-bold text-brand-600">興味なし</h1>
+            </header>
+            <main id="dislikes-list-container" class="flex-grow p-4 space-y-4 pb-20">
+                <!-- 興味なし物件がここに挿入されます -->
+            </main>
+        </div>
+
+        <!-- ===== マッチングモードページ ===== -->
+        <div id="page-matching" class="page page-hidden flex flex-col">
+            <header class="p-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
+                <h1 class="text-xl font-bold text-brand-600">マッチングモード</h1>
+                <p class="text-sm text-slate-500 mt-1">スワイプで物件を評価しよう！</p>
+            </header>
+            <main class="flex-grow p-4 pb-20 relative">
+                <div id="matching-container" class="relative w-full h-full max-w-sm mx-auto">
+                    <!-- スワイプカードがここに挿入されます -->
+                </div>
+                <div id="matching-empty" class="hidden text-center py-16">
+                    <div class="text-6xl text-slate-300 mb-4">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-600">すべての物件をチェックしました！</h3>
+                    <p class="text-slate-500 mt-2">お気に入りやスターマークページで結果を確認してください。</p>
+                    <button onclick="navigateTo('list')" class="mt-6 bg-brand-500 text-white font-bold py-3 px-8 rounded-full">
+                        物件リストに戻る
+                    </button>
+                </div>
+            </main>
+        </div>
+
+        <!-- ===== 売り手ページ ===== -->
+        <div id="page-seller" class="page page-hidden flex flex-col">
+            <header class="p-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-xl font-bold text-brand-600">物件を出品する</h1>
+                    <button id="back-to-list-btn" class="p-2 rounded-full hover:bg-slate-100">
+                        <i class="fas fa-arrow-left text-slate-600 text-lg"></i>
+                    </button>
+                </div>
+            </header>
+            
+            <main class="flex-grow p-4 pb-20">
+                <div class="max-w-md mx-auto">
+                    <!-- 物件情報入力フォーム -->
+                    <form id="property-form" class="space-y-6">
+                        <div>
+                            <label for="property-title" class="block text-sm font-medium text-slate-700 mb-2">物件タイトル</label>
+                            <input type="text" id="property-title" name="title" 
+                                   class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                                   placeholder="例：駅近の新築一戸建て" required>
+                        </div>
+                        
+                        <div>
+                            <label for="property-address" class="block text-sm font-medium text-slate-700 mb-2">住所</label>
+                            <input type="text" id="property-address" name="address" 
+                                   class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                                   placeholder="例：東京都渋谷区恵比寿1-1-1" required>
+                        </div>
+                        
+                        <div>
+                            <label for="property-price" class="block text-sm font-medium text-slate-700 mb-2">価格</label>
+                            <div class="flex items-center">
+                                <input type="number" id="property-price" name="price" 
+                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                                       placeholder="5000" required>
+                                <span class="ml-2 text-slate-600">万円</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="property-layout" class="block text-sm font-medium text-slate-700 mb-2">間取り</label>
+                            <select id="property-layout" name="layout" 
+                                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent" required>
+                                <option value="">間取りを選択</option>
+                                <option value="1R">1R</option>
+                                <option value="1K">1K</option>
+                                <option value="1DK">1DK</option>
+                                <option value="1LDK">1LDK</option>
+                                <option value="2K">2K</option>
+                                <option value="2DK">2DK</option>
+                                <option value="2LDK">2LDK</option>
+                                <option value="3K">3K</option>
+                                <option value="3DK">3DK</option>
+                                <option value="3LDK">3LDK</option>
+                                <option value="4K">4K</option>
+                                <option value="4DK">4DK</option>
+                                <option value="4LDK">4LDK</option>
+                                <option value="5K以上">5K以上</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="property-age" class="block text-sm font-medium text-slate-700 mb-2">築年数</label>
+                            <select id="property-age" name="age" 
+                                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent" required>
+                                <option value="">築年数を選択</option>
+                                <option value="新築">新築</option>
+                                <option value="築1-3年">築1-3年</option>
+                                <option value="築4-10年">築4-10年</option>
+                                <option value="築11-20年">築11-20年</option>
+                                <option value="築21-30年">築21-30年</option>
+                                <option value="築31年以上">築31年以上</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="property-station" class="block text-sm font-medium text-slate-700 mb-2">最寄駅</label>
+                            <input type="text" id="property-station" name="station" 
+                                   class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                                   placeholder="例：恵比寿駅" required>
+                        </div>
+                        
+                        <div>
+                            <label for="property-walk-time" class="block text-sm font-medium text-slate-700 mb-2">駅から徒歩</label>
+                            <div class="flex items-center">
+                                <input type="number" id="property-walk-time" name="walkTime" 
+                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                                       placeholder="5" required>
+                                <span class="ml-2 text-slate-600">分</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">設備</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="facilities" value="エアコン" class="mr-2">
+                                    <span class="text-sm">エアコン</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="facilities" value="洗濯機" class="mr-2">
+                                    <span class="text-sm">洗濯機</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="facilities" value="冷蔵庫" class="mr-2">
+                                    <span class="text-sm">冷蔵庫</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="facilities" value="テレビ" class="mr-2">
+                                    <span class="text-sm">テレビ</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="facilities" value="Wi-Fi" class="mr-2">
+                                    <span class="text-sm">Wi-Fi</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="facilities" value="駐車場" class="mr-2">
+                                    <span class="text-sm">駐車場</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="facilities" value="バス・トイレ別" class="mr-2">
+                                    <span class="text-sm">バス・トイレ別</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="facilities" value="オートロック" class="mr-2">
+                                    <span class="text-sm">オートロック</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">物件写真（最大4枚）</label>
+                            <div class="space-y-4">
+                                <!-- 写真アップロードエリア -->
+                                <div id="photo-upload-area" class="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-brand-500 transition-colors cursor-pointer">
+                                    <i class="fas fa-camera text-3xl text-slate-400 mb-2"></i>
+                                    <p class="text-sm text-slate-600 mb-2">写真をドラッグ&ドロップまたはクリックして選択</p>
+                                    <p class="text-xs text-slate-500">JPG, PNG形式（各ファイル最大5MB）</p>
+                                    <input type="file" id="photo-input" accept="image/jpeg,image/png" multiple class="hidden">
+                                </div>
+                                
+                                <!-- 写真プレビューエリア -->
+                                <div id="photo-preview-container" class="grid grid-cols-2 gap-3 hidden">
+                                    <div class="relative">
+                                        <img class="w-full h-32 object-cover rounded-lg" src="" alt="写真1">
+                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" onclick="removePhoto(0)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="relative">
+                                        <img class="w-full h-32 object-cover rounded-lg" src="" alt="写真2">
+                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" onclick="removePhoto(1)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="relative">
+                                        <img class="w-full h-32 object-cover rounded-lg" src="" alt="写真3">
+                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" onclick="removePhoto(2)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="relative">
+                                        <img class="w-full h-32 object-cover rounded-lg" src="" alt="写真4">
+                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" onclick="removePhoto(3)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="property-description" class="block text-sm font-medium text-slate-700 mb-2">物件の詳細・特徴</label>
+                            <textarea id="property-description" name="description" rows="4"
+                                      class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                                      placeholder="物件の特徴やアピールポイントを入力してください"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-brand-500 text-white font-bold py-4 px-6 rounded-lg hover:bg-brand-600 transition-colors duration-200">
+                            物件を出品する
+                        </button>
+                    </form>
+                </div>
+            </main>
+        </div>
+
+        <!-- ===== 下部ナビゲーション ===== -->
+        <nav id="bottom-nav" class="hidden absolute bottom-0 left-0 right-0 bg-white shadow-lg grid grid-cols-6 z-20 border-t">
+            <button class="nav-btn p-2 text-brand-500" data-page="list">
+                <i class="fas fa-home text-lg"></i>
+                <span class="text-xs font-bold">物件リスト</span>
+            </button>
+            <button class="nav-btn p-2 text-slate-500" data-page="favorites">
+                <i class="fas fa-heart text-lg"></i>
+                <span class="text-xs">お気に入り</span>
+            </button>
+            <button class="nav-btn p-2 text-slate-500" data-page="stars">
+                <i class="fas fa-star text-lg"></i>
+                <span class="text-xs">スター</span>
+            </button>
+            <button class="nav-btn p-2 text-slate-500" data-page="dislikes">
+                <i class="fas fa-times text-lg"></i>
+                <span class="text-xs">興味なし</span>
+            </button>
+            <button class="nav-btn p-2 text-slate-500" data-page="matching">
+                <i class="fas fa-fire text-lg"></i>
+                <span class="text-xs">マッチング</span>
+            </button>
+             <button class="nav-btn p-2 text-slate-500" data-page="start">
+                <i class="fas fa-undo text-lg"></i>
+                <span class="text-xs">再診断</span>
+            </button>
+        </nav>
+        
+        <!-- ===== トースト通知 ===== -->
+        <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-sm py-2 px-4 rounded-full shadow-lg z-50">
+            <span id="toast-message"></span>
+        </div>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // ========== 状態管理 ==========
+        const state = {
+            currentPage: 'start',
+            quiz: {
+                currentQuestion: 0,
+                answers: {}
+            },
+            properties: [],
+            favorites: [],
+            stars: [],
+            dislikes: [],
+            filters: {
+                sort: 'match_desc',
+                tags: [],
+                tagMode: 'AND', // 'OR'
+                maxPrice: 150000,
+                maxAge: 100,
+                prefecture: '',
+                city: ''
+            },
+            // API接続状態の管理
+            api: {
+                dataLoaded: false,
+                isLoading: false,
+                lastError: null,
+                municipalities: [], // 自治体データ
+                lastFetchTime: null
+            },
+            currentMap: null,
+            detailMap: null,
+            mapMarkers: [],
+            userLocation: null,
+            mapMode: 'single', // 'single' or 'multiple'
+            matching: {
+                currentIndex: 0,
+                properties: [],
+                isAnimating: false
+            }
+        };
+
+        // ========== ダミーデータ ==========
+        let dummyProperties = [
+    { 
+        id: 1, 
+        title: '緑に囲まれた静かな古民家', 
+        address: '東京都調布市深大寺元町', 
+        price: 85000, 
+        layout: '3DK', 
+        age: 60, 
+        station_distance: 20, 
+        tags: ['古民家', '自然豊か', 'DIY可', 'ペット可'], 
+        amenities: ['wifi', 'kitchen', 'parking', 'ac'], 
+        exterior_images: [
+            'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop'
+        ],
+        interior_images: [
+            'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop'
+        ],
+        coordinates: [35.698, 139.553] 
+    },
+    { 
+        id: 2, 
+        title: '駅近！リノベーション済みアパート', 
+        address: '東京都調布市布田', 
+        price: 110000, 
+        layout: '1LDK', 
+        age: 15, 
+        station_distance: 5, 
+        tags: ['駅近', 'リノベーション', '都市ガス'], 
+        amenities: ['wifi', 'kitchen', 'ac', 'bath'], 
+        exterior_images: [
+            'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop'
+        ],
+        interior_images: [
+            'https://images.unsplash.com/photo-1560448204-61dc36dc98c8?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop'
+        ],
+        coordinates: [35.652, 139.544] 
+    },
+    { 
+        id: 3, 
+        title: 'クリエイター向けSOHO可能物件', 
+        address: '東京都調布市仙川町', 
+        price: 130000, 
+        layout: '2DK', 
+        age: 25, 
+        station_distance: 8, 
+        tags: ['SOHO可', 'デザイナーズ', '日当たり良好'], 
+        amenities: ['wifi', 'kitchen', 'ac', 'desk'], 
+        exterior_images: [
+            'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop'
+        ],
+        interior_images: [
+            'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop'
+        ],
+        coordinates: [35.662, 139.585] 
+    }
+];
+
+        // ========== 診断データ ==========
+        const quizData = [
+            {
+                question: "どんな場所で暮らしたい？",
+                key: "location",
+                options: [
+                    { text: "🌿 自然に囲まれた静かな場所", value: "nature", tags: ["自然豊か", "古民家"] },
+                    { text: "🏙️ 活気あふれる街の中心", value: "city", tags: ["駅近", "SOHO可"] }
+                ]
+            },
+            {
+                question: "休日はどう過ごすことが多い？",
+                key: "hobby",
+                options: [
+                    { text: "🎨 創作活動やDIYに没頭", value: "creative", tags: ["DIY可", "SOHO可", "デザイナーズ"] },
+                    { text: "🎉 仲間と集まってワイワイ", value: "social", tags: ["シェアハウス", "交流", "ファミリー向け"] },
+                    { text: "🌱 庭いじりや家庭菜園", value: "garden", tags: ["家庭菜園", "自然豊か"] }
+                ]
+            },
+            {
+                question: "家づくり、どう関わりたい？",
+                key: "diy",
+                options: [
+                    { text: "🛠️ 自分の手で空間を創りたい", value: "yes", tags: ["DIY可", "古民家"] },
+                    { text: "✨ キレイで完成された家がいい", value: "no", tags: ["リノベーション", "デザイナーズ"] }
+                ]
+            },
+            {
+                question: "人との繋がりはどのくらい大事？",
+                key: "community",
+                options: [
+                    { text: "🤝 地域や住人との交流を楽しみたい", value: "important", tags: ["交流", "シェアハウス", "ファミリー向け"] },
+                    { text: "🏠 プライベートな時間を大切にしたい", value: "private", tags: ["SOHO可"] }
+                ]
+            }
+        ];
+
+        let resultTypes = {
+            '🧑‍🎨 クリエイティブ隠れ家タイプ': {
+                answers: ['nature', 'creative', 'diy', 'private', 'remote', 'retro'],
+                tags: ['自然豊か', 'DIY可', 'SOHO可'],
+                comment: '静かな空間で、あなたのアイデアが花開くよ！'
+            },
+            '🤝 まちの交流HUBタイプ': {
+                answers: ['city', 'social', 'complete', 'social', 'station', 'soho'],
+                tags: ['シェアハウス', '交流', '駅近'],
+                comment: 'みんなでつながる家、きっと見つかる！'
+            },
+            '🌾 スローライフ家庭菜園タイプ': {
+                answers: ['nature', 'garden', 'diy', 'social', 'car', 'family'],
+                tags: ['家庭菜園', 'ペット可', '庭付き'],
+                comment: '自然と一緒に、ゆったり育む暮らしを♪'
+            },
+            '💻 スマートワーカータイプ': {
+                answers: ['city', 'creative', 'complete', 'private', 'station', 'soho'],
+                tags: ['駅近', 'デザイナーズ', 'SOHO可'],
+                comment: '集中できる空間で、仕事も暮らしも快適に！'
+            },
+            '🏡 ファミリーハーモニータイプ': {
+                answers: ['water', 'social', 'complete', 'social', 'car', 'family'],
+                tags: ['ファミリー向け', '庭付き', '駐車場'],
+                comment: '家族の笑顔があふれる家を見つけよう！'
+            },
+            '🪴 ローカル・コミュニティクリエイタータイプ': {
+                answers: ['nature', 'creative', 'diy', 'social', 'walk', 'community'],
+                tags: ['交流', 'DIY可', '古民家'],
+                comment: 'あなたの手でまちをもっと素敵に！'
+            }
+        };
+
+        let quizQuestions = [
+            {
+                question: "どんな場所で暮らしたい？",
+                key: "location",
+                options: [
+                    { text: "🌿 自然豊か", value: "nature", tags: ["自然豊か", "古民家", "家庭菜園"] },
+                    { text: "🏙️ 都会派", value: "city", tags: ["駅近", "SOHO可", "デザイナーズ"] },
+                    { text: "🌊 海・川のそば", value: "water", tags: ["自然豊か", "海・川近く"] }
+                ]
+            },
+            {
+                question: "休日はどんな過ごし方をしたい？",
+                key: "hobby",
+                options: [
+                    { text: "🎨 創作", value: "creative", tags: ["DIY可", "SOHO可", "デザイナーズ"] },
+                    { text: "🎉 友人交流", value: "social", tags: ["シェアハウス", "交流", "ファミリー向け"] },
+                    { text: "🌳 家庭菜園", value: "garden", tags: ["家庭菜園", "自然豊か", "庭付き"] }
+                ]
+            },
+            {
+                question: "家づくりにどのくらい関わりたい？",
+                key: "diy",
+                options: [
+                    { text: "🛠️ DIYしたい", value: "diy", tags: ["DIY可", "古民家"] },
+                    { text: "✨ 完成された家がいい", value: "complete", tags: ["リノベーション", "デザイナーズ"] }
+                ]
+            },
+            {
+                question: "人との繋がりをどう感じる？",
+                key: "community",
+                options: [
+                    { text: "🤝 交流重視", value: "social", tags: ["交流", "シェアハウス", "ファミリー向け"] },
+                    { text: "🏠 静かに過ごしたい", value: "private", tags: ["SOHO可", "静寂"] }
+                ]
+            },
+            {
+                question: "移動のしやすさ、どのくらい大事？",
+                key: "transport",
+                options: [
+                    { text: "🚉 駅近がいい", value: "station", tags: ["駅近", "SOHO可"] },
+                    { text: "🚗 車が使える場所", value: "car", tags: ["駐車場", "郊外"] },
+                    { text: "🚶 徒歩圏で完結したい", value: "walk", tags: ["徒歩圏", "近隣施設充実"] }
+                ]
+            },
+            {
+                question: "理想の広さは？",
+                key: "size",
+                options: [
+                    { text: "🏠 広々ファミリー向け", value: "family", tags: ["ファミリー向け", "広々", "庭付き"] },
+                    { text: "🛋️ 1人暮らしに十分", value: "single", tags: ["コンパクト", "1人暮らし向け"] },
+                    { text: "🏢 コンパクトSOHO", value: "soho", tags: ["SOHO可", "デザイナーズ", "コンパクト"] }
+                ]
+            },
+            {
+                question: "動物や植物と暮らしたい？",
+                key: "nature",
+                options: [
+                    { text: "🐶 ペットOK必須", value: "pet", tags: ["ペット可", "庭付き"] },
+                    { text: "🌿 庭がほしい", value: "garden", tags: ["庭付き", "家庭菜園", "自然豊か"] },
+                    { text: "🚫 特にこだわらない", value: "none", tags: ["シンプル"] }
+                ]
+            },
+            {
+                question: "働くスタイルに合う家は？",
+                key: "work",
+                options: [
+                    { text: "💻 在宅中心", value: "remote", tags: ["SOHO可", "静寂", "デザイナーズ"] },
+                    { text: "🏢 外出多め", value: "office", tags: ["駅近", "通勤便利"] },
+                    { text: "🧑‍🎓 学生生活メイン", value: "student", tags: ["学生向け", "シェアハウス", "交流"] }
+                ]
+            },
+            {
+                question: "どんな雰囲気が落ち着く？",
+                key: "atmosphere",
+                options: [
+                    { text: "🪵 レトロ", value: "retro", tags: ["古民家", "レトロ", "DIY可"] },
+                    { text: "🧱 モダン", value: "modern", tags: ["デザイナーズ", "モダン"] },
+                    { text: "🌈 ナチュラル", value: "natural", tags: ["自然豊か", "ナチュラル", "庭付き"] },
+                    { text: "🧡 個性的", value: "unique", tags: ["個性的", "DIY可", "デザイナーズ"] }
+                ]
+            },
+            {
+                question: "あなたの暮らしの目的に近いのは？",
+                key: "lifestyle",
+                options: [
+                    { text: "🎓 学びの場", value: "learning", tags: ["学生向け", "SOHO可", "静寂"] },
+                    { text: "💼 仕事の拠点", value: "work", tags: ["SOHO可", "駅近", "デザイナーズ"] },
+                    { text: "👨‍👩‍👧‍👦 家族との時間", value: "family", tags: ["ファミリー向け", "広々", "庭付き"] },
+                    { text: "🌱 地域貢献", value: "community", tags: ["交流", "地域密着", "シェアハウス"] }
+                ]
+            }
+        ];
+
+        const amenityIcons = {
+            wifi: '<i class="fas fa-wifi"></i>',
+            kitchen: '<i class="fas fa-utensils"></i>',
+            parking: '<i class="fas fa-car"></i>',
+            ac: '<i class="fas fa-snowflake"></i>',
+            bath: '<i class="fas fa-bath"></i>',
+            desk: '<i class="fas fa-briefcase"></i>',
+            garden: '<i class="fas fa-leaf"></i>',
+            lounge: '<i class="fas fa-couch"></i>'
+        };
+
+        // ========== DOM要素 ==========
+        const appContainer = document.getElementById('app-container');
+        const pages = {
+            start: document.getElementById('page-start'),
+            quiz: document.getElementById('page-quiz'),
+            list: document.getElementById('page-list'),
+            details: document.getElementById('page-details'),
+            favorites: document.getElementById('page-favorites'),
+            stars: document.getElementById('page-stars'),
+            dislikes: document.getElementById('page-dislikes'),
+            matching: document.getElementById('page-matching'),
+            seller: document.getElementById('page-seller'),
+        };
+        const bottomNav = document.getElementById('bottom-nav');
+        const propertyListContainer = document.getElementById('property-list-container');
+        const favoritesListContainer = document.getElementById('favorites-list-container');
+        const starsListContainer = document.getElementById('stars-list-container');
+        const dislikesListContainer = document.getElementById('dislikes-list-container');
+        const matchingContainer = document.getElementById('matching-container');
+        const matchingEmpty = document.getElementById('matching-empty');
+        const filterModal = document.getElementById('filter-modal');
+        const filterPanel = document.getElementById('filter-panel');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+
+        // ========== データ読み込み ==========
+        const API_ENDPOINTS = {
+            properties: 'properties.json',
+            quiz: 'quiz.json',
+            // 将来のAPI接続用
+            // properties: 'https://api.yourapp.com/properties',
+            // quiz: 'https://api.yourapp.com/quiz',
+            // municipalities: 'https://api.yourapp.com/municipalities'
+        };
+
+        const MAX_RETRIES = 3;
+        const RETRY_DELAY = 1000; // 1秒
+
+        // ローディング状態の管理
+        const setLoadingState = (isLoading = true, message = 'データを読み込み中...') => {
+            const loadingIndicator = document.getElementById('loading-indicator') || createLoadingIndicator();
+            if (isLoading) {
+                loadingIndicator.classList.remove('hidden');
+                loadingIndicator.querySelector('.loading-message').textContent = message;
+            } else {
+                loadingIndicator.classList.add('hidden');
+            }
+        };
+
+        // ローディングインジケーターを作成
+        const createLoadingIndicator = () => {
+            const indicator = document.createElement('div');
+            indicator.id = 'loading-indicator';
+            indicator.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+            indicator.innerHTML = `
+                <div class="bg-white rounded-lg p-6 text-center shadow-lg">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto mb-4"></div>
+                    <div class="loading-message text-sm text-slate-600">データを読み込み中...</div>
+                </div>
+            `;
+            document.body.appendChild(indicator);
+            return indicator;
+        };
+
+        // リトライ機能付きfetch
+        const fetchWithRetry = async (url, options = {}, retries = MAX_RETRIES) => {
+            for (let attempt = 1; attempt <= retries; attempt++) {
+                try {
+                    console.log(`データ取得を試行中... (${attempt}/${retries}): ${url}`);
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒タイムアウト
+                    
+                    const response = await fetch(url, {
+                        ...options,
+                        signal: controller.signal,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            ...options.headers
+                        }
+                    });
+                    
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => null);
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}${errorData ? ` - ${JSON.stringify(errorData)}` : ''}`);
+                    }
+
+                    const data = await response.json();
+                    console.log(`✅ データ取得成功 (${url}):`, data);
+                    return data;
+
+                } catch (error) {
+                    console.warn(`❌ データ取得失敗 (${attempt}/${retries}): ${error.message}`);
+                    
+                    if (attempt === retries) {
+                        throw error;
+                    }
+                    
+                    // 指数バックオフで待機
+                    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * attempt));
+                }
+            }
+        };
+
+        // Firebase風のAPI呼び出しを模擬（将来の拡張用）
+        const fetchAPI = async (endpoint, options = {}) => {
+            const url = typeof endpoint === 'string' ? endpoint : endpoint.url;
+            const isExternalAPI = url.startsWith('http');
+            
+            if (isExternalAPI) {
+                // 外部APIの場合は認証トークンなどを追加
+                const token = localStorage.getItem('auth_token');
+                return await fetchWithRetry(url, {
+                    ...options,
+                    headers: {
+                        'Authorization': token ? `Bearer ${token}` : '',
+                        'X-API-Key': localStorage.getItem('api_key') || '',
+                        ...options.headers
+                    }
+                });
+            } else {
+                // ローカルファイルの場合は既存の処理
+                return await fetchWithRetry(url, options);
+            }
+        };
+
+        // 自治体データAPIとの連携（将来の自治体API用）
+        const fetchMunicipalitiesData = async () => {
+            if (state.api.municipalities.length > 0) {
+                return state.api.municipalities; // キャッシュされたデータを返す
+            }
+
+            try {
+                console.log('🌐 自治体データを取得中...');
+                setLoadingState(true, '自治体データを読み込み中...');
+                
+                // 外部自治体API（例：e-Stat, リクナビNEXT等）の模擬
+                const municipalitiesEndpoint = 'https://api.municipality.com/v1/municipalities';
+                
+                // 実際のAPI呼び出しフロー
+                const municipalitiesData = await fetchAPI(municipalitiesEndpoint, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'User-Agent': 'IEpita-Property-Search/1.0'
+                    }
+                });
+
+                // データのバリデーション
+                if (Array.isArray(municipalitiesData)) {
+                    state.api.municipalities = municipalitiesData;
+                    state.api.lastFetchTime = new Date().toISOString();
+                    
+                    console.log(`🏛️ 自治体データ取得成功: ${municipalitiesData.length}件`);
+                    setLoadingState(false);
+                    
+                    return municipalitiesData;
+                } else {
+                    throw new Error('自治体データの形式が不正です');
+                }
+
+            } catch (error) {
+                console.warn('自治体データ取得失敗:', error);
+                setLoadingState(false);
+                
+                // フォールバック：ローカルデータを使用
+                console.log('🔄 ローカル自治体データにフォールバック...');
+                return await loadLocalMunicipalities();
+            }
+        };
+
+        // ローカル自治体データの読み込み（フォールバック用）
+        const loadLocalMunicipalities = async () => {
+            try {
+                const localData = await fetchAPI('municipalities.json');
+                state.api.municipalities = localData;
+                console.log('📁 ローカル自治体データ読み込み完了');
+                return localData;
+            } catch (error) {
+                console.warn('ローカル自治体データも読み込み失敗:', error);
+                // 最後の手段：properties.jsonから抽出
+                const { prefectures, cityData } = extractRegionData();
+                const municipalities = prefectures.map(prefecture => ({
+                    prefecture_code: generatePrefectureCode(prefecture),
+                    prefecture_name: prefecture,
+                    municipalities: cityData[prefecture] || []
+                }));
+                state.api.municipalities = municipalities;
+                return municipalities;
+            }
+        };
+
+        // 都道府県コードの生成（簡易版）
+        const generatePrefectureCode = (prefecture) => {
+            const codes = {
+                '北海道': '01', '青森県': '02', '岩手県': '03', '宮城県': '04',
+                '秋田県': '05', '山形県': '06', '福島県': '07', '茨城県': '08',
+                '栃木県': '09', '群馬県': '10', '埼玉県': '11', '千葉県': '12',
+                '東京都': '13', '神奈川県': '14', '新潟県': '15', '富山県': '16',
+                '石川県': '17', '福井県': '18', '山梨県': '19', '長野県': '20',
+                '岐阜県': '21', '静岡県': '22', '愛知県': '23', '三重県': '24',
+                '滋賀県': '25', '京都府': '26', '大阪府': '27', '兵庫県': '28',
+                '奈良県': '29', '和歌山県': '30', '鳥取県': '31', '島根県': '32',
+                '岡山県': '33', '広島県': '34', '山口県': '35', '徳島県': '36',
+                '香川県': '37', '愛媛県': '38', '高知県': '39', '福岡県': '40',
+                '佐賀県': '41', '長崎県': '42', '熊本県': '43', '大分県': '44',
+                '宮崎県': '45', '鹿児島県': '46', '沖縄県': '47'
+            };
+            return codes[prefecture] || '99';
+        };
+
+        // メインデータ読み込み関数
+        const loadData = async () => {
+            setLoadingState(true, 'データを読み込み中...');
+            
+            try {
+                // 並列でデータを読み込み（パフォーマンス向上）
+                const [propertiesData, quizData] = await Promise.all([
+                    fetchAPI(API_ENDPOINTS.properties).catch(error => {
+                        console.error('Properties取得エラー:', error);
+                        throw new Error(`物件データの取得に失敗しました: ${error.message}`);
+                    }),
+                    fetchAPI(API_ENDPOINTS.quiz).catch(error => {
+                        console.error('Quiz取得エラー:', error);
+                        throw new Error(`診断データの取得に失敗しました: ${error.message}`);
+                    })
+                ]);
+
+                // データの検証
+                if (!Array.isArray(propertiesData) || propertiesData.length === 0) {
+                    throw new Error('物件データが無効または空です');
+                }
+
+                if (!quizData.questions || !Array.isArray(quizData.questions)) {
+                    throw new Error('診断データが無効です');
+                }
+
+                // データを設定
+                dummyProperties = propertiesData;
+                quizQuestions = quizData.questions;
+                resultTypes = {};
+
+                // resultTypesをセットアップ
+                if (quizData.resultTypes) {
+                    for (const [typeName, typeData] of Object.entries(quizData.resultTypes)) {
+                        resultTypes[typeName] = typeData.answers;
+                    }
+                }
+
+                // 成功メッセージ
+                console.log('🚀 データ読み込み完了:', {
+                    properties: dummyProperties.length,
+                    questions: quizQuestions.length,
+                    resultTypes: Object.keys(resultTypes).length
+                });
+
+                setLoadingState(false);
+                
+                // API状態を更新
+                state.api.dataLoaded = true;
+                state.api.isLoading = false;
+                state.api.lastError = null;
+                state.api.lastFetchTime = new Date().toISOString();
+                
+                // 成功トースト（初回読み込み時のみ）
+                if (!state.dataLoaded) {
+                    showToast('データの読み込み完了！', 'success');
+                    state.dataLoaded = true;
+                }
+
+            } catch (error) {
+                console.error('💥 データ読み込みエラー:', error);
+                setLoadingState(false);
+
+                // API状態を更新
+                state.api.isLoading = false;
+                state.api.lastError = error.message;
+
+                // エラー表示UIを更新
+                showDataLoadError(error.message);
+
+                // フォールバック（既存のハードコードされたデータを使用）
+                console.warn('🔄 フォールバックモードに切り替え...');
+                
+                // デフォルト値での初期化
+                dummyProperties = dummyProperties || [];
+                quizQuestions = quizQuestions || [];
+                resultTypes = resultTypes || {};
+                
+                // 部分的なデータ読み込み成功の場合の処理
+                if (dummyProperties.length > 0 || quizQuestions.length > 0) {
+                    console.log('🟡 部分的なデータ読み込み成功 - 基本機能は利用可能');
+                    state.api.dataLoaded = true; // 一部のデータは読み込み成功
+                }
+            }
+        };
+
+        // データ読み込みエラーの表示
+        const showDataLoadError = (message) => {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed top-4 left-4 right-4 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg z-50';
+            errorDiv.innerHTML = `
+                <div class="flex items-start">
+                    <div class="text-red-600">
+                        <i class="fas fa-exclamation-triangle text-lg"></i>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h3 class="text-sm font-medium text-red-800">データ読み込みエラー</h3>
+                        <p class="text-sm text-red-700 mt-1">${message}</p>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove(); loadData();" 
+                                class="mt-3 text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+                            <i class="fas fa-redo mr-1"></i>再試行
+                        </button>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove();" 
+                            class="ml-3 text-red-400 hover:text-red-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(errorDiv);
+
+            // 5秒後に自動非表示
+            setTimeout(() => {
+                if (errorDiv.parentElement) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        };
+
+        // ========== API状態チェック関数 ==========
+        const isDataLoaded = () => state.api.dataLoaded && dummyProperties.length > 0;
+        
+        const checkDataAvailability = () => {
+            if (!isDataLoaded()) {
+                console.warn('⚠️ データが読み込まれていません');
+                return false;
+            }
+            return true;
+        };
+
+        // ========== データ再読み込み機能 ==========
+        const refreshData = async () => {
+            console.log('🔄 データを再読み込み中...');
+            await loadData();
+            
+            // 自治体データの更新も試行（オプション）
+            try {
+                await fetchMunicipalitiesData();
+            } catch (error) {
+                console.warn('自治体データ更新失敗:', error);
+            }
+        };
+
+        // ========== データ保存の自動化 ==========
+        const saveAllUserData = () => {
+            console.log('💾 全ユーザーデータを保存中...');
+            saveFavorites();
+            saveStars();
+            saveDislikes();
+        };
+
+        // データの整合性チェック
+        const validateUserData = () => {
+            const issues = [];
+            
+            // 配列の型チェック
+            if (!Array.isArray(state.favorites)) {
+                issues.push('favorites is not an array');
+                state.favorites = [];
+            }
+            if (!Array.isArray(state.stars)) {
+                issues.push('stars is not an array');
+                state.stars = [];
+            }
+            if (!Array.isArray(state.dislikes)) {
+                issues.push('dislikes is not an array');
+                state.dislikes = [];
+            }
+
+            // 重複チェック
+            const allIds = [...state.favorites, ...state.stars, ...state.dislikes];
+            const uniqueIds = [...new Set(allIds)];
+            if (allIds.length !== uniqueIds.length) {
+                issues.push('duplicate IDs found in user data');
+            }
+
+            if (issues.length > 0) {
+                console.warn('⚠️ データ整合性の問題を検出:', issues);
+                // 問題がある場合は保存し直す
+                saveAllUserData();
+            } else {
+                console.log('✅ データ整合性チェック完了');
+            }
+        };
+
+        // 全データのリセット機能
+        const resetAllUserData = () => {
+            if (confirm('すべてのユーザーデータ（お気に入り、スターマーク、興味なし）を削除しますか？')) {
+                state.favorites = [];
+                state.stars = [];
+                state.dislikes = [];
+                
+                // localStorageからも削除
+                localStorage.removeItem('iepita_favorites');
+                localStorage.removeItem('iepita_stars');
+                localStorage.removeItem('iepita_dislikes');
+                
+                // セッションストレージのバックアップも削除
+                sessionStorage.removeItem('iepita_favorites_backup');
+                sessionStorage.removeItem('iepita_stars_backup');
+                sessionStorage.removeItem('iepita_dislikes_backup');
+                
+                console.log('🗑️ 全ユーザーデータをリセットしました');
+                showToast('すべてのデータをリセットしました');
+                
+                // 現在のページを再描画
+                if (state.currentPage === 'favorites') renderFavorites();
+                if (state.currentPage === 'stars') renderStars();
+                if (state.currentPage === 'dislikes') renderDislikes();
+            }
+        };
+
+        // 定期的な自動保存（30秒ごと）
+        const startAutoSave = () => {
+            setInterval(() => {
+                saveAllUserData();
+            }, 30000); // 30秒
+        };
+
+        // ページ離脱時の保存
+        const setupPageUnloadSave = () => {
+            window.addEventListener('beforeunload', (e) => {
+                saveAllUserData();
+                console.log('🚪 ページ離脱時にデータを保存しました');
+            });
+
+            // ページが非表示になった時も保存
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    saveAllUserData();
+                    console.log('👁️ ページ非表示時にデータを保存しました');
+                }
+            });
+        };
+
+
+        // ========== 初期化処理 ==========
+        const init = async () => {
+            await loadData();
+            
+            // データチェック
+            if (!checkDataAvailability()) {
+                showDataLoadError('初期データの読み込みに失敗しました。ページを再読み込みしてください。');
+                return;
+            }
+            
+            // ユーザーデータの読み込み
+            loadFavorites();
+            loadStars();
+            loadDislikes();
+            
+            // データ整合性チェック
+            validateUserData();
+            
+            // 自動保存機能の開始
+            startAutoSave();
+            setupPageUnloadSave();
+            
+            initRegionFilters(); // 地域フィルターを初期化
+            setupEventListeners();
+            navigateTo('start');
+        };
+
+        // ========== ナビゲーション ==========
+        const navigateTo = (pageKey, params = {}) => {
+            const oldPage = pages[state.currentPage];
+            const newPage = pages[pageKey];
+
+            if (oldPage && newPage && oldPage !== newPage) {
+                // 詳細ページから遷移する際は地図をクリーンアップ
+                if (state.currentPage === 'details' && state.detailMap) {
+                    state.detailMap.remove();
+                    state.detailMap = null;
+                }
+                
+                oldPage.classList.remove('page-active');
+                oldPage.classList.add('page-exit');
+                
+                setTimeout(() => {
+                    oldPage.classList.add('page-hidden');
+                    oldPage.classList.remove('page-exit');
+                }, 400);
+
+                newPage.classList.remove('page-hidden');
+                // DOMの更新を待つ
+                requestAnimationFrame(() => {
+                    newPage.classList.add('page-enter');
+                    requestAnimationFrame(() => {
+                        newPage.classList.remove('page-enter');
+                        newPage.classList.add('page-active');
+                    });
+                });
+            }
+            
+            state.currentPage = pageKey;
+
+            // ページ特有の処理
+            switch (pageKey) {
+                case 'list':
+                    if (params.fromQuiz) {
+                        calculateMatchScores();
+                        renderResultType();
+                    }
+                    renderPropertyList();
+                    bottomNav.classList.remove('hidden');
+                    break;
+                case 'details':
+                    renderPropertyDetails(params.id);
+                    bottomNav.classList.add('hidden');
+                    break;
+                case 'favorites':
+                    renderFavorites();
+                    bottomNav.classList.remove('hidden');
+                    break;
+                case 'stars':
+                    renderStars();
+                    bottomNav.classList.remove('hidden');
+                    break;
+                case 'dislikes':
+                    renderDislikes();
+                    bottomNav.classList.remove('hidden');
+                    break;
+                case 'matching':
+                    initMatchingMode();
+                    bottomNav.classList.remove('hidden');
+                    break;
+                case 'quiz':
+                    startQuiz();
+                    bottomNav.classList.add('hidden');
+                    break;
+                case 'start':
+                    bottomNav.classList.add('hidden');
+                    break;
+            }
+
+            updateBottomNav(pageKey);
+        };
+
+        // ========== レンダリング ==========
+
+        // 診断結果タイプの表示
+        const renderResultType = () => {
+            const display = document.getElementById('result-type-display');
+            const answers = Object.values(state.quiz.answers);
+            let bestMatch = 'あなたにぴったりのタイプ';
+            let bestMatchData = null;
+            let maxScore = 0;
+
+            // 新しいタイプ分類ロジック
+            for (const typeName in resultTypes) {
+                const typeData = resultTypes[typeName];
+                const expectedAnswers = typeData.answers;
+                
+                // 各質問の回答が期待値と一致するかチェック
+                let score = 0;
+                for (let i = 0; i < expectedAnswers.length && i < answers.length; i++) {
+                    if (answers[i] === expectedAnswers[i]) {
+                        score += 1;
+                    }
+                }
+                
+                // 完全一致の場合はボーナス点
+                if (score === expectedAnswers.length && answers.length === expectedAnswers.length) {
+                    score += 2;
+                }
+                
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestMatch = typeName;
+                    bestMatchData = typeData;
+                }
+            }
+
+            // いえっぴの吹き出しで結果を表示
+            display.innerHTML = `
+                <div class="relative">
+                    <!-- いえっぴキャラクター -->
+                    <div class="flex justify-center mb-2">
+                        <div class="relative iepita-bounce">
+                            <img src="iepita.png" alt="いえっぴ" class="w-8 h-8 drop-shadow-lg object-contain">
+                        </div>
+                    </div>
+                    
+                    <!-- 吹き出し -->
+                    <div class="relative bg-white rounded-lg p-2 shadow-sm border border-brand-200 mx-1 speech-bubble">
+                        <!-- 吹き出しのしっぽ -->
+                        <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white border-r border-b border-brand-200 rotate-45"></div>
+                        
+                        <div class="text-center">
+                            <p class="font-bold text-brand-600 text-xs mb-1">${bestMatch}</p>
+                            <div class="bg-brand-50 p-1.5 rounded">
+                                <p class="text-xs text-brand-700 font-medium">
+                                    いえっぴ「${bestMatchData ? bestMatchData.comment : 'きっと素敵な住まいが見つかるよ♪'}」
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // 物件リストのレンダリング
+        const renderPropertyList = (showSkeleton = true) => {
+            // データロードチェック
+            if (!checkDataAvailability()) {
+                propertyListContainer.innerHTML = `
+                    <div class="text-center py-8 text-slate-500">
+                        <i class="fas fa-home text-4xl mb-4"></i>
+                        <p>データ読み込み中...</p>
+                        <button onclick="refreshData();" class="mt-4 text-sm bg-brand-500 text-white px-4 py-2 rounded hover:bg-brand-600">
+                            <i class="fas fa-redo mr-1"></i>再読み込み
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            if (showSkeleton) {
+                propertyListContainer.innerHTML = Array(3).fill(0).map(createSkeletonCardHTML).join('');
+            }
+
+            setTimeout(() => {
+                const filteredProperties = getFilteredProperties();
+                
+                if (filteredProperties.length === 0) {
+                    propertyListContainer.innerHTML = createEmptyStateHTML('物件が見つかりません', '絞り込み条件を変更してみてください。');
+                    return;
+                }
+                
+                propertyListContainer.innerHTML = filteredProperties.map(createPropertyCardHTML).join('');
+            }, showSkeleton ? 500 : 0);
+        };
+
+        // お気に入りリストのレンダリング
+        const renderFavorites = () => {
+            const favoriteProperties = dummyProperties.filter(p => state.favorites.includes(p.id));
+            if (favoriteProperties.length === 0) {
+                favoritesListContainer.innerHTML = createEmptyStateHTML('お気に入りはまだありません', '気になる物件のハートマークを押してみましょう！');
+                return;
+            }
+            favoritesListContainer.innerHTML = favoriteProperties.map(createPropertyCardHTML).join('');
+        };
+
+        // スターマークリストのレンダリング
+        const renderStars = () => {
+            const starProperties = dummyProperties.filter(p => state.stars.includes(p.id));
+            if (starProperties.length === 0) {
+                starsListContainer.innerHTML = createEmptyStateHTML('スターマークはまだありません', '気になる物件のスターマークを押してみましょう！');
+                return;
+            }
+            starsListContainer.innerHTML = starProperties.map(createPropertyCardHTML).join('');
+        };
+
+        // 興味なしリストのレンダリング
+        const renderDislikes = () => {
+            const dislikeProperties = dummyProperties.filter(p => state.dislikes.includes(p.id));
+            if (dislikeProperties.length === 0) {
+                dislikesListContainer.innerHTML = createEmptyStateHTML('興味なしはまだありません', '気になる物件の興味なしボタンを押してみましょう！');
+                return;
+            }
+            dislikesListContainer.innerHTML = dislikeProperties.map(createPropertyCardHTML).join('');
+        };
+        
+        // 物件詳細のレンダリング
+        const renderPropertyDetails = (propertyId) => {
+            const property = dummyProperties.find(p => p.id === propertyId);
+            if (!property) {
+                pages.details.innerHTML = createEmptyStateHTML('物件情報が見つかりません', 'リストページに戻ってお探しください。');
+                return;
+            }
+
+            // 類似物件 (タグが2つ以上一致するもの)
+            const similarProperties = dummyProperties.filter(p => {
+                if (p.id === property.id) return false;
+                const commonTags = p.tags.filter(tag => property.tags.includes(tag));
+                return commonTags.length >= 2;
+            }).slice(0, 3);
+
+            pages.details.innerHTML = `
+                <header class="relative">
+                    <div class="gallery-container w-full h-64 overflow-x-auto flex snap-x snap-mandatory">
+                        ${(() => {
+                            let imagesToShow = [];
+                            
+                            if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.length > 0) {
+                                // ユーザーがアップロードした写真がある場合は、それを表示
+                                imagesToShow = property.uploadedPhotos.map((photo, index) => ({
+                                    src: photo.dataUrl,
+                                    alt: `${property.title}の画像 ${index + 1}`
+                                }));
+                            } else {
+                                // 既存の画像ファイルの処理
+                                // 外観と内観の画像を分けて表示
+const exteriorImages = property.exterior_images.map((img, index) => ({
+    src: img,
+    alt: `${property.title}の外観 ${index + 1}`,
+    type: 'exterior'
+}));
+
+const interiorImages = property.interior_images.map((img, index) => ({
+    src: img,
+    alt: `${property.title}の内観 ${index + 1}`,
+    type: 'interior'
+}));
+
+imagesToShow = [...exteriorImages, ...interiorImages];
+                            }
+                            
+                            return imagesToShow.map((imgData, index) => `
+                                <div class="gallery-item w-full flex-shrink-0 snap-center">
+                                    <img src="${imgData.src}" 
+                                         alt="${imgData.alt}" class="w-full h-full object-cover">
+                                </div>
+                            `).join('');
+                        })()}
+                    </div>
+                    <button onclick="navigateTo('list')" class="absolute top-4 left-4 bg-white/70 backdrop-blur-sm w-10 h-10 rounded-full flex items-center justify-center shadow-md">
+                        <i class="fas fa-arrow-left text-slate-700"></i>
+                    </button>
+                    <div class="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-2 py-1 rounded-md">
+                        <span class="gallery-indicator">1 / ${property.isUserAdded && property.uploadedPhotos ? property.uploadedPhotos.length : (property.exterior_images.length + property.interior_images.length)}</span>
+                    </div>
+                </header>
+
+                <main class="p-4">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h1 class="text-2xl font-bold">${property.title}</h1>
+                            <p class="text-sm text-slate-500 mt-1"><i class="fas fa-map-marker-alt mr-1"></i>${property.address}</p>
+                        </div>
+                        <div class="text-right flex-shrink-0 ml-4">
+                            <p class="text-2xl font-bold text-red-500">${(property.price/10000).toLocaleString()}万円</p>
+                            <p class="text-xs text-slate-500">（賃料）</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        ${property.tags.map(tag => `<span class="bg-brand-100 text-brand-600 text-xs font-semibold px-2.5 py-1 rounded-full">${tag}</span>`).join('')}
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 text-center my-6 py-4 border-y">
+                        <div>
+                            <p class="text-sm text-slate-500">間取り</p>
+                            <p class="font-bold text-lg">${property.layout}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500">築年数</p>
+                            <p class="font-bold text-lg">${property.age}年</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500">最寄駅から</p>
+                            <p class="font-bold text-lg">徒歩${property.station_distance}分</p>
+                        </div>
+                    </div>
+                    
+                    <section class="mb-6">
+                        <h2 class="text-lg font-bold mb-3">設備</h2>
+                        <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 text-center">
+                            ${Object.entries(amenityIcons).map(([key, icon]) => `
+                                <div class="flex flex-col items-center p-2 rounded-lg ${property.amenities.includes(key) ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-400'}">
+                                    <span class="text-2xl">${icon}</span>
+                                    <span class="text-xs mt-1">${key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                                    <i class="fas ${property.amenities.includes(key) ? 'fa-check-circle text-green-500' : 'fa-times-circle text-slate-300'} text-sm absolute top-1 right-1"></i>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </section>
+                    
+                    <section class="mb-6">
+                        <h2 class="text-lg font-bold mb-3">地図</h2>
+                        <div id="detail-map" class="w-full h-64 z-0"></div>
+                    </section>
+                    
+                    <div class="cta-bar bg-white p-3 grid grid-cols-5 gap-2 mb-6">
+                    <button class="toggle-favorite-btn-details flex flex-col items-center justify-center rounded-lg py-2 ${state.favorites.includes(property.id) ? 'bg-red-100 text-red-500' : 'bg-slate-100 text-slate-600'}" data-id="${property.id}">
+                        ${state.favorites.includes(property.id) ? '<i class="fas fa-heart text-xl"></i><span class="text-xs mt-1">お気に入り済</span>' : '<i class="far fa-heart text-xl"></i><span class="text-xs mt-1">お気に入り</span>'}
+                    </button>
+                    <button class="toggle-star-btn-details flex flex-col items-center justify-center rounded-lg py-2 ${state.stars.includes(property.id) ? 'bg-yellow-100 text-yellow-500' : 'bg-slate-100 text-slate-600'}" data-id="${property.id}">
+                        ${state.stars.includes(property.id) ? '<i class="fas fa-star text-xl"></i><span class="text-xs mt-1">スター済</span>' : '<i class="far fa-star text-xl"></i><span class="text-xs mt-1">スター</span>'}
+                    </button>
+                    <button class="toggle-dislike-btn-details flex flex-col items-center justify-center rounded-lg py-2 ${state.dislikes.includes(property.id) ? 'bg-slate-200 text-slate-500' : 'bg-slate-100 text-slate-600'}" data-id="${property.id}">
+                        ${state.dislikes.includes(property.id) ? '<i class="fas fa-times text-xl"></i><span class="text-xs mt-1">興味なし済</span>' : '<i class="far fa-times text-xl"></i><span class="text-xs mt-1">興味なし</span>'}
+                    </button>
+                    <button class="bg-slate-800 text-white font-bold rounded-lg col-span-2">
+                        問い合わせる
+                    </button>
+                    <!-- <button class="bg-blue-500 text-white rounded-lg flex items-center justify-center"><i class="fas fa-map-marked-alt mr-2"></i>地図を開く</button> -->
+                </div>
+                    
+                     <section>
+                        <h2 class="text-lg font-bold mb-3">類似の物件</h2>
+                        <div class="space-y-3">
+                            ${similarProperties.length > 0 ? similarProperties.map(createPropertyCardHTML).join('') : '<p class="text-slate-500 text-sm">現在、類似の物件はありません。</p>'}
+                        </div>
+                    </section>
+                </main>
+            `;
+            
+            // 地図の初期化
+            initDetailMap(property);
+
+            // ギャラリーのインジケータ更新
+            const gallery = pages.details.querySelector('.gallery-container');
+            const indicator = pages.details.querySelector('.gallery-indicator');
+            const totalImages = property.isUserAdded && property.uploadedPhotos ? 
+    property.uploadedPhotos.length : 
+    (property.exterior_images.length + property.interior_images.length);
+            gallery.addEventListener('scroll', () => {
+                const page = Math.round(gallery.scrollLeft / gallery.clientWidth) + 1;
+                indicator.textContent = `${page} / ${totalImages}`;
+            });
+        };
+
+
+        // ========== HTML生成ヘルパー ==========
+        const createPropertyCardHTML = (property) => {
+            const isFavorited = state.favorites.includes(property.id);
+            const isStarred = state.stars.includes(property.id);
+            const isDisliked = state.dislikes.includes(property.id);
+            // 画像の表示を決定
+           // 外観の最初の画像を使用
+const imgFile = property.exterior_images[0];
+let imageSrc;
+
+if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.length > 0) {
+    imageSrc = property.uploadedPhotos[0].dataUrl;
+} else {
+    // URLの場合はそのまま使用
+    imageSrc = imgFile;
+}
+            
+            return `
+                <div class="property-card bg-white rounded-xl overflow-hidden shadow-md cursor-pointer" onclick="navigateTo('details', { id: ${property.id} })">
+                    <div class="relative">
+                        <img src="${imageSrc}" 
+                             alt="${property.title}" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-slate-800/60 text-white text-sm font-bold px-3 py-1.5 rounded-full flex items-center">
+                            <i class="fas fa-bolt text-yellow-300 mr-2"></i> マッチ度 ${property.matchScore || '??'}%
+                        </div>
+                        <div class="absolute top-2 right-2 flex flex-col gap-1">
+                            <button class="toggle-favorite-btn w-10 h-10 rounded-full flex items-center justify-center bg-white/70 backdrop-blur-sm" data-id="${property.id}">
+                                 <i class="${isFavorited ? 'fas text-red-500' : 'far'} fa-heart text-xl"></i>
+                            </button>
+                            <button class="toggle-star-btn w-10 h-10 rounded-full flex items-center justify-center bg-white/70 backdrop-blur-sm" data-id="${property.id}">
+                                 <i class="${isStarred ? 'fas text-yellow-500' : 'far'} fa-star text-xl"></i>
+                            </button>
+                            <button class="toggle-dislike-btn w-10 h-10 rounded-full flex items-center justify-center bg-white/70 backdrop-blur-sm" data-id="${property.id}">
+                                 <i class="${isDisliked ? 'fas text-slate-500' : 'far'} fa-times text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg truncate">${property.title}</h3>
+                        <p class="text-sm text-slate-500 mt-1"><i class="fas fa-map-marker-alt fa-fw mr-1"></i>${property.address}</p>
+                        <div class="flex items-baseline justify-between mt-3">
+                            <div>
+                                <span class="text-xl font-bold text-red-500">${(property.price/10000).toLocaleString()}</span>
+                                <span class="text-sm font-medium">万円</span>
+                            </div>
+                            <div class="text-sm text-slate-600">
+                                <span class="font-semibold">${property.layout}</span> / <span>${property.age}年</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 mt-3">
+                            ${property.tags.slice(0, 3).map(tag => `<span class="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-md">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+        
+        const createSkeletonCardHTML = () => `
+            <div class="bg-white rounded-xl overflow-hidden shadow-md">
+                <div class="skeleton w-full h-48"></div>
+                <div class="p-4">
+                    <div class="skeleton h-6 w-3/4 mb-2"></div>
+                    <div class="skeleton h-4 w-1/2 mb-4"></div>
+                    <div class="skeleton h-5 w-1/3 mb-4"></div>
+                    <div class="flex gap-2">
+                        <div class="skeleton h-5 w-16"></div>
+                        <div class="skeleton h-5 w-20"></div>
+                        <div class="skeleton h-5 w-16"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const createEmptyStateHTML = (title, message) => `
+            <div class="text-center py-16 px-6">
+                <div class="text-6xl text-slate-300 mb-4">
+                    <svg viewBox="0 0 100 100" class="w-24 h-24 mx-auto drop-shadow-lg">
+                        <path d="M50 5 L95 40 V95 H5 V40 Z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="4" />
+                        <circle cx="38" cy="55" r="4" fill="#94a3b8" />
+                        <circle cx="62" cy="55" r="4" fill="#94a3b8" />
+                        <path d="M40 75 L60 75" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-600">${title}</h3>
+                <p class="text-slate-500 mt-2">${message}</p>
+            </div>
+        `;
+        
+        // ========== 診断ロジック ==========
+        const startQuiz = () => {
+            state.quiz.currentQuestion = 0;
+            state.quiz.answers = {};
+            renderQuizQuestion();
+        };
+
+        const renderQuizQuestion = () => {
+            const index = state.quiz.currentQuestion;
+            const q = quizQuestions[index];
+            const quizContent = document.getElementById('quiz-content');
+            const quizNav = document.getElementById('quiz-nav');
+            
+            // プログレスバー更新
+            const progress = ((index + 1) / quizQuestions.length) * 100;
+            document.getElementById('quiz-progress-bar').style.width = `${progress}%`;
+            document.getElementById('quiz-progress-text').textContent = `質問 ${index + 1} / ${quizQuestions.length}`;
+
+            // 質問と選択肢
+            let optionsHTML = q.options.map(opt => `
+                <button class="quiz-option-btn w-full text-left p-4 border rounded-lg text-lg hover:bg-brand-50 transition" data-key="${q.key}" data-value="${opt.value}">
+                    ${opt.text}
+                </button>
+            `).join('');
+
+            quizContent.innerHTML = `
+                <h2 class="text-2xl font-bold">${q.question}</h2>
+                <div class="space-y-4 mt-6">${optionsHTML}</div>
+            `;
+            
+            // 戻るボタンの表示制御
+            document.getElementById('quiz-back-btn').style.visibility = index > 0 ? 'visible' : 'hidden';
+        };
+
+        const handleQuizAnswer = (key, value) => {
+            state.quiz.answers[key] = value;
+            if (state.quiz.currentQuestion < quizQuestions.length - 1) {
+                state.quiz.currentQuestion++;
+                renderQuizQuestion();
+            } else {
+                navigateTo('list', { fromQuiz: true });
+            }
+        };
+
+        const goBackQuizQuestion = () => {
+            if (state.quiz.currentQuestion > 0) {
+                state.quiz.currentQuestion--;
+                renderQuizQuestion();
+            }
+        };
+        
+        const calculateMatchScores = () => {
+            // 診断回答からタグを抽出
+            const answerTags = Object.entries(state.quiz.answers).flatMap(([key, value]) => {
+                const question = quizQuestions.find(q => q.key === key);
+                const option = question.options.find(o => o.value === value);
+                return option ? option.tags : [];
+            });
+            
+            // 診断結果タイプのタグも追加
+            const answers = Object.values(state.quiz.answers);
+            let bestMatchType = null;
+            let maxScore = 0;
+            
+            for (const typeName in resultTypes) {
+                const typeData = resultTypes[typeName];
+                const expectedAnswers = typeData.answers;
+                
+                let score = 0;
+                for (let i = 0; i < expectedAnswers.length && i < answers.length; i++) {
+                    if (answers[i] === expectedAnswers[i]) {
+                        score += 1;
+                    }
+                }
+                
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestMatchType = typeData;
+                }
+            }
+            
+            // タイプのタグも追加
+            if (bestMatchType && bestMatchType.tags) {
+                answerTags.push(...bestMatchType.tags);
+            }
+            
+            dummyProperties.forEach(p => {
+                // 診断結果とのタグマッチング
+                const commonTags = p.tags.filter(tag => answerTags.includes(tag));
+                const uniqueTags = [...new Set(answerTags)]; // 重複を除去
+                
+                // 基本スコア計算（より精密に）
+                let baseScore = 30; // 基本点
+                baseScore += (commonTags.length / uniqueTags.length) * 50; // マッチ率による点数
+                baseScore += commonTags.length * 8; // マッチタグ数によるボーナス
+                
+                // ユーザーの評価による調整
+                if (state.favorites.includes(p.id)) {
+                    baseScore += 15; // お気に入り +15点
+                }
+                if (state.stars.includes(p.id)) {
+                    baseScore += 25; // スターマーク +25点
+                }
+                if (state.dislikes.includes(p.id)) {
+                    baseScore -= 35; // 興味なし -35点
+                }
+                
+                // ランダム要素を追加（±8点）
+                const randomFactor = Math.floor(Math.random() * 17) - 8;
+                p.matchScore = Math.max(0, Math.min(100, Math.round(baseScore + randomFactor)));
+            });
+        };
+        
+        // ========== お気に入りロジック ==========
+        const toggleFavorite = (propertyId) => {
+            const index = state.favorites.indexOf(propertyId);
+            if (index > -1) {
+                state.favorites.splice(index, 1);
+            } else {
+                state.favorites.push(propertyId);
+            }
+            saveFavorites();
+            updateFavoriteIcons(propertyId);
+            
+            // お気に入りページが開いている場合は再描画
+            if(state.currentPage === 'favorites') {
+                renderFavorites();
+            }
+        };
+
+        const updateFavoriteIcons = (propertyId) => {
+            const isFavorited = state.favorites.includes(propertyId);
+            const icons = document.querySelectorAll(`.toggle-favorite-btn[data-id='${propertyId}'] i, .toggle-favorite-btn-details[data-id='${propertyId}'] i`);
+            icons.forEach(icon => {
+                icon.className = `${isFavorited ? 'fas text-red-500' : 'far'} fa-heart text-xl`;
+            });
+            
+            // 詳細ページのボタンテキストも更新
+            const detailsBtn = document.querySelector(`.toggle-favorite-btn-details[data-id='${propertyId}']`);
+            if (detailsBtn) {
+                detailsBtn.className = `toggle-favorite-btn-details flex flex-col items-center justify-center rounded-lg py-2 ${isFavorited ? 'bg-red-100 text-red-500' : 'bg-slate-100 text-slate-600'}`;
+                detailsBtn.querySelector('span').textContent = isFavorited ? 'お気に入り済' : 'お気に入り';
+            }
+        };
+        
+        // ========== localStorage管理（強化版） ==========
+        const saveFavorites = () => {
+            try {
+                localStorage.setItem('iepita_favorites', JSON.stringify(state.favorites));
+                console.log('✅ お気に入りを保存しました:', state.favorites);
+            } catch (error) {
+                console.error('❌ お気に入りの保存に失敗:', error);
+                // フォールバック: セッションストレージに保存
+                try {
+                    sessionStorage.setItem('iepita_favorites_backup', JSON.stringify(state.favorites));
+                    console.log('🔄 セッションストレージにバックアップ保存');
+                } catch (fallbackError) {
+                    console.error('❌ バックアップ保存も失敗:', fallbackError);
+                }
+            }
+        };
+
+        const loadFavorites = () => {
+            try {
+            const favs = localStorage.getItem('iepita_favorites');
+                if (favs) {
+                    state.favorites = JSON.parse(favs);
+                    console.log('✅ お気に入りを読み込みました:', state.favorites);
+                } else {
+                    state.favorites = [];
+                    console.log('📝 お気に入りは空です');
+                }
+            } catch (error) {
+                console.error('❌ お気に入りの読み込みに失敗:', error);
+                // フォールバック: セッションストレージから復元
+                try {
+                    const backup = sessionStorage.getItem('iepita_favorites_backup');
+                    if (backup) {
+                        state.favorites = JSON.parse(backup);
+                        console.log('🔄 セッションストレージから復元:', state.favorites);
+                    } else {
+                        state.favorites = [];
+                    }
+                } catch (fallbackError) {
+                    console.error('❌ バックアップ復元も失敗:', fallbackError);
+                    state.favorites = [];
+                }
+            }
+        };
+
+        // ========== スターマークロジック ==========
+        const toggleStar = (propertyId) => {
+            const index = state.stars.indexOf(propertyId);
+            if (index > -1) {
+                state.stars.splice(index, 1);
+            } else {
+                state.stars.push(propertyId);
+            }
+            saveStars();
+            updateStarIcons(propertyId);
+            
+            // スターマークページが開いている場合は再描画
+            if(state.currentPage === 'stars') {
+                renderStars();
+            }
+        };
+
+        const updateStarIcons = (propertyId) => {
+            const isStarred = state.stars.includes(propertyId);
+            const icons = document.querySelectorAll(`.toggle-star-btn[data-id='${propertyId}'] i, .toggle-star-btn-details[data-id='${propertyId}'] i`);
+            icons.forEach(icon => {
+                icon.className = `${isStarred ? 'fas text-yellow-500' : 'far'} fa-star text-xl`;
+            });
+            
+            // 詳細ページのボタンテキストも更新
+            const detailsBtn = document.querySelector(`.toggle-star-btn-details[data-id='${propertyId}']`);
+            if (detailsBtn) {
+                detailsBtn.className = `toggle-star-btn-details flex flex-col items-center justify-center rounded-lg py-2 ${isStarred ? 'bg-yellow-100 text-yellow-500' : 'bg-slate-100 text-slate-600'}`;
+                detailsBtn.querySelector('span').textContent = isStarred ? 'スター済' : 'スター';
+            }
+        };
+        
+        const saveStars = () => {
+            try {
+                localStorage.setItem('iepita_stars', JSON.stringify(state.stars));
+                console.log('✅ スターマークを保存しました:', state.stars);
+            } catch (error) {
+                console.error('❌ スターマークの保存に失敗:', error);
+                // フォールバック: セッションストレージに保存
+                try {
+                    sessionStorage.setItem('iepita_stars_backup', JSON.stringify(state.stars));
+                    console.log('🔄 セッションストレージにバックアップ保存');
+                } catch (fallbackError) {
+                    console.error('❌ バックアップ保存も失敗:', fallbackError);
+                }
+            }
+        };
+
+        const loadStars = () => {
+            try {
+            const stars = localStorage.getItem('iepita_stars');
+                if (stars) {
+                    state.stars = JSON.parse(stars);
+                    console.log('✅ スターマークを読み込みました:', state.stars);
+                } else {
+                    state.stars = [];
+                    console.log('📝 スターマークは空です');
+                }
+            } catch (error) {
+                console.error('❌ スターマークの読み込みに失敗:', error);
+                // フォールバック: セッションストレージから復元
+                try {
+                    const backup = sessionStorage.getItem('iepita_stars_backup');
+                    if (backup) {
+                        state.stars = JSON.parse(backup);
+                        console.log('🔄 セッションストレージから復元:', state.stars);
+                    } else {
+                        state.stars = [];
+                    }
+                } catch (fallbackError) {
+                    console.error('❌ バックアップ復元も失敗:', fallbackError);
+                    state.stars = [];
+                }
+            }
+        };
+
+        const loadDislikes = () => {
+            try {
+            const dislikes = localStorage.getItem('iepita_dislikes');
+                if (dislikes) {
+                    state.dislikes = JSON.parse(dislikes);
+                    console.log('✅ 興味なしを読み込みました:', state.dislikes);
+                } else {
+                    state.dislikes = [];
+                    console.log('📝 興味なしは空です');
+                }
+            } catch (error) {
+                console.error('❌ 興味なしの読み込みに失敗:', error);
+                // フォールバック: セッションストレージから復元
+                try {
+                    const backup = sessionStorage.getItem('iepita_dislikes_backup');
+                    if (backup) {
+                        state.dislikes = JSON.parse(backup);
+                        console.log('🔄 セッションストレージから復元:', state.dislikes);
+                    } else {
+                        state.dislikes = [];
+                    }
+                } catch (fallbackError) {
+                    console.error('❌ バックアップ復元も失敗:', fallbackError);
+                    state.dislikes = [];
+                }
+            }
+        };
+
+        // ========== 興味なしロジック ==========
+        const toggleDislike = (propertyId) => {
+            const index = state.dislikes.indexOf(propertyId);
+            if (index > -1) {
+                state.dislikes.splice(index, 1);
+            } else {
+                state.dislikes.push(propertyId);
+            }
+            saveDislikes();
+            updateDislikeIcons(propertyId);
+            
+            // 興味なしページが開いている場合は再描画
+            if(state.currentPage === 'dislikes') {
+                renderDislikes();
+            }
+        };
+
+        const updateDislikeIcons = (propertyId) => {
+            const isDisliked = state.dislikes.includes(propertyId);
+            const icons = document.querySelectorAll(`.toggle-dislike-btn[data-id='${propertyId}'] i, .toggle-dislike-btn-details[data-id='${propertyId}'] i`);
+            icons.forEach(icon => {
+                icon.className = `${isDisliked ? 'fas text-slate-500' : 'far'} fa-times text-xl`;
+            });
+            
+            // 詳細ページのボタンテキストも更新
+            const detailsBtn = document.querySelector(`.toggle-dislike-btn-details[data-id='${propertyId}']`);
+            if (detailsBtn) {
+                detailsBtn.className = `toggle-dislike-btn-details flex flex-col items-center justify-center rounded-lg py-2 ${isDisliked ? 'bg-slate-200 text-slate-500' : 'bg-slate-100 text-slate-600'}`;
+                detailsBtn.querySelector('span').textContent = isDisliked ? '興味なし済' : '興味なし';
+            }
+        };
+        
+        const saveDislikes = () => {
+            try {
+                localStorage.setItem('iepita_dislikes', JSON.stringify(state.dislikes));
+                console.log('✅ 興味なしを保存しました:', state.dislikes);
+            } catch (error) {
+                console.error('❌ 興味なしの保存に失敗:', error);
+                // フォールバック: セッションストレージに保存
+                try {
+                    sessionStorage.setItem('iepita_dislikes_backup', JSON.stringify(state.dislikes));
+                    console.log('🔄 セッションストレージにバックアップ保存');
+                } catch (fallbackError) {
+                    console.error('❌ バックアップ保存も失敗:', fallbackError);
+                }
+            }
+        };
+
+        // ========== マッチングモードロジック ==========
+        const initMatchingMode = () => {
+            // 診断結果に基づいて物件をフィルタリング
+            const answerTags = Object.entries(state.quiz.answers).flatMap(([key, value]) => {
+                const question = quizQuestions.find(q => q.key === key);
+                const option = question.options.find(o => o.value === value);
+                return option ? option.tags : [];
+            });
+            
+            // マッチ度でソートして上位20件を取得
+            const sortedProperties = [...dummyProperties].sort((a, b) => {
+                const aScore = a.tags.filter(tag => answerTags.includes(tag)).length;
+                const bScore = b.tags.filter(tag => answerTags.includes(tag)).length;
+                return bScore - aScore;
+            }).slice(0, 20);
+            
+            state.matching.properties = sortedProperties;
+            state.matching.currentIndex = 0;
+            state.matching.isAnimating = false;
+            
+            renderMatchingCards();
+        };
+
+        const renderMatchingCards = () => {
+            if (state.matching.currentIndex >= state.matching.properties.length) {
+                matchingContainer.innerHTML = '';
+                matchingEmpty.classList.remove('hidden');
+                return;
+            }
+            
+            matchingEmpty.classList.add('hidden');
+            
+            // 現在のカードと次のカードを表示（重ね合わせ）
+            const currentProperty = state.matching.properties[state.matching.currentIndex];
+            const nextProperty = state.matching.properties[state.matching.currentIndex + 1];
+            
+            let html = '';
+            
+            // 次のカード（背景）
+            if (nextProperty) {
+                html += createSwipeCardHTML(nextProperty, 'next');
+            }
+            
+            // 現在のカード（前面）
+            html += createSwipeCardHTML(currentProperty, 'current');
+            
+            matchingContainer.innerHTML = html;
+            
+            // スワイプイベントを設定
+            setupSwipeEvents();
+        };
+
+        const createSwipeCardHTML = (property, position) => {
+            // 外観の最初の画像を使用
+const imgFile = property.exterior_images[0];
+            
+            return `
+                <div class="swipe-card ${position}" data-id="${property.id}">
+                    <div class="relative h-full">
+                        <img src="${isRealPhoto ? imgFile : `https://placehold.co/1200x800/e2e8f0/64748b?text=${imgFile}`}" 
+                             alt="${property.title}" class="w-full h-2/3 object-cover">
+                        <div class="absolute top-4 left-4 bg-slate-800/60 text-white text-sm font-bold px-3 py-1.5 rounded-full flex items-center">
+                            <i class="fas fa-bolt text-yellow-300 mr-2"></i> マッチ度 ${property.matchScore || '??'}%
+                        </div>
+                        <div class="p-4 h-1/3 flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-xl mb-2">${property.title}</h3>
+                                <p class="text-sm text-slate-500 mb-2"><i class="fas fa-map-marker-alt fa-fw mr-1"></i>${property.address}</p>
+                                <div class="flex items-baseline justify-between mb-3">
+                                    <div>
+                                        <span class="text-2xl font-bold text-red-500">${(property.price/10000).toLocaleString()}</span>
+                                        <span class="text-sm font-medium">万円</span>
+                                    </div>
+                                    <div class="text-sm text-slate-600">
+                                        <span class="font-semibold">${property.layout}</span> / <span>${property.age}年</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    ${property.tags.slice(0, 4).map(tag => `<span class="bg-brand-100 text-brand-600 text-xs px-2 py-1 rounded-full">${tag}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swipe-overlay like">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="swipe-overlay star">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="swipe-overlay dislike">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        const setupSwipeEvents = () => {
+            const currentCard = matchingContainer.querySelector('.swipe-card.current');
+            if (!currentCard) return;
+            
+            let startX = 0;
+            let startY = 0;
+            let currentX = 0;
+            let currentY = 0;
+            let isDragging = false;
+            let lastClickTime = 0;
+            
+            const startDrag = (e) => {
+                if (state.matching.isAnimating) return;
+                
+                isDragging = true;
+                currentCard.classList.add('swiping');
+                
+                const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+                const clientY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
+                
+                startX = clientX;
+                startY = clientY;
+                currentX = 0;
+                currentY = 0;
+            };
+            
+            const drag = (e) => {
+                if (!isDragging || state.matching.isAnimating) return;
+                
+                e.preventDefault();
+                
+                const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+                const clientY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
+                
+                currentX = clientX - startX;
+                currentY = clientY - startY;
+                
+                const rotation = currentX * 0.1;
+                currentCard.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${rotation}deg)`;
+                
+                // スワイプ方向に応じてオーバーレイを表示
+                const likeOverlay = currentCard.querySelector('.swipe-overlay.like');
+                const starOverlay = currentCard.querySelector('.swipe-overlay.star');
+                const dislikeOverlay = currentCard.querySelector('.swipe-overlay.dislike');
+                
+                if (Math.abs(currentX) > 50) {
+                    if (currentX > 0) {
+                        starOverlay.classList.add('show');
+                        likeOverlay.classList.remove('show');
+                        dislikeOverlay.classList.remove('show');
+                    } else {
+                        likeOverlay.classList.add('show');
+                        starOverlay.classList.remove('show');
+                        dislikeOverlay.classList.remove('show');
+                    }
+                } else {
+                    likeOverlay.classList.remove('show');
+                    starOverlay.classList.remove('show');
+                    dislikeOverlay.classList.remove('show');
+                }
+            };
+            
+            const endDrag = () => {
+                if (!isDragging || state.matching.isAnimating) return;
+                
+                isDragging = false;
+                currentCard.classList.remove('swiping');
+                
+                const threshold = 100;
+                
+                if (Math.abs(currentX) > threshold) {
+                    // スワイプが完了
+                    state.matching.isAnimating = true;
+                    
+                    if (currentX > 0) {
+                        // 右スワイプ = スター
+                        currentCard.classList.add('swipe-right', 'swipe-success');
+                        toggleStar(parseInt(currentCard.dataset.id));
+                    } else {
+                        // 左スワイプ = ハート
+                        currentCard.classList.add('swipe-left', 'swipe-success');
+                        toggleFavorite(parseInt(currentCard.dataset.id));
+                    }
+                    
+                    // アニメーション完了後に次のカードを表示
+                    setTimeout(() => {
+                        state.matching.currentIndex++;
+                        state.matching.isAnimating = false;
+                        renderMatchingCards();
+                    }, 300);
+                } else {
+                    // スワイプが不十分、元の位置に戻す
+                    currentCard.style.transform = '';
+                    currentCard.querySelectorAll('.swipe-overlay').forEach(overlay => {
+                        overlay.classList.remove('show');
+                    });
+                }
+            };
+
+            // ダブルクリックで興味なし
+            const handleDoubleClick = (e) => {
+                if (state.matching.isAnimating) return;
+                
+                const currentTime = new Date().getTime();
+                if (currentTime - lastClickTime < 300) {
+                    // ダブルクリック検出
+                    state.matching.isAnimating = true;
+                    currentCard.classList.add('swipe-left', 'swipe-success');
+                    toggleDislike(parseInt(currentCard.dataset.id));
+                    
+                    setTimeout(() => {
+                        state.matching.currentIndex++;
+                        state.matching.isAnimating = false;
+                        renderMatchingCards();
+                    }, 300);
+                }
+                lastClickTime = currentTime;
+            };
+            
+            // マウスイベント
+            currentCard.addEventListener('mousedown', startDrag);
+            currentCard.addEventListener('click', handleDoubleClick);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+            
+            // タッチイベント
+            currentCard.addEventListener('touchstart', startDrag, { passive: false });
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('touchend', endDrag);
+        };
+
+        // ========== フィルター/ソートロジック ==========
+        const getFilteredProperties = () => {
+            let properties = [...dummyProperties];
+            const { sort, tags, tagMode, maxPrice, maxAge, prefecture, city } = state.filters;
+
+            // Filter
+            properties = properties.filter(p => p.price <= maxPrice && p.age <= maxAge);
+            
+            // 地域フィルター
+            if (prefecture) {
+                properties = properties.filter(p => {
+                    const match = p.address.match(/^([^都道府県]{1,4}[都道府県])/);
+                    const propPrefecture = match ? match[1] : p.address.split(' ')[0];
+                    return propPrefecture === prefecture;
+                });
+            }
+            
+            if (city && prefecture) {
+                properties = properties.filter(p => {
+                    // 都道府県の後の部分から市区町村を抽出
+                    const prefectureMatch = p.address.match(/^([^都道府県]{1,4}[都道府県])/);
+                    if (prefectureMatch) {
+                        const remaining = p.address.substring(prefectureMatch[1].length);
+                        const cityMatch = remaining.match(/^([^区市町村]{1,10}[区市町村])/);
+                        return cityMatch ? cityMatch[1] === city : false;
+                    }
+                    const addressParts = p.address.split(' ');
+                    return addressParts.length > 1 ? addressParts[1] === city : false;
+                });
+            }
+            
+            if (tags.length > 0) {
+                if (tagMode === 'AND') {
+                    properties = properties.filter(p => tags.every(tag => p.tags.includes(tag)));
+                } else { // OR
+                    properties = properties.filter(p => tags.some(tag => p.tags.includes(tag)));
+                }
+            }
+
+            // Sort
+            properties.sort((a, b) => {
+                switch(sort) {
+                    case 'match_desc': return (b.matchScore || 0) - (a.matchScore || 0);
+                    case 'new_desc': return b.id - a.id; // IDで代用
+                    case 'price_asc': return a.price - b.price;
+                    case 'price_desc': return b.price - a.price;
+                    case 'distance_asc': 
+                        if (state.userLocation) {
+                            const distanceA = calculateDistance(
+                                state.userLocation.lat, 
+                                state.userLocation.lng,
+                                a.coordinates[0], 
+                                a.coordinates[1]
+                            );
+                            const distanceB = calculateDistance(
+                                state.userLocation.lat, 
+                                state.userLocation.lng,
+                                b.coordinates[0], 
+                                b.coordinates[1]
+                            );
+                            return distanceA - distanceB;
+                        } else {
+                            // 現在地が取得できない場合はマッチ度順
+                            return (b.matchScore || 0) - (a.matchScore || 0);
+                        }
+                    default: return 0;
+                }
+            });
+
+            return properties;
+        };
+        
+        const openFilterModal = () => {
+            renderFilterTags();
+            filterModal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                filterPanel.classList.remove('translate-x-full');
+            });
+        };
+        
+        const closeFilterModal = () => {
+            filterPanel.classList.add('translate-x-full');
+            setTimeout(() => {
+                filterModal.classList.add('hidden');
+            }, 300);
+        };
+        
+        // 地域データを抽出する関数
+        const extractRegionData = () => {
+            const prefectures = [...new Set(dummyProperties.map(p => {
+                // addressから都道府県を抽出「東京都○○市」パターン
+                // より厳密な正規表現で都道府県のみを抽出
+                const match = p.address.match(/^([^都道府県]{1,4}[都道府県])/);
+                return match ? match[1] : p.address.split(' ')[0];
+            }))].sort();
+
+            // 都道府県ごとの市区町村をグループ化
+            const cityData = {};
+            prefectures.forEach(prefecture => {
+                cityData[prefecture] = [...new Set(dummyProperties
+                    .filter(p => {
+                        const match = p.address.match(/^([^都道府県]{1,4}[都道府県])/);
+                        const propPrefecture = match ? match[1] : p.address.split(' ')[0];
+                        return propPrefecture === prefecture;
+                    })
+                    .map(p => {
+                        // 住所から市区町村を抽出（都道府県の後の部分）
+                        const prefectureMatch = p.address.match(/^([^都道府県]{1,4}[都道府県])/);
+                        if (prefectureMatch) {
+                            const remaining = p.address.substring(prefectureMatch[1].length);
+                            // 残りの部分から最初の市区町村を取得
+                            // まず「市」を探し、その後「区」がある場合は「市」までを取得
+                            const cityMatch = remaining.match(/^([^区市町村]{1,10}市)([^区市町村]{1,10}区)?/);
+                            if (cityMatch) {
+                                console.log(`市区町村抽出 (${prefecture}):`, p.address, '→', cityMatch[1]);
+                                return cityMatch[1]; // 「京都市」を返す
+                            }
+                            // 「市」がない場合は区町村を探す
+                            const districtMatch = remaining.match(/^([^区市町村]{1,10}[区町村])/);
+                            const result = districtMatch ? districtMatch[1] : remaining.split(' ')[0];
+                            console.log(`市区町村抽出 (${prefecture}):`, p.address, '→', result);
+                            return result;
+                        }
+                        return p.address.split(' ')[1] || p.address.split(' ')[0];
+                    })
+                )].sort();
+            });
+
+            console.log('抽出された地域データ:', { prefectures, cityData });
+            return { prefectures, cityData };
+        };
+
+        // 人気地域データ
+        const popularRegions = [
+            { name: '東京', prefecture: '東京都', city: '' },
+            { name: '大阪', prefecture: '大阪府', city: '' },
+            { name: '名古屋', prefecture: '愛知県', city: '名古屋市' },
+            { name: '福岡', prefecture: '福岡県', city: '' },
+            { name: '横浜', prefecture: '神奈川県', city: '横浜市' },
+            { name: '神戸', prefecture: '兵庫県', city: '神戸市' },
+            { name: '札幌', prefecture: '北海道', city: '札幌市' }
+        ];
+
+        // 地域フィルターのUIを初期化
+        const initRegionFilters = () => {
+            const { prefectures, cityData } = extractRegionData();
+            
+            // 人気エリアボタンを生成
+            const popularRegionsDiv = document.getElementById('popular-regions');
+            popularRegionsDiv.innerHTML = popularRegions.map(region => `
+                <button class="popular-region-btn px-2 py-1 text-xs bg-blue-50 text-blue-600 border border-blue-200 rounded-full hover:bg-blue-100" 
+                        data-prefecture="${region.prefecture}" data-city="${region.city}">
+                    ${region.name}
+                </button>
+            `).join('');
+
+            // 都道府県ドロップダウンを生成
+            const prefectureSelect = document.getElementById('prefecture-select');
+            prefectureSelect.innerHTML = '<option value="">すべて</option>' +
+                prefectures.map(p => `<option value="${p}">${p}</option>`).join('');
+            
+            // 市区町村ドロップダウンを生成（初期状態はすべて）
+            const citySelect = document.getElementById('city-select');
+            cityData[''] = []; // 空の場合は全選択
+
+            // 地域検索ボックスのイベントリスナー
+            const regionSearch = document.getElementById('region-search');
+            const regionSuggestions = document.getElementById('region-suggestions');
+            let searchTimeout;
+
+            regionSearch.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const query = e.target.value.trim();
+                
+                if (query.length >= 2) {
+                    searchTimeout = setTimeout(() => {
+                        showRegionSuggestions(query, regionSuggestions);
+                    }, 300);
+                } else {
+                    regionSuggestions.classList.add('hidden');
+                }
+            });
+
+            // 検索候補クリック時の処理
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('suggestion-item')) {
+                    const prefecture = e.target.dataset.prefecture;
+                    const city = e.target.dataset.city;
+                    
+                    // セレクトボックスを更新
+                    prefectureSelect.value = prefecture || '';
+                    citySelect.value = city || '';
+                    
+                    // フィルター状態を更新
+                    state.filters.prefecture = prefecture || '';
+                    state.filters.city = city || '';
+                    
+                    // 検索ボックスをクリア
+                    regionSearch.value = '';
+                    regionSuggestions.classList.add('hidden');
+                    
+                    // 市区町村リストを更新
+                    citySelect.innerHTML = '<option value="">すべて</option>';
+                    if (prefecture && cityData[prefecture]) {
+                        citySelect.innerHTML += cityData[prefecture]
+                            .map(c => `<option value="${c}">${c}</option>`).join('');
+                    }
+                }
+                
+                if (e.target.classList.contains('popular-region-btn')) {
+                    const prefecture = e.target.dataset.prefecture;
+                    const city = e.target.dataset.city;
+                    console.log('人気エリアタグクリック:', { prefecture, city, cityData: cityData[prefecture] });
+                    
+                    prefectureSelect.value = prefecture;
+                    state.filters.prefecture = prefecture;
+                    
+                    // 市区町村リストを更新
+                    citySelect.innerHTML = '<option value="">すべて</option>';
+                    if (cityData[prefecture]) {
+                        citySelect.innerHTML += cityData[prefecture]
+                            .map(c => `<option value="${c}">${c}</option>`).join('');
+                        console.log('市区町村リスト更新:', cityData[prefecture]);
+                    }
+                    
+                    // 市区町村も設定（指定されている場合）
+                    if (city) {
+                        citySelect.value = city;
+                        state.filters.city = city;
+                        console.log('市区町村設定:', city);
+                    } else {
+                        citySelect.value = '';
+                        state.filters.city = '';
+                        console.log('市区町村クリア');
+                    }
+                }
+            });
+
+            // 都道府県変更時のイベントリスナー
+            prefectureSelect.addEventListener('change', (e) => {
+                const selectedPrefecture = e.target.value;
+                state.filters.prefecture = selectedPrefecture;
+                state.filters.city = ''; // 市区町村をリセット
+                
+                // 市区町村ドロップダウンを更新
+                citySelect.innerHTML = '<option value="">すべて</option>';
+                if (selectedPrefecture && cityData[selectedPrefecture]) {
+                    citySelect.innerHTML += cityData[selectedPrefecture]
+                        .map(city => `<option value="${city}">${city}</option>`).join('');
+                }
+                
+                // city選択をリセット
+                citySelect.value = '';
+            });
+
+            // 市区町村変更時のイベントリスナー
+            citySelect.addEventListener('change', (e) => {
+                state.filters.city = e.target.value;
+            });
+        };
+
+        // 地域検索候補を表示
+        const showRegionSuggestions = (query, suggestionsContainer) => {
+            const { prefectures, cityData } = extractRegionData();
+            const matchingRegions = [];
+            
+            // 都道府県でマッチング
+            prefectures.forEach(prefecture => {
+                if (prefecture.includes(query)) {
+                    matchingRegions.push({
+                        text: prefecture,
+                        prefecture,
+                        city: '',
+                        type: '都道府県'
+                    });
+                }
+            });
+            
+            // 市区町村でマッチング
+            Object.entries(cityData).forEach(([prefecture, cities]) => {
+                cities.forEach(city => {
+                    if (city.includes(query)) {
+                        matchingRegions.push({
+                            text: `${city} (${prefecture})`,
+                            prefecture,
+                            city,
+                            type: '市区町村'
+                        });
+                    }
+                });
+            });
+            
+            // 候補を表示
+            if (matchingRegions.length > 0) {
+                suggestionsContainer.innerHTML = matchingRegions.slice(0, 10).map(region => `
+                    <div class="suggestion-item p-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100" 
+                         data-prefecture="${region.prefecture}" data-city="${region.city}">
+                        <div class="font-medium text-sm">${region.text}</div>
+                        <div class="text-xs text-gray-500">${region.type}</div>
+                    </div>
+                `).join('');
+                suggestionsContainer.classList.remove('hidden');
+            } else {
+                suggestionsContainer.classList.add('hidden');
+            }
+        };
+        
+        const renderFilterTags = () => {
+            const allTags = [...new Set(dummyProperties.flatMap(p => p.tags))];
+            const container = document.getElementById('filter-tags');
+            container.innerHTML = allTags.map(tag => `
+                <button class="filter-tag-btn px-3 py-1.5 text-sm rounded-full border ${state.filters.tags.includes(tag) ? 'bg-brand-500 border-brand-500 text-white' : 'bg-white border-slate-300 text-slate-700'}" data-tag="${tag}">
+                    ${tag}
+                </button>
+            `).join('');
+        };
+        
+        // ========== 地図ロジック ==========
+        // ========== 強化されたマップ機能 ==========
+        
+        // 距離計算関数（ハヴァサイン公式）
+        const calculateDistance = (lat1, lon1, lat2, lon2) => {
+            const R = 6371; // 地球の半径（km）
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        };
+
+        // ユーザーの現在地を取得
+        const getUserLocation = () => {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('Geolocation is not supported'));
+                    return;
+                }
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const location = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        state.userLocation = location;
+                        console.log('📍 現在地を取得しました:', location);
+                        resolve(location);
+                    },
+                    (error) => {
+                        console.error('❌ 現在地取得エラー:', error);
+                        reject(error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000 // 5分間キャッシュ
+                    }
+                );
+            });
+        };
+
+        // 単一物件のマップ初期化
+        const initSingleMap = (property) => {
+            if (state.currentMap) {
+                state.currentMap.remove();
+                state.currentMap = null;
+            }
+            
+            state.mapMode = 'single';
+            state.currentMap = L.map('map').setView(property.coordinates, 15);
+            
+            // タイルレイヤー
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(state.currentMap);
+
+            // 物件マーカー
+            const marker = L.marker(property.coordinates).addTo(state.currentMap);
+            marker.bindPopup(`
+                <div class="p-2">
+                    <h3 class="font-bold text-lg">${property.title}</h3>
+                    <p class="text-sm text-gray-600">${property.address}</p>
+                    <p class="text-sm font-semibold text-brand-600">¥${property.price.toLocaleString()}/月</p>
+                    <button onclick="navigateTo('details', {id: ${property.id}})" 
+                            class="mt-2 w-full bg-brand-500 text-white px-3 py-1 rounded text-sm hover:bg-brand-600">
+                        詳細を見る
+                    </button>
+                </div>
+            `).openPopup();
+
+            // 現在地ボタンを追加
+            L.control.locate({
+                position: 'topright',
+                strings: {
+                    title: '現在地を表示'
+                }
+            }).addTo(state.currentMap);
+        };
+
+        // 物件詳細ページ専用のマップ初期化
+        const initDetailMap = (property) => {
+            // 既存の詳細ページ地図を削除
+            if (state.detailMap) {
+                state.detailMap.remove();
+                state.detailMap = null;
+            }
+            
+            // 詳細ページ地図を初期化
+            state.detailMap = L.map('detail-map').setView(property.coordinates, 15);
+            
+            // タイルレイヤー
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(state.detailMap);
+
+            // 物件マーカー
+            const marker = L.marker(property.coordinates).addTo(state.detailMap);
+            marker.bindPopup(`
+                <div class="p-2">
+                    <h3 class="font-bold text-lg">${property.title}</h3>
+                    <p class="text-sm text-gray-600">${property.address}</p>
+                    <p class="text-sm font-semibold text-brand-600">¥${property.price.toLocaleString()}/月</p>
+                </div>
+            `);
+        };
+
+        // 複数物件のマップ初期化
+        const initMultipleMap = (properties) => {
+            if (state.currentMap) {
+                state.currentMap.remove();
+                state.currentMap = null;
+            }
+            
+            state.mapMode = 'multiple';
+            
+            // 全物件の中心点を計算
+            const bounds = L.latLngBounds();
+            properties.forEach(property => {
+                bounds.extend(property.coordinates);
+            });
+            
+            state.currentMap = L.map('map').fitBounds(bounds);
+            
+            // タイルレイヤー
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(state.currentMap);
+
+            // マーカークラスター
+            const markers = L.markerClusterGroup({
+                chunkedLoading: true,
+                maxClusterRadius: 50
+            });
+
+            // 各物件にマーカーを追加
+            properties.forEach(property => {
+                const marker = L.marker(property.coordinates);
+                
+                // カスタムアイコン（価格に応じて色分け）
+                const priceColor = property.price < 100000 ? 'green' : 
+                                 property.price < 150000 ? 'orange' : 'red';
+                
+                const customIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div class="w-6 h-6 bg-${priceColor}-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold">¥</div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+                
+                marker.setIcon(customIcon);
+                
+                marker.bindPopup(`
+                    <div class="p-2 min-w-48">
+                        <h3 class="font-bold text-lg">${property.title}</h3>
+                        <p class="text-sm text-gray-600">${property.address}</p>
+                        <p class="text-sm font-semibold text-brand-600">¥${property.price.toLocaleString()}/月</p>
+                        <div class="flex gap-1 mt-2">
+                            ${property.tags.slice(0, 3).map(tag => 
+                                `<span class="text-xs bg-gray-100 px-2 py-1 rounded">${tag}</span>`
+                            ).join('')}
+                        </div>
+                        <button onclick="navigateTo('details', {id: ${property.id}})" 
+                                class="mt-2 w-full bg-brand-500 text-white px-3 py-1 rounded text-sm hover:bg-brand-600">
+                            詳細を見る
+                        </button>
+                    </div>
+                `);
+                
+                markers.addLayer(marker);
+            });
+
+            state.currentMap.addLayer(markers);
+            state.mapMarkers = markers;
+
+            // 現在地ボタンを追加
+            L.control.locate({
+                position: 'topright',
+                strings: {
+                    title: '現在地を表示'
+                },
+                locateOptions: {
+                    enableHighAccuracy: true,
+                    maxZoom: 16, // 最大ズームレベル
+                    timeout: 10000,
+                    maximumAge: 300000 // 5分間キャッシュ
+                },
+                flyTo: true, // スムーズに現在地に移動
+                keepCurrentZoomLevel: false, // ズームレベルを変更
+                showPopup: false // ポップアップは手動で制御
+            }).addTo(state.currentMap);
+
+            // 現在地取得成功時の処理
+            state.currentMap.on('locationfound', (e) => {
+                state.userLocation = e.latlng;
+                console.log('📍 現在地を取得しました:', e.latlng);
+                
+                // 現在地にズーム（ズームレベル15で詳細表示）
+                state.currentMap.setView(e.latlng, 15);
+                
+                // 現在地マーカーを追加
+                const userMarker = L.marker(e.latlng, {
+                    icon: L.divIcon({
+                        className: 'user-location-marker',
+                        html: '<div class="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>',
+                        iconSize: [16, 16],
+                        iconAnchor: [8, 8]
+                    })
+                }).addTo(state.currentMap);
+                
+                userMarker.bindPopup('<div class="text-center"><strong>あなたの現在地</strong></div>').openPopup();
+                
+                // 物件の距離情報を更新（表示は変更しない）
+                updatePropertyDistances();
+            });
+        };
+
+        // 物件の距離情報を更新（表示は変更しない）
+        const updatePropertyDistances = () => {
+            if (!state.userLocation || !state.mapMarkers) return;
+            
+            // 既存のマーカーのポップアップを更新
+            state.mapMarkers.eachLayer(marker => {
+                if (marker.getLatLng) {
+                    const distance = calculateDistance(
+                        state.userLocation.lat,
+                        state.userLocation.lng,
+                        marker.getLatLng().lat,
+                        marker.getLatLng().lng
+                    );
+                    
+                    // ポップアップの内容を更新（距離情報を追加）
+                    const property = dummyProperties.find(p => 
+                        p.coordinates[0] === marker.getLatLng().lat && 
+                        p.coordinates[1] === marker.getLatLng().lng
+                    );
+                    
+                    if (property) {
+                        const distanceText = `<p class="text-xs text-gray-500 mt-1">📍 ${distance.toFixed(1)}km</p>`;
+                        marker.setPopupContent(`
+                            <div class="p-2 min-w-48">
+                                <h3 class="font-bold text-lg">${property.title}</h3>
+                                <p class="text-sm text-gray-600">${property.address}</p>
+                                <p class="text-sm font-semibold text-brand-600">¥${property.price.toLocaleString()}/月</p>
+                                ${distanceText}
+                                <div class="flex gap-1 mt-2">
+                                    ${property.tags.slice(0, 3).map(tag => 
+                                        `<span class="text-xs bg-gray-100 px-2 py-1 rounded">${tag}</span>`
+                                    ).join('')}
+                                </div>
+                                <button onclick="navigateTo('details', {id: ${property.id}})" 
+                                        class="mt-2 w-full bg-brand-500 text-white px-3 py-1 rounded text-sm hover:bg-brand-600">
+                                    詳細を見る
+                                </button>
+                            </div>
+                        `);
+                    }
+                }
+            });
+        };
+
+        // 距離ソートでマップを更新
+        const updateMapWithDistanceSort = () => {
+            if (!state.userLocation) return;
+            
+            const properties = getFilteredProperties();
+            const propertiesWithDistance = properties.map(property => ({
+                ...property,
+                distance: calculateDistance(
+                    state.userLocation.lat, 
+                    state.userLocation.lng,
+                    property.coordinates[0], 
+                    property.coordinates[1]
+                )
+            })).sort((a, b) => a.distance - b.distance);
+
+            // 日本全国の物件を表示（距離フィルターは適用しない）
+            initMultipleMapWithUserLocation(propertiesWithDistance);
+        };
+
+        // 現在地を中心とした複数物件マップ初期化
+        const initMultipleMapWithUserLocation = (properties) => {
+            if (state.currentMap) {
+                state.currentMap.remove();
+                state.currentMap = null;
+            }
+            
+            state.mapMode = 'multiple';
+            
+            // 現在地を中心にズームレベル15で初期化
+            state.currentMap = L.map('map').setView(state.userLocation, 15);
+            
+            // タイルレイヤー
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(state.currentMap);
+
+            // 現在地マーカーを追加
+            const userMarker = L.marker(state.userLocation, {
+                icon: L.divIcon({
+                    className: 'user-location-marker',
+                    html: '<div class="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>',
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                })
+            }).addTo(state.currentMap);
+            
+            userMarker.bindPopup('<div class="text-center"><strong>あなたの現在地</strong></div>');
+
+            // マーカークラスター
+            const markers = L.markerClusterGroup({
+                chunkedLoading: true,
+                maxClusterRadius: 50
+            });
+
+            // 各物件にマーカーを追加
+            properties.forEach(property => {
+                const marker = L.marker(property.coordinates);
+                
+                // カスタムアイコン（価格に応じて色分け）
+                const priceColor = property.price < 100000 ? 'green' : 
+                                 property.price < 150000 ? 'orange' : 'red';
+                
+                const customIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div class="w-6 h-6 bg-${priceColor}-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold">¥</div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+                
+                marker.setIcon(customIcon);
+                
+                // 距離情報をポップアップに追加
+                const distanceText = property.distance ? 
+                    `<p class="text-xs text-gray-500 mt-1">📍 ${property.distance.toFixed(1)}km</p>` : '';
+                
+                marker.bindPopup(`
+                    <div class="p-2 min-w-48">
+                        <h3 class="font-bold text-lg">${property.title}</h3>
+                        <p class="text-sm text-gray-600">${property.address}</p>
+                        <p class="text-sm font-semibold text-brand-600">¥${property.price.toLocaleString()}/月</p>
+                        ${distanceText}
+                        <div class="flex gap-1 mt-2">
+                            ${property.tags.slice(0, 3).map(tag => 
+                                `<span class="text-xs bg-gray-100 px-2 py-1 rounded">${tag}</span>`
+                            ).join('')}
+                        </div>
+                        <button onclick="navigateTo('details', {id: ${property.id}})" 
+                                class="mt-2 w-full bg-brand-500 text-white px-3 py-1 rounded text-sm hover:bg-brand-600">
+                            詳細を見る
+                        </button>
+                    </div>
+                `);
+                
+                markers.addLayer(marker);
+            });
+
+            state.currentMap.addLayer(markers);
+            state.mapMarkers = markers;
+
+            // 現在地ボタンを追加
+            L.control.locate({
+                position: 'topright',
+                strings: {
+                    title: '現在地を表示'
+                },
+                locateOptions: {
+                    enableHighAccuracy: true,
+                    maxZoom: 16,
+                    timeout: 10000,
+                    maximumAge: 300000
+                },
+                flyTo: true,
+                keepCurrentZoomLevel: false,
+                showPopup: false
+            }).addTo(state.currentMap);
+        };
+
+        // マップの初期化（用途に応じて自動選択）
+        const initMap = (propertyOrProperties) => {
+            if (Array.isArray(propertyOrProperties)) {
+                initMultipleMap(propertyOrProperties);
+            } else {
+                initSingleMap(propertyOrProperties);
+            }
+        };
+        
+        // ========== UIヘルパー ==========
+        const updateBottomNav = (pageKey) => {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.dataset.page === pageKey) {
+                    btn.classList.add('text-brand-500');
+                    btn.classList.remove('text-slate-500');
+                } else {
+                    btn.classList.add('text-slate-500');
+                    btn.classList.remove('text-brand-500');
+                }
+            });
+        };
+        
+        let toastTimeout;
+        // いえっぴトースト通知の表示
+        const showIepitaToast = (message, type = 'info', soundType = null) => {
+            clearTimeout(toastTimeout);
+            
+            // いえっぴのメッセージを生成
+            const iepitaMessages = {
+                success: ['やったね！', '素晴らしい！', '完璧だよ！', 'いいね！'],
+                error: ['あらら...', 'うーん...', '残念...', 'ごめんね...'],
+                warning: ['ちょっと待って！', '気をつけて！', '注意してね！', '大丈夫？'],
+                info: ['そうそう！', 'いい感じ！', 'そうだね！', 'わかった！']
+            };
+            
+            const randomMessage = iepitaMessages[type][Math.floor(Math.random() * iepitaMessages[type].length)];
+            
+            toast.innerHTML = `
+                <div class="iepita-toast flex items-center p-3">
+                    <div class="iepita-bounce">
+                        <img src="iepita.png" alt="いえっぴ" class="w-12 h-12 drop-shadow-lg object-contain">
+                    </div>
+                    <div class="iepita-speech-bubble">
+                        <p class="text-sm font-medium text-gray-800">${randomMessage}</p>
+                        <p class="text-xs text-gray-600 mt-1">${message}</p>
+                    </div>
+                </div>
+            `;
+            
+            toast.classList.add('show', 'toast-show');
+            
+            // サウンド効果を再生
+            if (soundType) {
+                playSound(soundType);
+            }
+            
+            // いえっぴを少し振らせる
+            const iepitaImg = toast.querySelector('img');
+            if (iepitaImg) {
+                iepitaImg.classList.add('iepita-wiggle');
+                setTimeout(() => {
+                    iepitaImg.classList.remove('iepita-wiggle');
+                }, 500);
+            }
+            
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show', 'toast-show');
+            }, 4000);
+        };
+
+        // 従来のトースト通知（後方互換性のため）
+        const showToast = (message, soundType = null) => {
+            // いえっぴトーストに統一
+            showIepitaToast(message, 'info', soundType);
+        };
+
+        // サウンド効果の再生
+        const playSound = (type) => {
+            try {
+                // Web Audio APIを使用してサウンドを生成
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // 音の種類に応じて周波数を設定
+                switch(type) {
+                    case 'like':
+                        oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                        oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                        break;
+                    case 'star':
+                        oscillator.frequency.setValueAtTime(392.00, audioContext.currentTime); // G4
+                        oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime + 0.1); // C5
+                        oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.2); // E5
+                        break;
+                    case 'dislike':
+                        oscillator.frequency.setValueAtTime(220.00, audioContext.currentTime); // A3
+                        break;
+                }
+                
+                // 音量設定
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (error) {
+                console.log('サウンド再生に失敗しました:', error);
+            }
+        };
+
+        // ========== 写真管理 ==========
+        let uploadedPhotos = [];
+        const MAX_PHOTOS = 4;
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+        const validatePhoto = (file) => {
+            if (!file.type.startsWith('image/')) {
+                showNotification('画像ファイルのみアップロード可能です', 'error');
+                return false;
+            }
+            
+            if (file.size > MAX_FILE_SIZE) {
+                showNotification('ファイルサイズは5MB以下にしてください', 'error');
+                return false;
+            }
+            
+            return true;
+        };
+
+        const handlePhotoUpload = (files) => {
+            const validFiles = Array.from(files).filter(validatePhoto);
+            
+            if (uploadedPhotos.length + validFiles.length > MAX_PHOTOS) {
+                showNotification(`最大${MAX_PHOTOS}枚までアップロード可能です`, 'error');
+                return;
+            }
+            
+            validFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedPhotos.push({
+                        file: file,
+                        dataUrl: e.target.result
+                    });
+                    updatePhotoPreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        };
+
+        const updatePhotoPreview = () => {
+            const previewContainer = document.getElementById('photo-preview-container');
+            const uploadArea = document.getElementById('photo-upload-area');
+            
+            if (uploadedPhotos.length === 0) {
+                previewContainer.classList.add('hidden');
+                uploadArea.classList.remove('hidden');
+                return;
+            }
+            
+            uploadArea.classList.add('hidden');
+            previewContainer.classList.remove('hidden');
+            
+            const images = previewContainer.querySelectorAll('img');
+            const removeButtons = previewContainer.querySelectorAll('button');
+            
+            images.forEach((img, index) => {
+                if (index < uploadedPhotos.length) {
+                    img.src = uploadedPhotos[index].dataUrl;
+                    img.parentElement.classList.remove('hidden');
+                } else {
+                    img.parentElement.classList.add('hidden');
+                }
+            });
+            
+            removeButtons.forEach((btn, index) => {
+                if (index < uploadedPhotos.length) {
+                    btn.classList.remove('hidden');
+                } else {
+                    btn.classList.add('hidden');
+                }
+            });
+        };
+
+        const removePhoto = (index) => {
+            uploadedPhotos.splice(index, 1);
+            updatePhotoPreview();
+        };
+
+        // 写真アップロード関連のイベントリスナー
+        const setupPhotoUploadListeners = () => {
+            const photoInput = document.getElementById('photo-input');
+            const uploadArea = document.getElementById('photo-upload-area');
+            
+            // クリックでファイル選択
+            uploadArea.addEventListener('click', () => {
+                photoInput.click();
+            });
+            
+            // ファイル選択
+            photoInput.addEventListener('change', (e) => {
+                handlePhotoUpload(e.target.files);
+                e.target.value = ''; // 同じファイルを選択できるようにリセット
+            });
+            
+            // ドラッグ&ドロップ
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('border-brand-500', 'bg-brand-50');
+            });
+            
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('border-brand-500', 'bg-brand-50');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('border-brand-500', 'bg-brand-50');
+                handlePhotoUpload(e.dataTransfer.files);
+            });
+        };
+
+        // ========== 物件フォーム送信処理 ==========
+        const handlePropertySubmit = (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const selectedFacilities = Array.from(document.querySelectorAll('input[name="facilities"]:checked')).map(cb => cb.value);
+            
+            // アップロードされた写真のファイル名を生成
+            const photoFileNames = uploadedPhotos.map((photo, index) => {
+                const timestamp = Date.now();
+                const extension = photo.file.name.split('.').pop();
+                return `user_photo_${timestamp}_${index + 1}.${extension}`;
+            });
+            
+            // デフォルト画像が1枚もない場合は、最初の画像をデフォルトとして使用
+            const images = photoFileNames.length > 0 ? photoFileNames : ['p001.png'];
+            
+            // 新しい物件オブジェクトを作成
+            const newProperty = {
+                id: Date.now(), // 簡単なID生成
+                title: formData.get('title'),
+                address: formData.get('address'),
+                price: parseInt(formData.get('price')) * 10000, // 万円を円に変換
+                layout: formData.get('layout'),
+                age: formData.get('age'),
+                station_distance: parseInt(formData.get('walkTime')),
+                station_name: formData.get('station'),
+                tags: [formData.get('age'), formData.get('layout')].filter(Boolean),
+                amenities: selectedFacilities,
+                images: images,
+                coordinates: [35.652, 139.544], // デフォルト座標（調布市）
+                description: formData.get('description') || '',
+                isUserAdded: true, // ユーザーが追加した物件であることを示すフラグ
+                uploadedPhotos: uploadedPhotos // 実際の写真データも保存（実際のアプリではサーバーにアップロード）
+            };
+            
+            // ダミーデータに追加
+            dummyProperties.unshift(newProperty);
+            
+            // 成功メッセージを表示
+            showNotification('物件が正常に出品されました！', 'success');
+            
+            // フォームをリセット
+            e.target.reset();
+            uploadedPhotos = [];
+            updatePhotoPreview();
+            
+            // 物件リストページに戻る
+            navigateTo('list');
+            
+            // 物件リストを再レンダリング
+            renderPropertyList();
+        };
+
+        // ========== 通知表示機能 ==========
+        const showNotification = (message, type = 'info') => {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // 3秒後に削除
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        };
+
+        // ========== イベントリスナー設定 ==========
+        const setupEventListeners = () => {
+            document.getElementById('start-quiz-btn').addEventListener('click', () => navigateTo('quiz'));
+            
+            // 診断ページ
+            document.getElementById('quiz-content').addEventListener('click', e => {
+                const btn = e.target.closest('.quiz-option-btn');
+                if (btn) {
+                    handleQuizAnswer(btn.dataset.key, btn.dataset.value);
+                }
+            });
+            document.getElementById('quiz-back-btn').addEventListener('click', goBackQuizQuestion);
+            
+            // 売り手ページボタン
+            document.getElementById('seller-page-btn').addEventListener('click', () => navigateTo('seller'));
+            document.getElementById('back-to-list-btn').addEventListener('click', () => navigateTo('list'));
+            
+            // 物件フォーム送信
+            document.getElementById('property-form').addEventListener('submit', handlePropertySubmit);
+            
+            // 写真アップロード機能
+            setupPhotoUploadListeners();
+            
+            // ナビゲーション
+            bottomNav.addEventListener('click', e => {
+                const btn = e.target.closest('.nav-btn');
+                if (btn) {
+                    navigateTo(btn.dataset.page);
+                }
+            });
+            
+            // お気に入りボタン（リストと詳細）
+            appContainer.addEventListener('click', e => {
+                const btn = e.target.closest('.toggle-favorite-btn, .toggle-favorite-btn-details');
+                if (btn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleFavorite(parseInt(btn.dataset.id));
+                }
+            }, true);
+
+            // スターマークボタン（リストと詳細）
+            appContainer.addEventListener('click', e => {
+                const btn = e.target.closest('.toggle-star-btn, .toggle-star-btn-details');
+                if (btn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleStar(parseInt(btn.dataset.id));
+                }
+            }, true);
+
+            // 興味なしボタン（リストと詳細）
+            appContainer.addEventListener('click', e => {
+                const btn = e.target.closest('.toggle-dislike-btn, .toggle-dislike-btn-details');
+                if (btn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleDislike(parseInt(btn.dataset.id));
+                }
+            }, true);
+
+            // フィルター
+            document.getElementById('open-filter-btn').addEventListener('click', openFilterModal);
+            document.getElementById('close-filter-btn').addEventListener('click', closeFilterModal);
+            
+            // マップ表示切り替え
+            document.getElementById('toggle-map-btn').addEventListener('click', () => {
+                const mapContainer = document.getElementById('map-container');
+                const isHidden = mapContainer.classList.contains('hidden');
+                
+                if (isHidden) {
+                    // マップを表示
+                    mapContainer.classList.remove('hidden');
+                    const properties = getFilteredProperties();
+                    
+                    // マップを初期化（日本全国の物件を表示）
+                    initMap(properties);
+                    
+                    // 現在地を取得して距離情報を更新
+                    getUserLocation().then(location => {
+                        // 現在地が取得できた場合、距離情報を更新
+                        updatePropertyDistances();
+                    }).catch(error => {
+                        console.warn('現在地取得に失敗しました:', error);
+                    });
+                } else {
+                    // マップを非表示
+                    mapContainer.classList.add('hidden');
+                    if (state.currentMap) {
+                        state.currentMap.remove();
+                        state.currentMap = null;
+                    }
+                }
+            });
+            
+            // マップを閉じる
+            document.getElementById('close-map-btn').addEventListener('click', () => {
+                document.getElementById('map-container').classList.add('hidden');
+                if (state.currentMap) {
+                    state.currentMap.remove();
+                    state.currentMap = null;
+                }
+            });
+            
+            filterModal.addEventListener('click', (e) => {
+                 if (e.target === filterModal) closeFilterModal();
+            });
+            
+            document.getElementById('apply-filter-btn').addEventListener('click', () => {
+                state.filters.sort = document.getElementById('sort-select').value;
+                state.filters.maxPrice = parseInt(document.getElementById('price-range').value);
+                state.filters.maxAge = parseInt(document.getElementById('age-range').value);
+                state.filters.prefecture = document.getElementById('prefecture-select').value;
+                state.filters.city = document.getElementById('city-select').value;
+                
+                // 地域検索ボックスをクリア
+                document.getElementById('region-search').value = '';
+                document.getElementById('region-suggestions').classList.add('hidden');
+                
+                renderPropertyList();
+                closeFilterModal();
+            });
+
+            document.getElementById('reset-filter-btn').addEventListener('click', () => {
+                state.filters = { sort: 'match_desc', tags: [], tagMode: 'AND', maxPrice: 150000, maxAge: 100, prefecture: '', city: '' };
+                document.getElementById('sort-select').value = 'match_desc';
+                document.getElementById('price-range').value = 150000;
+                document.getElementById('price-range-value').textContent = '15';
+                document.getElementById('age-range').value = 100;
+                document.getElementById('age-range-value').textContent = '100';
+                document.getElementById('prefecture-select').value = '';
+                document.getElementById('city-select').value = '';
+                document.getElementById('region-search').value = '';
+                // 市区町村セレクトをリセット
+                const citySelect = document.getElementById('city-select');
+                citySelect.innerHTML = '<option value="">すべて</option>';
+                renderFilterTags();
+                renderPropertyList();
+                closeFilterModal();
+            });
+
+            document.getElementById('filter-tags').addEventListener('click', e => {
+                const btn = e.target.closest('.filter-tag-btn');
+                if(btn) {
+                    const tag = btn.dataset.tag;
+                    const index = state.filters.tags.indexOf(tag);
+                    if (index > -1) {
+                        state.filters.tags.splice(index, 1);
+                        btn.classList.remove('bg-brand-500', 'border-brand-500', 'text-white');
+                        btn.classList.add('bg-white', 'border-slate-300', 'text-slate-700');
+                    } else {
+                        state.filters.tags.push(tag);
+                        btn.classList.add('bg-brand-500', 'border-brand-500', 'text-white');
+                        btn.classList.remove('bg-white', 'border-slate-300', 'text-slate-700');
+                    }
+                }
+            });
+            
+            document.querySelector('.p-0\\.5.bg-slate-200').addEventListener('click', e => {
+                const btn = e.target.closest('.filter-tag-mode-btn');
+                if (btn) {
+                    state.filters.tagMode = btn.dataset.type;
+                    document.querySelectorAll('.filter-tag-mode-btn').forEach(b => {
+                        if (b.dataset.type === state.filters.tagMode) {
+                            b.classList.add('bg-white', 'shadow');
+                            b.classList.remove('text-slate-500');
+                        } else {
+                            b.classList.remove('bg-white', 'shadow');
+                            b.classList.add('text-slate-500');
+                        }
+                    });
+                }
+            });
+            
+            // レンジスライダー
+            document.getElementById('price-range').addEventListener('input', e => {
+                document.getElementById('price-range-value').textContent = (e.target.value / 10000).toLocaleString();
+            });
+            document.getElementById('age-range').addEventListener('input', e => {
+                document.getElementById('age-range-value').textContent = e.target.value;
+            });
+
+            // ブラウザの戻るボタン対応
+            window.addEventListener('popstate', (event) => {
+                // history.back()で戻った場合に、SPA内でのナビゲーションが壊れないように
+                // 簡易的な実装として、リストページに強制的に戻す
+                // 本格的なSPAではルーティングライブラリが必要
+                if(state.currentPage === 'details') {
+                    navigateTo('list');
+                }
+            });
+            
+        };
+        
+        // window.navigateToをグローバルに公開して、インラインonclickから呼び出せるようにする
+        window.navigateTo = navigateTo;
+        window.removePhoto = removePhoto;
+
+        // Service Workerの登録
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker: 登録成功', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker: 登録失敗', error);
+                    });
+            });
+        }
+
+        // アプリケーション起動
+        init();
+
+    });
+    </script>
+</body>
+</html>
+

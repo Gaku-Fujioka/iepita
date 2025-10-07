@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "title": "緑に囲まれた静かな古民家",
+    "address": "東京都調布市深大寺元町",
+    "price": 85000,
+    "layout": "3DK",
+    "age": 60,
+    "station_distance": 20,
+    "tags": ["古民家", "自然豊か", "DIY可", "ペット可"],
+    "amenities": ["wifi", "kitchen", "parking", "ac"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [35.698, 139.553]
+  },
+  {
+    "id": 2,
+    "title": "駅近！リノベーション済みアパート",
+    "address": "東京都調布市布田",
+    "price": 110000,
+    "layout": "1LDK",
+    "age": 15,
+    "station_distance": 5,
+    "tags": ["駅近", "リノベーション", "都市ガス"],
+    "amenities": ["wifi", "kitchen", "ac", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1560448204-61dc36dc98c8?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [35.652, 139.544]
+  },
+  {
+    "id": 3,
+    "title": "クリエイター向けSOHO可能物件",
+    "address": "東京都調布市仙川町",
+    "price": 130000,
+    "layout": "2DK",
+    "age": 25,
+    "station_distance": 8,
+    "tags": ["SOHO可", "デザイナーズ", "日当たり良好"],
+    "amenities": ["wifi", "kitchen", "ac", "desk"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [35.662, 139.585]
+  }
+]

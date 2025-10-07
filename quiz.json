@@ -1,0 +1,162 @@
+{
+  "questions": [
+    {
+      "question": "どんな場所で暮らしたい？",
+      "key": "location",
+      "options": [
+        { "text": "🌿 自然が多い郊外や田舎", "value": "nature", "tags": ["自然豊か", "古民家", "環境"] },
+        { "text": "🏙️ 駅近で便利な都会", "value": "city", "tags": ["駅近", "デザイナーズ", "access"] },
+        { "text": "🌊 海や川の近く", "value": "waterfront", "tags": ["リバーサイド", "海沿い", "環境"] },
+        { "text": "🏞️ 山や公園のそば", "value": "mountain", "tags": ["自然豊か", "静か", "環境"] }
+      ]
+    },
+    {
+      "question": "休日はどう過ごすことが多い？",
+      "key": "holiday",
+      "options": [
+        { "text": "🎨 家で創作や趣味に没頭", "value": "creative", "tags": ["SOHO可", "DIY可", "creative"] },
+        { "text": "🎉 友達や家族と外出", "value": "social", "tags": ["交流", "ファミリー向け", "social"] },
+        { "text": "🌿 家でのんびり過ごす", "value": "relax", "tags": ["庭付き", "ペット可", "relax"] },
+        { "text": "🚗 ドライブや小旅行", "value": "travel", "tags": ["駐車場", "郊外", "travel"] }
+      ]
+    },
+    {
+      "question": "家づくり、どう関わりたい？",
+      "key": "diy",
+      "options": [
+        { "text": "💸 家賃の安さ", "value": "cheap", "tags": ["リーズナブル", "郊外", "price"] },
+        { "text": "🚉 交通アクセス", "value": "access", "tags": ["駅近", "都市ガス", "access"] },
+        { "text": "🛠️ カスタマイズ性", "value": "custom", "tags": ["DIY可", "古民家", "diy"] },
+        { "text": "🌳 環境の良さ", "value": "environment", "tags": ["自然豊か", "日当たり良好", "環境"] }
+      ]
+    },
+    {
+      "question": "家の雰囲気はどんな感じが好き？",
+      "key": "style",
+      "options": [
+        { "text": "🪵 レトロで落ち着いた", "value": "retro", "tags": ["古民家", "木造", "retro"] },
+        { "text": "🏢 モダンでおしゃれ", "value": "modern", "tags": ["デザイナーズ", "リノベーション", "modern"] },
+        { "text": "🌿 ナチュラルで明るい", "value": "natural", "tags": ["庭付き", "自然豊か", "natural"] },
+        { "text": "🎨 個性的でユニーク", "value": "unique", "tags": ["SOHO可", "アトリエ", "creative"] }
+      ]
+    },
+    {
+      "question": "働き方・学び方は？",
+      "key": "workstyle",
+      "options": [
+        { "text": "💻 在宅ワーク中心", "value": "remote", "tags": ["SOHO可", "Wi-Fi", "work"] },
+        { "text": "🏢 通勤・通学が多い", "value": "commute", "tags": ["駅近", "都市ガス", "access"] },
+        { "text": "🧑‍🎓 学生で自炊生活", "value": "student", "tags": ["リーズナブル", "1K", "price"] },
+        { "text": "🧭 フリーランス・自由業", "value": "freelance", "tags": ["SOHO可", "DIY可", "creative"] }
+      ]
+    },
+    {
+      "question": "人との関わり方は？",
+      "key": "community",
+      "options": [
+        { "text": "🤝 交流を大切にしたい", "value": "social", "tags": ["シェアハウス", "交流", "social"] },
+        { "text": "🏠 家族との時間を大事にしたい", "value": "family", "tags": ["ファミリー向け", "庭付き", "family"] },
+        { "text": "🧘‍♂️ 一人の時間を大切にしたい", "value": "private", "tags": ["SOHO可", "静か", "private"] },
+        { "text": "👥 地域活動に参加したい", "value": "local", "tags": ["地域交流", "古民家", "community"] }
+      ]
+    },
+    {
+      "question": "部屋の広さはどのくらいが理想？",
+      "key": "size",
+      "options": [
+        { "text": "🏢 コンパクト（1R～1K）", "value": "small", "tags": ["1R", "1K", "compact"] },
+        { "text": "🛋 やや広め（1LDK～2DK）", "value": "medium", "tags": ["1LDK", "2DK", "medium"] },
+        { "text": "🏠 ファミリー向け（3LDK以上）", "value": "large", "tags": ["3LDK", "ファミリー向け", "family"] },
+        { "text": "🏡 シェア・共用スペース多め", "value": "shared", "tags": ["シェアハウス", "交流", "social"] }
+      ]
+    },
+    {
+      "question": "動物や自然との関わりは？",
+      "key": "pets",
+      "options": [
+        { "text": "🐶 ペットと暮らしたい", "value": "pet", "tags": ["ペット可", "pets"] },
+        { "text": "🌱 家庭菜園や庭いじりしたい", "value": "garden", "tags": ["家庭菜園", "庭付き", "garden"] },
+        { "text": "🪴 観葉植物を育てたい", "value": "plants", "tags": ["自然豊か", "plants"] },
+        { "text": "🚫 特にこだわらない", "value": "none", "tags": ["シンプル", "simple"] }
+      ]
+    },
+    {
+      "question": "理想の暮らし方に近いのは？",
+      "key": "lifestyle",
+      "options": [
+        { "text": "🧑‍🎨 自分時間を楽しむ", "value": "solo", "tags": ["SOHO可", "DIY可", "creative"] },
+        { "text": "👨‍👩‍👧‍👦 家族で支え合う", "value": "family", "tags": ["ファミリー向け", "family"] },
+        { "text": "🌏 地域と関わる", "value": "community", "tags": ["地域交流", "community"] },
+        { "text": "💼 効率重視で快適に暮らす", "value": "efficient", "tags": ["デザイナーズ", "駅近", "modern"] }
+      ]
+    },
+    {
+      "question": "将来どんな暮らしをしていたい？",
+      "key": "future",
+      "options": [
+        { "text": "🌳 自然とともにスローライフ", "value": "slowlife", "tags": ["自然豊か", "家庭菜園", "environment"] },
+        { "text": "🏙️ 都会でスマートに生活", "value": "urban", "tags": ["駅近", "リノベーション", "access"] },
+        { "text": "🏡 地域と共にまちづくり", "value": "community", "tags": ["地域交流", "古民家", "community"] },
+        { "text": "🧑‍💻 好きな場所で働く自由", "value": "freedom", "tags": ["SOHO可", "Wi-Fi", "creative"] }
+      ]
+    }
+  ],
+  "resultTypes": {
+    "🧑‍🎨 クリエイティブ隠れ家タイプ": {
+      "description": "静かで創作・在宅仕事に集中したい",
+      "tagWeights": {
+        "自然豊か": 3, "DIY可": 3, "SOHO可": 3, "creative": 3, "environment": 2, "静か": 2, "retro": 2
+      },
+      "iepitaComment": "静かな空間で、あなたのアイデアが花開くよ！"
+    },
+    "🤝 まちの交流HUBタイプ": {
+      "description": "交流・シェアハウス・イベント志向",
+      "tagWeights": {
+        "シェアハウス": 3, "交流": 3, "駅近": 3, "social": 3, "access": 2, "modern": 2, "community": 2
+      },
+      "iepitaComment": "みんなでつながる家、きっと見つかる！"
+    },
+    "🌾 スローライフ家庭菜園タイプ": {
+      "description": "家庭菜園・自然共生",
+      "tagWeights": {
+        "家庭菜園": 3, "ペット可": 3, "庭付き": 3, "garden": 3, "環境": 2, "自然豊か": 2, "relax": 2
+      },
+      "iepitaComment": "自然と一緒に、ゆったり育む暮らしを♪"
+    },
+    "💻 スマートワーカータイプ": {
+      "description": "都会×効率重視",
+      "tagWeights": {
+        "駅近": 3, "デザイナーズ": 3, "SOHO可": 3, "access": 3, "modern": 2, "work": 2, "efficient": 2
+      },
+      "iepitaComment": "集中できる空間で、仕事も暮らしも快適に！"
+    },
+    "🏡 ファミリーハーモニータイプ": {
+      "description": "家族やパートナーとの空間重視",
+      "tagWeights": {
+        "ファミリー向け": 3, "庭付き": 3, "駐車場": 3, "family": 3, "social": 2, "環境": 2, "large": 2
+      },
+      "iepitaComment": "家族の笑顔があふれる家を見つけよう！"
+    },
+    "🪴 ローカル・コミュニティクリエイタータイプ": {
+      "description": "地域づくり・まち活動志向",
+      "tagWeights": {
+        "交流": 3, "DIY可": 3, "古民家": 3, "community": 3, "creative": 2, "環境": 2, "local": 2
+      },
+      "iepitaComment": "あなたの手でまちをもっと素敵に！"
+    },
+    "📦 ミニマリスト効率派タイプ": {
+      "description": "シンプルで効率的な暮らし",
+      "tagWeights": {
+        "リーズナブル": 3, "1K": 3, "駅近": 3, "price": 3, "compact": 2, "simple": 2, "access": 2
+      },
+      "iepitaComment": "シンプルで効率的な暮らしを、一緒に見つけよう！"
+    },
+    "✈️ トラベラー自由暮らしタイプ": {
+      "description": "自由な場所で働くライフスタイル",
+      "tagWeights": {
+        "SOHO可": 3, "Wi-Fi": 3, "駐車場": 3, "creative": 3, "travel": 2, "freedom": 2, "remote": 2
+      },
+      "iepitaComment": "自由な場所で、あなたらしい暮らしを♪"
+    }
+  }
+}
