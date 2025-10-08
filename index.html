@@ -1331,9 +1331,8 @@
                 state.api.lastError = null;
                 state.api.lastFetchTime = new Date().toISOString();
                 
-                // 成功トースト（初回読み込み時のみ）
+                // 初回読み込みフラグのみ更新（トースト通知は表示しない）
                 if (!state.dataLoaded) {
-                    showToast('データの読み込み完了！', 'success');
                     state.dataLoaded = true;
                 }
 
