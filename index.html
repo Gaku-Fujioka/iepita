@@ -2376,13 +2376,16 @@ if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.l
 
         const createSwipeCardHTML = (property, position) => {
             // 外観の最初の画像を使用
-const imgFile = property.exterior_images[0];
-            
-            return `
-                <div class="swipe-card ${position}" data-id="${property.id}">
-                    <div class="relative h-full">
-                        <img src="${isRealPhoto ? imgFile : `https://placehold.co/1200x800/e2e8f0/64748b?text=${imgFile}`}" 
-                             alt="${property.title}" class="w-full h-2/3 object-cover">
+// 外観の最初の画像を安全に取得
+const imgFile = Array.isArray(property.exterior_images) && property.exterior_images.length > 0 ? property.exterior_images[0] : null;
+const isRealPhoto = imgFile && (String(imgFile).startsWith('http') || String(imgFile).startsWith('data:'));
+const imgSrc = isRealPhoto ? imgFile : `https://placehold.co/1200x800/e2e8f0/64748b?text=${encodeURIComponent(imgFile || property.title)}`;
+
+return `
+    <div class="swipe-card ${position}" data-id="${property.id}">
+        <div class="relative h-full">
+            <img src="${imgSrc}" 
+                 alt="${property.title}" class="w-full h-2/3 object-cover">
                         <div class="absolute top-4 left-4 bg-slate-800/60 text-white text-sm font-bold px-3 py-1.5 rounded-full flex items-center">
                             <i class="fas fa-bolt text-yellow-300 mr-2"></i> マッチ度 ${property.matchScore || '??'}%
                         </div>
