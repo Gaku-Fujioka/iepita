@@ -1311,10 +1311,10 @@
 
                 // resultTypesをセットアップ
                 if (quizData.resultTypes) {
-                    for (const [typeName, typeData] of Object.entries(quizData.resultTypes)) {
-                        resultTypes[typeName] = typeData.answers;
-                    }
-                }
+    for (const [typeName, typeData] of Object.entries(quizData.resultTypes)) {
+        resultTypes[typeName] = typeData.tagWeights || {}; // ✅ 正しいプロパティ
+    }
+}
 
                 // 成功メッセージ
                 console.log('🚀 データ読み込み完了:', {
@@ -1628,28 +1628,29 @@
 
             // 新しいタイプ分類ロジック
             for (const typeName in resultTypes) {
-                const typeData = resultTypes[typeName];
-                const expectedAnswers = typeData.answers;
-                
-                // 各質問の回答が期待値と一致するかチェック
-                let score = 0;
-                for (let i = 0; i < expectedAnswers.length && i < answers.length; i++) {
-                    if (answers[i] === expectedAnswers[i]) {
-                        score += 1;
-                    }
-                }
-                
-                // 完全一致の場合はボーナス点
-                if (score === expectedAnswers.length && answers.length === expectedAnswers.length) {
-                    score += 2;
-                }
-                
-                if (score > maxScore) {
-                    maxScore = score;
-                    bestMatch = typeName;
-                    bestMatchData = typeData;
-                }
-            }
+    const tagWeights = resultTypes[typeName];
+    
+    // 診断回答からタグを抽出
+    const answerTags = Object.entries(state.quiz.answers).flatMap(([key, value]) => {
+        const question = quizQuestions.find(q => q.key === key);
+        const option = question?.options?.find(o => o.value === value);
+        return option ? option.tags : [];
+    });
+    
+    // タグベースのスコア計算
+    let score = 0;
+    Object.entries(tagWeights).forEach(([tag, weight]) => {
+        if (answerTags.includes(tag)) {
+            score += weight;
+        }
+    });
+    
+    if (score > maxScore) {
+        maxScore = score;
+        bestMatch = typeName;
+        bestMatchData = { tagWeights, answerTags };
+    }
+}
 
             // いえっぴの吹き出しで結果を表示
             display.innerHTML = `
@@ -2045,21 +2046,21 @@ if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.l
             let maxScore = 0;
             
             for (const typeName in resultTypes) {
-                const typeData = resultTypes[typeName];
-                const expectedAnswers = typeData.answers;
-                
-                let score = 0;
-                for (let i = 0; i < expectedAnswers.length && i < answers.length; i++) {
-                    if (answers[i] === expectedAnswers[i]) {
-                        score += 1;
-                    }
-                }
-                
-                if (score > maxScore) {
-                    maxScore = score;
-                    bestMatchType = typeData;
-                }
-            }
+    const tagWeights = resultTypes[typeName];
+    
+    // タグベースのスコア計算
+    let score = 0;
+    Object.entries(tagWeights).forEach(([tag, weight]) => {
+        if (answerTags.includes(tag)) {
+            score += weight;
+        }
+    });
+    
+    if (score > maxScore) {
+        maxScore = score;
+        bestMatchType = { tagWeights };
+    }
+}
             
             // タイプのタグも追加
             if (bestMatchType && bestMatchType.tags) {
