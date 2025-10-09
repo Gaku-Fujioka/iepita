@@ -1882,8 +1882,13 @@ imagesToShow = [...exteriorImages, ...interiorImages];
                 </main>
             `;
             
-            // 地図の初期化
-            initDetailMap(property);
+            // DOM要素のレンダリング完了を待ってから地図を初期化
+            requestAnimationFrame(() => {
+                // さらに次のフレームで地図を初期化（CSSレイアウト完了を確実にする）
+                requestAnimationFrame(() => {
+                    initDetailMap(property);
+                });
+            });
 
             // ギャラリーのインジケータ更新
             const gallery = pages.details.querySelector('.gallery-container');
@@ -2970,6 +2975,16 @@ return `
                 state.detailMap = null;
             }
             
+            // DOM要素の存在とサイズを確認
+            const mapContainer = document.getElementById('detail-map');
+            if (!mapContainer) {
+                console.warn('地図コンテナが見つかりません');
+                return;
+            }
+            
+            // コンテナのサイズを強制的に再計算
+            mapContainer.style.height = '256px'; // h-64 = 16rem = 256px
+            
             // 詳細ページ地図を初期化
             state.detailMap = L.map('detail-map').setView(property.coordinates, 15);
             
@@ -2987,6 +3002,13 @@ return `
                     <p class="text-sm font-semibold text-brand-600">¥${property.price.toLocaleString()}/月</p>
                 </div>
             `);
+            
+            // 地図のサイズを強制的に再計算（念のため）
+            setTimeout(() => {
+                if (state.detailMap) {
+                    state.detailMap.invalidateSize();
+                }
+            }, 100);
         };
 
         // 複数物件のマップ初期化
