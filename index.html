@@ -1311,10 +1311,14 @@
 
                 // resultTypesをセットアップ
                 if (quizData.resultTypes) {
-    for (const [typeName, typeData] of Object.entries(quizData.resultTypes)) {
-        resultTypes[typeName] = typeData.tagWeights || {}; // ✅ 正しいプロパティ
-    }
-}
+                    for (const [typeName, typeData] of Object.entries(quizData.resultTypes)) {
+                        resultTypes[typeName] = {
+                            tagWeights: typeData.tagWeights || {},
+                            comment: typeData.iepitaComment || 'きっと素敵な住まいが見つかるよ♪',
+                            description: typeData.description || ''
+                        };
+                    }
+                }
 
                 // 成功メッセージ
                 console.log('🚀 データ読み込み完了:', {
@@ -1625,33 +1629,33 @@
             let bestMatchData = null;
             let maxScore = 0;
 
+            // 診断回答からタグを抽出（一度だけ計算）
+            const answerTags = Object.entries(state.quiz.answers).flatMap(([key, value]) => {
+                const question = quizQuestions.find(q => q.key === key);
+                const option = question?.options?.find(o => o.value === value);
+                return option ? option.tags : [];
+            });
+
             // 新しいタイプ分類ロジック
-      // 新しいタイプ分類ロジック
-for (const typeName in resultTypes) {
-    const typeData = resultTypes[typeName];
-    
-    // 診断回答からタグを抽出
-    const answerTags = Object.entries(state.quiz.answers).flatMap(([key, value]) => {
-        const question = quizQuestions.find(q => q.key === key);
-        const option = question?.options?.find(o => o.value === value);
-        return option ? option.tags : [];
-    });
-    
-    // 回答ベースのスコア計算（answers配列と照合）
-    let score = 0;
-    const userAnswers = Object.values(state.quiz.answers);
-    typeData.answers.forEach(expectedAnswer => {
-        if (userAnswers.includes(expectedAnswer)) {
-            score += 1;
-        }
-    });
-    
-    if (score > maxScore) {
-        maxScore = score;
-        bestMatch = typeName;
-        bestMatchData = typeData;
-    }
-}
+            for (const typeName in resultTypes) {
+                const typeData = resultTypes[typeName];
+                
+                // タグベースのスコア計算
+                let score = 0;
+                if (typeData.tagWeights) {
+                    Object.entries(typeData.tagWeights).forEach(([tag, weight]) => {
+                        if (answerTags.includes(tag)) {
+                            score += weight;
+                        }
+                    });
+                }
+                
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestMatch = typeName;
+                    bestMatchData = typeData;
+                }
+            }
 
             // いえっぴの吹き出しで結果を表示
             display.innerHTML = `
@@ -2047,25 +2051,28 @@ if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.l
             let maxScore = 0;
             
             for (const typeName in resultTypes) {
-    const tagWeights = resultTypes[typeName];
-    
-    // タグベースのスコア計算
-    let score = 0;
-    Object.entries(tagWeights).forEach(([tag, weight]) => {
-        if (answerTags.includes(tag)) {
-            score += weight;
-        }
-    });
-    
-    if (score > maxScore) {
-        maxScore = score;
-        bestMatchType = { tagWeights };
-    }
-}
+                const typeData = resultTypes[typeName];
+                
+                // タグベースのスコア計算
+                let score = 0;
+                if (typeData.tagWeights) {
+                    Object.entries(typeData.tagWeights).forEach(([tag, weight]) => {
+                        if (answerTags.includes(tag)) {
+                            score += weight;
+                        }
+                    });
+                }
+                
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestMatchType = typeData;
+                }
+            }
             
-            // タイプのタグも追加
-            if (bestMatchType && bestMatchType.tags) {
-                answerTags.push(...bestMatchType.tags);
+            // タイプのタグも追加（tagWeightsからタグを抽出）
+            if (bestMatchType && bestMatchType.tagWeights) {
+                const typeTags = Object.keys(bestMatchType.tagWeights);
+                answerTags.push(...typeTags);
             }
             
             dummyProperties.forEach(p => {
