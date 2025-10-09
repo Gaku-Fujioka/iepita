@@ -1626,8 +1626,9 @@
             let maxScore = 0;
 
             // 新しいタイプ分類ロジック
-            for (const typeName in resultTypes) {
-    const tagWeights = resultTypes[typeName];
+      // 新しいタイプ分類ロジック
+for (const typeName in resultTypes) {
+    const typeData = resultTypes[typeName];
     
     // 診断回答からタグを抽出
     const answerTags = Object.entries(state.quiz.answers).flatMap(([key, value]) => {
@@ -1636,18 +1637,19 @@
         return option ? option.tags : [];
     });
     
-    // タグベースのスコア計算
+    // 回答ベースのスコア計算（answers配列と照合）
     let score = 0;
-    Object.entries(tagWeights).forEach(([tag, weight]) => {
-        if (answerTags.includes(tag)) {
-            score += weight;
+    const userAnswers = Object.values(state.quiz.answers);
+    typeData.answers.forEach(expectedAnswer => {
+        if (userAnswers.includes(expectedAnswer)) {
+            score += 1;
         }
     });
     
     if (score > maxScore) {
         maxScore = score;
         bestMatch = typeName;
-        bestMatchData = resultTypes[typeName];
+        bestMatchData = typeData;
     }
 }
 
