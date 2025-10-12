@@ -252,16 +252,27 @@
         /* 診断中のいえっぴ */
         .quiz-iepita {
             position: fixed;
-            bottom: 20px;
+            bottom: 100px;
+            bottom: calc(100px + env(safe-area-inset-bottom));
             right: 20px;
+            right: calc(20px + env(safe-area-inset-right));
             z-index: 50;
             animation: iepitaBounce 3s infinite;
+            transition: bottom 0.3s ease;
         }
 
         .quiz-iepita img {
             width: 60px;
             height: 60px;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+        
+        /* タブレット・PC（大画面）では下の方に配置 */
+        @media (min-width: 768px) {
+            .quiz-iepita {
+                bottom: 30px;
+                bottom: calc(30px + env(safe-area-inset-bottom));
+            }
         }
 
         /* ===== 下部ナビゲーションの最適化 ===== */
