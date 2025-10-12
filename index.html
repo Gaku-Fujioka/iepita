@@ -460,6 +460,141 @@
             transform: translateY(0);
         }
 
+        /* === オンボーディングUI === */
+
+        /* オーバーレイの暗さ */
+        #onboarding-overlay {
+            opacity: 0.6;
+        }
+
+        /* スポットライト効果 */
+        #onboarding-spotlight {
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6),
+                        0 0 0 5px rgba(245, 158, 11, 0.8),
+                        0 0 30px 10px rgba(245, 158, 11, 0.5),
+                        inset 0 0 0 3px rgba(255, 255, 255, 1);
+            pointer-events: none;
+            z-index: 10001;
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ツールチップのアニメーション */
+        #onboarding-tooltip {
+            z-index: 10002;
+            animation: tooltipBounce 0.5s ease-out;
+        }
+
+        @keyframes tooltipBounce {
+            0% {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* プログレスドット */
+        .onboarding-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            transition: all 0.3s;
+        }
+
+        .onboarding-dot.active {
+            width: 24px;
+            border-radius: 4px;
+            background: #f59e0b;
+        }
+
+        /* 矢印のアニメーション */
+        #onboarding-arrow {
+            z-index: 10002;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        /* ハイライトされた要素の強調 */
+        .onboarding-highlight {
+            position: relative;
+            z-index: 10003 !important;
+        }
+
+        /* === スタートページの最適化 === */
+        #page-start .relative.z-10 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+
+        #page-start .mascot {
+            margin-bottom: 0.75rem !important;
+        }
+
+        #page-start .mascot img {
+            width: 6rem !important;
+            height: 6rem !important;
+        }
+
+        #page-start h1 {
+            font-size: 2.5rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        #page-start h1 + p {
+            font-size: 1rem !important;
+            margin-bottom: 1rem !important;
+        }
+
+        #page-start .grid.grid-cols-3 {
+            margin-bottom: 1rem !important;
+            gap: 0.5rem !important;
+        }
+
+        #page-start .grid.grid-cols-3 > div {
+            padding: 0.75rem !important;
+        }
+
+        #page-start .grid.grid-cols-3 .text-3xl {
+            font-size: 2rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+
+        #page-start .bg-white\/90 {
+            padding: 1rem !important;
+            margin-bottom: 1.25rem !important;
+        }
+
+        #page-start .bg-white\/90 h2 {
+            font-size: 1rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+
+        #page-start .bg-white\/90 .space-y-3 {
+            gap: 0.5rem !important;
+        }
+
+        #page-start .bg-white\/90 .space-y-3 > div {
+            gap: 0.5rem !important;
+        }
+
+        #page-start .bg-white\/90 p {
+            font-size: 0.8rem !important;
+            padding-top: 0 !important;
+        }
+
+        #page-start #start-quiz-btn {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+            padding-left: 3rem !important;
+            padding-right: 3rem !important;
+        }
+
+        #page-start #start-quiz-btn + p {
+            margin-top: 0.75rem !important;
+        }
+
         /* 診断中のいえっぴ */
         .quiz-iepita {
             position: fixed;
@@ -640,7 +775,7 @@
                     <div class="space-y-3 text-left">
                         <div class="flex items-start gap-3">
                             <div class="flex-shrink-0 w-7 h-7 rounded-full bg-brand-500 text-white text-xs flex items-center justify-center font-bold">1</div>
-                            <p class="text-sm text-slate-700 pt-0.5"><span class="font-semibold text-brand-600">5つの質問</span>に答える</p>
+                            <p class="text-sm text-slate-700 pt-0.5"><span class="font-semibold text-brand-600">10個の質問</span>に答える</p>
                         </div>
                         <div class="flex items-start gap-3">
                             <div class="flex-shrink-0 w-7 h-7 rounded-full bg-brand-500 text-white text-xs flex items-center justify-center font-bold">2</div>
@@ -2255,7 +2390,260 @@
             `;
         };
 
-        // === 段階5: 管理用関数 ===
+        // ========== オンボーディング機能 ==========
+        
+        // === オンボーディングステップの定義 ===
+        const onboardingSteps = [
+            {
+                id: 'step1',
+                target: '#start-quiz-btn',
+                title: '診断をはじめよう！',
+                description: '10個の質問に答えて、あなたにぴったりの物件を見つけます。所要時間は約1分です。',
+                tooltipPosition: 'top',
+                arrowDirection: 'down'
+            },
+            {
+                id: 'step2',
+                target: '.nav-btn[data-page="matching"]',
+                title: 'マッチングモード',
+                description: 'Tinder風のスワイプで楽しく物件を評価できます！左：お気に入り、右：スター、上：興味なし',
+                tooltipPosition: 'top',
+                arrowDirection: 'down',
+                requirePage: 'list'
+            },
+            {
+                id: 'step3',
+                target: '.toggle-favorite-btn',
+                title: 'お気に入りを保存しよう',
+                description: 'ハートマークで物件を保存できます。スターマークや興味なしも使ってみてください！',
+                tooltipPosition: 'bottom',
+                arrowDirection: 'up',
+                requirePage: 'list'
+            },
+            {
+                id: 'step4',
+                target: null,
+                title: '準備完了！🎉',
+                description: 'これで「いえぴた！」の使い方はバッチリです。さあ、あなたにぴったりの物件を見つけましょう！',
+                tooltipPosition: 'center',
+                arrowDirection: null
+            }
+        ];
+        
+        // === 段階2: ステップ管理 ===
+        const onboardingState = {
+            currentStep: 0,
+            isActive: false,
+            completed: false
+        };
+        
+        // オンボーディングを開始
+        window.startOnboarding = () => {
+            onboardingState.currentStep = 0;
+            onboardingState.isActive = true;
+            
+            const modal = document.getElementById('onboarding-modal');
+            modal.classList.remove('hidden');
+            
+            showOnboardingStep(0);
+        };
+        
+        // オンボーディングを終了
+        window.closeOnboarding = (saveCompleted = true) => {
+            const modal = document.getElementById('onboarding-modal');
+            modal.classList.add('hidden');
+            
+            onboardingState.isActive = false;
+            
+            if (saveCompleted) {
+                localStorage.setItem('onboarding_completed', 'true');
+                onboardingState.completed = true;
+            }
+            
+            // ハイライトを解除
+            document.querySelectorAll('.onboarding-highlight').forEach(el => {
+                el.classList.remove('onboarding-highlight');
+            });
+        };
+        
+        // 次のステップへ
+        window.nextOnboardingStep = () => {
+            if (onboardingState.currentStep < onboardingSteps.length - 1) {
+                onboardingState.currentStep++;
+                showOnboardingStep(onboardingState.currentStep);
+            } else {
+                // 最後のステップ→完了
+                closeOnboarding(true);
+                // スタートページに戻る
+                navigateTo('start');
+            }
+        };
+        
+        // プログレスドットを更新
+        const updateOnboardingProgress = (currentStep) => {
+            const progressContainer = document.getElementById('onboarding-progress');
+            progressContainer.innerHTML = onboardingSteps.map((step, index) => `
+                <div class="onboarding-dot ${index === currentStep ? 'active' : ''}"></div>
+            `).join('');
+            
+            document.getElementById('onboarding-step-text').textContent = 
+                `${currentStep + 1} / ${onboardingSteps.length}`;
+        };
+        
+        // === 段階3: ターゲットハイライト ===
+        
+        // ステップを表示
+        const showOnboardingStep = (stepIndex) => {
+            const step = onboardingSteps[stepIndex];
+            
+            // 必要なページに移動
+            if (step.requirePage && state.currentPage !== step.requirePage) {
+                navigateTo(step.requirePage);
+                // ページ遷移アニメーション待機
+                setTimeout(() => {
+                    showOnboardingStep(stepIndex);
+                }, 500);
+                return;
+            }
+            
+            // プログレス更新
+            updateOnboardingProgress(stepIndex);
+            
+            // コンテンツ更新
+            document.getElementById('onboarding-title').textContent = step.title;
+            document.getElementById('onboarding-description').textContent = step.description;
+            
+            // ボタンテキスト更新
+            const nextBtn = document.getElementById('onboarding-next');
+            nextBtn.textContent = stepIndex === onboardingSteps.length - 1 ? '完了！' : '次へ →';
+            
+            if (step.target) {
+                // ターゲット要素を取得
+                const targetElement = document.querySelector(step.target);
+                
+                if (targetElement) {
+                    // スポットライトとツールチップを配置
+                    positionOnboardingElements(targetElement, step);
+                } else {
+                    console.warn('ターゲット要素が見つかりません:', step.target);
+                    // フォールバック：センター表示
+                    positionOnboardingCenter(step);
+                }
+            } else {
+                // センター表示（ターゲットなし）
+                positionOnboardingCenter(step);
+            }
+            
+            console.log(`ステップ${stepIndex + 1}を表示:`, step.title);
+        };
+        
+        // ターゲット要素をハイライトしてツールチップを配置
+        const positionOnboardingElements = (targetElement, step) => {
+            const spotlight = document.getElementById('onboarding-spotlight');
+            const tooltip = document.getElementById('onboarding-tooltip');
+            const arrow = document.getElementById('onboarding-arrow');
+            
+            // ターゲット要素をハイライト
+            document.querySelectorAll('.onboarding-highlight').forEach(el => {
+                el.classList.remove('onboarding-highlight');
+            });
+            targetElement.classList.add('onboarding-highlight');
+            
+            // ターゲット要素の位置を取得
+            const rect = targetElement.getBoundingClientRect();
+            
+            // スポットライトを配置
+            spotlight.style.display = 'block';
+            spotlight.style.top = `${rect.top - 8}px`;
+            spotlight.style.left = `${rect.left - 8}px`;
+            spotlight.style.width = `${rect.width + 16}px`;
+            spotlight.style.height = `${rect.height + 16}px`;
+            
+            // ツールチップの位置を計算
+            tooltip.style.transform = 'none';
+            const tooltipRect = tooltip.getBoundingClientRect();
+            
+            // 矢印を表示
+            arrow.style.display = 'block';
+            
+            if (step.tooltipPosition === 'top') {
+                // ツールチップを上に配置
+                const tooltipTop = Math.max(16, rect.top - tooltipRect.height - 60);
+                const tooltipLeft = Math.max(16, Math.min(
+                    window.innerWidth - tooltipRect.width - 16,
+                    rect.left + rect.width / 2 - tooltipRect.width / 2
+                ));
+                
+                tooltip.style.top = `${tooltipTop}px`;
+                tooltip.style.left = `${tooltipLeft}px`;
+                
+                // 矢印を配置（ツールチップの下、ターゲットの上）
+                arrow.style.top = `${rect.top - 50}px`;
+                arrow.style.left = `${rect.left + rect.width / 2 - 20}px`;
+                arrow.innerHTML = '<i class="fas fa-arrow-down"></i>';
+            } else if (step.tooltipPosition === 'bottom') {
+                // ツールチップを下に配置
+                const tooltipTop = rect.bottom + 60;
+                const tooltipLeft = Math.max(16, Math.min(
+                    window.innerWidth - tooltipRect.width - 16,
+                    rect.left + rect.width / 2 - tooltipRect.width / 2
+                ));
+                
+                tooltip.style.top = `${tooltipTop}px`;
+                tooltip.style.left = `${tooltipLeft}px`;
+                
+                // 矢印を配置（ツールチップの上、ターゲットの下）
+                arrow.style.top = `${rect.bottom + 10}px`;
+                arrow.style.left = `${rect.left + rect.width / 2 - 20}px`;
+                arrow.innerHTML = '<i class="fas fa-arrow-up"></i>';
+            }
+            
+            // ターゲットまでスムーズにスクロール
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+        
+        // センター表示（ターゲットなし）
+        const positionOnboardingCenter = (step) => {
+            const spotlight = document.getElementById('onboarding-spotlight');
+            const tooltip = document.getElementById('onboarding-tooltip');
+            const arrow = document.getElementById('onboarding-arrow');
+            
+            // スポットライトを非表示
+            spotlight.style.display = 'none';
+            
+            // ツールチップを中央に配置
+            tooltip.style.top = '50%';
+            tooltip.style.left = '50%';
+            tooltip.style.transform = 'translate(-50%, -50%)';
+            
+            // 矢印を非表示
+            arrow.style.display = 'none';
+        };
+        
+        // === 段階4: 完成とlocalStorage連携 ===
+        
+        // 初期化時にオンボーディングチェック
+        const checkOnboarding = () => {
+            const completed = localStorage.getItem('onboarding_completed');
+            
+            if (!completed) {
+                // 初回訪問：少し待ってからオンボーディング開始
+                console.log('初回訪問を検出。オンボーディングを開始します...');
+                setTimeout(() => {
+                    startOnboarding();
+                }, 1500);
+            } else {
+                console.log('オンボーディング完了済み');
+            }
+        };
+        
+        // オンボーディングをリセット（設定から再度表示）
+        window.resetOnboarding = () => {
+            localStorage.removeItem('onboarding_completed');
+            console.log('オンボーディングをリセットしました');
+        };
+        
+        // === チャットボット管理用関数 ===
         
         // 問い合わせ一覧を表示（開発者ツールで使用）
         window.showInquiries = () => {
@@ -2312,6 +2700,9 @@
             initRegionFilters(); // 地域フィルターを初期化
             setupEventListeners();
             navigateTo('start');
+            
+            // === 段階4: オンボーディング自動起動 ===
+            checkOnboarding();
         };
 
         // ========== ナビゲーション ==========
@@ -4567,6 +4958,21 @@ return `
                 }
             });
             
+            // === オンボーディング：段階2 - イベントリスナー ===
+            
+            // スキップボタン
+            document.getElementById('onboarding-skip').addEventListener('click', () => {
+                if (confirm('チュートリアルをスキップしますか？\n（設定からいつでも見られます）')) {
+                    closeOnboarding(true);
+                    navigateTo('start');
+                }
+            });
+            
+            // 次へボタン
+            document.getElementById('onboarding-next').addEventListener('click', () => {
+                nextOnboardingStep();
+            });
+            
             document.querySelector('.p-0\\.5.bg-slate-200').addEventListener('click', e => {
                 const btn = e.target.closest('.filter-tag-mode-btn');
                 if (btn) {
@@ -4655,6 +5061,50 @@ return `
             <div id="chat-input-area" class="p-4 border-t bg-white">
                 <!-- 選択肢やフォームがここに表示される -->
             </div>
+        </div>
+    </div>
+
+    <!-- === オンボーディングモーダル === -->
+    <div id="onboarding-modal" class="hidden fixed inset-0" style="z-index: 10000;">
+        <!-- オーバーレイ -->
+        <div id="onboarding-overlay" class="absolute inset-0 bg-black transition-opacity duration-300"></div>
+        
+        <!-- スポットライト（ターゲット要素を明るく） -->
+        <div id="onboarding-spotlight" class="absolute rounded-xl transition-all duration-500"></div>
+        
+        <!-- ツールチップ -->
+        <div id="onboarding-tooltip" class="absolute bg-white rounded-2xl shadow-2xl p-6 max-w-sm transition-all duration-500">
+            <!-- コンテンツエリア -->
+            <div class="flex items-start gap-3 mb-4">
+                <img src="iepita.png" class="w-12 h-12 animate-bounce-slow" alt="いえっぴ">
+                <div class="flex-1">
+                    <h3 id="onboarding-title" class="text-lg font-bold text-slate-800 mb-2"></h3>
+                    <p id="onboarding-description" class="text-sm text-slate-600"></p>
+                </div>
+            </div>
+            
+            <!-- プログレス -->
+            <div class="flex items-center justify-between mb-4">
+                <div id="onboarding-progress" class="flex gap-1.5">
+                    <!-- ドットがここに表示される -->
+                </div>
+                <span id="onboarding-step-text" class="text-xs text-slate-400"></span>
+            </div>
+            
+            <!-- ボタン -->
+            <div class="flex gap-2">
+                <button id="onboarding-skip" class="flex-1 py-2 px-4 rounded-lg text-slate-600 hover:bg-slate-100 transition text-sm font-medium">
+                    スキップ
+                </button>
+                <button id="onboarding-next" class="flex-1 py-3 px-4 rounded-lg bg-brand-500 text-white font-bold hover:bg-brand-600 transition">
+                    次へ →
+                </button>
+            </div>
+        </div>
+        
+        <!-- 矢印（ターゲットを指す） -->
+        <div id="onboarding-arrow" class="absolute text-brand-500 text-4xl transition-all duration-500">
+            <i class="fas fa-arrow-down animate-bounce"></i>
         </div>
     </div>
 
