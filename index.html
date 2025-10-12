@@ -249,6 +249,217 @@
             75% { transform: rotate(5deg); }
         }
 
+        /* === フェーズ1：新しいアニメーション === */
+        
+        /* ゆっくりバウンス（スタートページのいえっぴ用） */
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 3s ease-in-out infinite;
+        }
+
+        /* ゆっくりパルス（ボタン用） */
+        @keyframes pulse-slow {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.95;
+                transform: scale(1.02);
+            }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+
+        /* キラキラエフェクト（プログレスバー用） */
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+            animation: shimmer 2s infinite;
+        }
+
+        /* スライドアップ（質問カード用） */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        /* ホバー時のスケール */
+        .hover\:scale-102:hover {
+            transform: scale(1.02);
+        }
+
+        /* === フェーズ1終了 === */
+
+        /* === チャットボットUI === */
+
+        /* チャットメッセージのアニメーション */
+        @keyframes slideInChat {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message {
+            animation: slideInChat 0.3s ease-out;
+        }
+
+        /* スクロールバーのカスタマイズ */
+        #chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chat-messages::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        #chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* いえっぴのメッセージ（左） */
+        .chat-message.iepita {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .chat-bubble.iepita {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 16px 16px 16px 4px;
+            max-width: 75%;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        /* ユーザーのメッセージ（右） */
+        .chat-message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .chat-bubble.user {
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 12px 16px;
+            border-radius: 16px 16px 4px 16px;
+            max-width: 75%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* タイピングインジケータ */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            border-radius: 16px 16px 16px 4px;
+            width: fit-content;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        /* 選択肢ボタン */
+        .chat-option-btn {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 14px 16px;
+            border-radius: 12px;
+            text-align: left;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .chat-option-btn:hover {
+            border-color: #f59e0b;
+            background: #fef9c3;
+            transform: translateX(4px);
+        }
+
+        .chat-option-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* フォーム入力フィールド */
+        .chat-input, .chat-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .chat-input:focus, .chat-textarea:focus {
+            border-color: #f59e0b;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .chat-textarea {
+            resize: none;
+            font-family: inherit;
+        }
+
+        .chat-submit-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: white;
+            font-weight: bold;
+            padding: 14px;
+            border-radius: 12px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .chat-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+        }
+
+        .chat-submit-btn:active {
+            transform: translateY(0);
+        }
+
         /* 診断中のいえっぴ */
         .quiz-iepita {
             position: fixed;
@@ -386,36 +597,118 @@
     <div id="app-container" class="relative mx-auto max-w-lg h-screen overflow-hidden">
 
         <!-- ===== 開始/診断ページ ===== -->
-        <div id="page-start" class="page page-active p-6 pt-12 flex flex-col items-center justify-center text-center">
-            <div class="mascot text-8xl mb-4">
-                <img src="iepita.png" alt="いえっぴ" class="w-28 h-28 mx-auto drop-shadow-lg object-contain">
+        <div id="page-start" class="page page-active relative overflow-auto">
+            <!-- フェーズ1：グラデーション背景 -->
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-100 via-amber-50 to-orange-100"></div>
+            
+            <!-- 装飾的な円 -->
+            <div class="absolute top-10 right-10 w-32 h-32 bg-brand-200 rounded-full opacity-30 blur-3xl"></div>
+            <div class="absolute bottom-20 left-10 w-40 h-40 bg-orange-200 rounded-full opacity-30 blur-3xl"></div>
+            
+            <!-- コンテンツ -->
+            <div class="relative z-10 p-6 pt-12 pb-8 flex flex-col items-center text-center">
+                <div class="mascot text-8xl mb-4 animate-bounce-slow">
+                    <img src="iepita.png" alt="いえっぴ" class="w-32 h-32 mx-auto drop-shadow-2xl object-contain">
+                </div>
+                <h1 class="text-5xl font-extrabold text-brand-600 mb-3 tracking-tight">いえぴた！</h1>
+                <p class="text-lg text-slate-700 font-medium mb-6">
+                    あなたの"ぴたっ"とくる空き家、見つけます。
+                </p>
+                
+                <!-- フェーズ2：特徴カード -->
+                <div class="grid grid-cols-3 gap-3 w-full max-w-sm mb-8 animate-slide-up">
+                    <div class="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div class="text-3xl mb-2">🏠</div>
+                        <p class="text-xs font-bold text-slate-700">空き家探し</p>
+                    </div>
+                    <div class="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div class="text-3xl mb-2">✨</div>
+                        <p class="text-xs font-bold text-slate-700">AI診断</p>
+                    </div>
+                    <div class="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div class="text-3xl mb-2">❤️</div>
+                        <p class="text-xs font-bold text-slate-700">簡単マッチ</p>
+                    </div>
+                </div>
+                
+                <!-- フェーズ2：診断の流れ説明カード -->
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg max-w-sm mb-8 animate-slide-up" style="animation-delay: 0.2s;">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center justify-center gap-2">
+                        <span class="text-brand-500">📋</span>
+                        診断の流れ
+                    </h2>
+                    <div class="space-y-3 text-left">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-7 h-7 rounded-full bg-brand-500 text-white text-xs flex items-center justify-center font-bold">1</div>
+                            <p class="text-sm text-slate-700 pt-0.5"><span class="font-semibold text-brand-600">5つの質問</span>に答える</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-7 h-7 rounded-full bg-brand-500 text-white text-xs flex items-center justify-center font-bold">2</div>
+                            <p class="text-sm text-slate-700 pt-0.5"><span class="font-semibold text-brand-600">AIが分析</span>してあなたのタイプを判定</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-7 h-7 rounded-full bg-brand-500 text-white text-xs flex items-center justify-center font-bold">3</div>
+                            <p class="text-sm text-slate-700 pt-0.5"><span class="font-semibold text-brand-600">ぴったりの物件</span>をご提案</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ボタン -->
+                <button id="start-quiz-btn" class="bg-brand-500 text-white font-bold py-5 px-16 rounded-full shadow-2xl hover:bg-brand-600 transition-all duration-300 transform hover:scale-105 hover:shadow-brand-500/50 animate-pulse-slow flex items-center gap-2">
+                    診断をはじめる
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                
+                <!-- 所要時間 -->
+                <p class="mt-4 text-xs text-slate-500">
+                    <i class="far fa-clock mr-1"></i>所要時間：約1分
+                </p>
             </div>
-            <h1 class="text-4xl font-extrabold text-brand-600">いえぴた！</h1>
-            <p class="mt-2 text-slate-600">あなたの"ぴたっ"とくる空き家、見つけます。</p>
-            <p class="mt-6 text-sm text-slate-500">簡単な診断で、理想の暮らしを提案します。<br>さあ、始めましょう！</p>
-            <button id="start-quiz-btn" class="mt-10 bg-brand-500 text-white font-bold py-4 px-12 rounded-full shadow-lg hover:bg-brand-600 transition-all duration-300 transform hover:scale-105">
-                診断をはじめる
-            </button>
         </div>
 
         <!-- ===== 診断質問ページ ===== -->
-        <div id="page-quiz" class="page page-hidden p-6 flex flex-col justify-between">
-            <div>
+        <div id="page-quiz" class="page page-hidden relative overflow-auto">
+            <!-- フェーズ3：グラデーション背景 -->
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50"></div>
+            
+            <!-- コンテンツ -->
+            <div class="relative z-10 p-6 flex flex-col min-h-screen pb-32">
+                <!-- プログレスエリア -->
                 <div class="pt-6">
-                    <div class="flex justify-between items-center mb-2">
-                        <span id="quiz-progress-text" class="text-sm font-medium text-slate-500"></span>
-                        <button id="quiz-back-btn" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fas fa-arrow-left mr-1"></i> 戻る</button>
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <span id="quiz-progress-text" class="text-sm font-bold text-brand-600"></span>
+                            <p class="text-xs text-slate-500 mt-0.5">あなたに合った物件を探しています...</p>
+                        </div>
+                        <button id="quiz-back-btn" class="text-slate-400 hover:text-slate-600 text-sm transition-colors">
+                            <i class="fas fa-arrow-left mr-1"></i> 戻る
+                        </button>
                     </div>
-                    <div class="w-full bg-slate-200 rounded-full h-2.5">
-                        <div id="quiz-progress-bar" class="bg-brand-500 h-2.5 rounded-full transition-all duration-500"></div>
+                    
+                    <!-- プログレスバー（装飾強化） -->
+                    <div class="relative w-full bg-slate-200 rounded-full h-3 shadow-inner">
+                        <div id="quiz-progress-bar" class="h-3 rounded-full transition-all duration-500 shadow-lg relative overflow-hidden" style="background: linear-gradient(90deg, #f59e0b 0%, #eab308 50%, #fbbf24 100%);">
+                            <!-- キラキラエフェクト -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-shimmer"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- ステップ表示 -->
+                    <div class="flex justify-between mt-2 px-1">
+                        <span class="text-xs text-slate-400">スタート</span>
+                        <span class="text-xs text-slate-400">完了</span>
                     </div>
                 </div>
-                <div id="quiz-content" class="mt-8">
-                    <!-- 質問がここに挿入されます -->
+                
+                <!-- 質問カード -->
+                <div id="quiz-content" class="mt-8 flex-grow">
+                    <!-- 質問がここに挿入されます（カード形式で） -->
                 </div>
-            </div>
-            <div id="quiz-nav" class="flex justify-center gap-4 mt-8 pb-4">
-                 <!-- ナビゲーションボタンがここに挿入されます -->
+                
+                <!-- ナビゲーション -->
+                <div id="quiz-nav" class="flex justify-center gap-4 mt-auto pb-4">
+                    <!-- ナビゲーションボタン -->
+                </div>
             </div>
             
             <!-- 診断中のいえっぴ -->
@@ -1074,6 +1367,7 @@
             {
                 question: "どんな場所で暮らしたい？",
                 key: "location",
+                iepitaComment: "まずは住む場所から選んでいこう！",
                 options: [
                     { text: "🌿 自然豊か", value: "nature", tags: ["自然豊か", "古民家", "家庭菜園"] },
                     { text: "🏙️ 都会派", value: "city", tags: ["駅近", "SOHO可", "デザイナーズ"] },
@@ -1083,6 +1377,7 @@
             {
                 question: "休日はどんな過ごし方をしたい？",
                 key: "hobby",
+                iepitaComment: "あなたらしい休日の過ごし方を教えて！",
                 options: [
                     { text: "🎨 創作", value: "creative", tags: ["DIY可", "SOHO可", "デザイナーズ"] },
                     { text: "🎉 友人交流", value: "social", tags: ["シェアハウス", "交流", "ファミリー向け"] },
@@ -1092,6 +1387,7 @@
             {
                 question: "家づくりにどのくらい関わりたい？",
                 key: "diy",
+                iepitaComment: "自分好みに手を加えるのも楽しいよね！",
                 options: [
                     { text: "🛠️ DIYしたい", value: "diy", tags: ["DIY可", "古民家"] },
                     { text: "✨ 完成された家がいい", value: "complete", tags: ["リノベーション", "デザイナーズ"] }
@@ -1100,6 +1396,7 @@
             {
                 question: "人との繋がりをどう感じる？",
                 key: "community",
+                iepitaComment: "コミュニティとの関わり方も大切だね！",
                 options: [
                     { text: "🤝 交流重視", value: "social", tags: ["交流", "シェアハウス", "ファミリー向け"] },
                     { text: "🏠 静かに過ごしたい", value: "private", tags: ["SOHO可", "静寂"] }
@@ -1108,6 +1405,7 @@
             {
                 question: "移動のしやすさ、どのくらい大事？",
                 key: "transport",
+                iepitaComment: "日々の移動も暮らしの質に関わるよ！",
                 options: [
                     { text: "🚉 駅近がいい", value: "station", tags: ["駅近", "SOHO可"] },
                     { text: "🚗 車が使える場所", value: "car", tags: ["駐車場", "郊外"] },
@@ -1117,6 +1415,7 @@
             {
                 question: "理想の広さは？",
                 key: "size",
+                iepitaComment: "最後の質問だよ！もう少しで完了！",
                 options: [
                     { text: "🏠 広々ファミリー向け", value: "family", tags: ["ファミリー向け", "広々", "庭付き"] },
                     { text: "🛋️ 1人暮らしに十分", value: "single", tags: ["コンパクト", "1人暮らし向け"] },
@@ -1627,6 +1926,367 @@
         };
 
 
+        // ========== チャットボット機能 ==========
+        
+        // === チャットボットの状態管理 ===
+        const chatbotState = {
+            propertyId: null,
+            inquiryType: null,
+            visitDate: null,
+            message: null,
+            userName: null,
+            userEmail: null,
+            userPhone: null
+        };
+        
+        // === 段階1: モーダル開閉 ===
+        
+        // グローバルスコープに公開（HTMLのonclickから呼び出せるように）
+        window.openChatbotModal = (propertyId) => {
+            const property = dummyProperties.find(p => p.id === propertyId);
+            chatbotState.propertyId = propertyId;
+            
+            const modal = document.getElementById('chatbot-modal');
+            modal.classList.remove('hidden');
+            
+            // 初期メッセージ表示
+            setTimeout(() => {
+                addIepitaMessage(`こんにちは！「${property.title}」について質問があるんだね！`);
+                setTimeout(() => {
+                    const typing = showTypingIndicator();
+                    setTimeout(() => {
+                        typing.remove();
+                        addIepitaMessage('どんなことが知りたい？');
+                        setTimeout(() => showInquiryTypeOptions(), 500);
+                    }, 1500);
+                }, 1000);
+            }, 300);
+        };
+
+        window.closeChatbotModal = () => {
+            const modal = document.getElementById('chatbot-modal');
+            modal.classList.add('hidden');
+            document.getElementById('chat-messages').innerHTML = '';
+            document.getElementById('chat-input-area').innerHTML = '';
+            
+            // 状態をリセット
+            chatbotState.propertyId = null;
+            chatbotState.inquiryType = null;
+            chatbotState.visitDate = null;
+            chatbotState.message = null;
+            chatbotState.userName = null;
+            chatbotState.userEmail = null;
+            chatbotState.userPhone = null;
+        };
+
+        // === 段階2: メッセージ表示 ===
+        
+        // いえっぴのメッセージを追加（内部関数なのでconstのまま）
+        const addIepitaMessage = (text) => {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message iepita';
+            messageDiv.innerHTML = `
+                <img src="iepita.png" class="w-8 h-8 flex-shrink-0" alt="いえっぴ">
+                <div class="chat-bubble iepita">${text}</div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        };
+
+        // ユーザーのメッセージを追加
+        const addUserMessage = (text) => {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message user';
+            messageDiv.innerHTML = `
+                <div class="chat-bubble user">${text}</div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        };
+
+        // タイピングインジケータ表示
+        const showTypingIndicator = () => {
+            const messagesContainer = document.getElementById('chat-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-message iepita typing-message';
+            typingDiv.innerHTML = `
+                <img src="iepita.png" class="w-8 h-8 flex-shrink-0" alt="いえっぴ">
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return typingDiv;
+        };
+
+        // === 段階3: 選択肢機能 ===
+        
+        // ステップ1: 問い合わせタイプ選択
+        window.showInquiryTypeOptions = () => {
+            const inputArea = document.getElementById('chat-input-area');
+            inputArea.innerHTML = `
+                <div class="space-y-2">
+                    <button onclick="selectInquiryType('details')" class="chat-option-btn w-full">
+                        📝 物件の詳細を聞きたい
+                    </button>
+                    <button onclick="selectInquiryType('visit')" class="chat-option-btn w-full">
+                        🏠 内見・見学をしたい
+                    </button>
+                    <button onclick="selectInquiryType('contract')" class="chat-option-btn w-full">
+                        📋 契約条件について相談したい
+                    </button>
+                    <button onclick="selectInquiryType('other')" class="chat-option-btn w-full">
+                        💬 その他の質問
+                    </button>
+                </div>
+            `;
+        };
+
+        window.selectInquiryType = (type) => {
+            const typeTexts = {
+                'details': '📝 物件の詳細を聞きたい',
+                'visit': '🏠 内見・見学をしたい',
+                'contract': '📋 契約条件について相談したい',
+                'other': '💬 その他の質問'
+            };
+            
+            addUserMessage(typeTexts[type]);
+            chatbotState.inquiryType = type;
+            
+            // 入力エリアをクリア
+            document.getElementById('chat-input-area').innerHTML = '';
+            
+            // タイピング表示
+            const typing = showTypingIndicator();
+            setTimeout(() => {
+                typing.remove();
+                if (type === 'visit') {
+                    addIepitaMessage('いいね！いつ頃見学できそう？');
+                    setTimeout(() => showVisitDateOptions(), 500);
+                } else {
+                    addIepitaMessage('わかった！詳しく教えてもらえる？');
+                    setTimeout(() => showMessageInput(), 500);
+                }
+            }, 1000);
+        };
+
+        // ステップ2: 見学日時選択（内見の場合のみ）
+        window.showVisitDateOptions = () => {
+            const inputArea = document.getElementById('chat-input-area');
+            inputArea.innerHTML = `
+                <div class="space-y-2">
+                    <button onclick="selectVisitDate('this-week')" class="chat-option-btn w-full">
+                        📅 今週中
+                    </button>
+                    <button onclick="selectVisitDate('next-week')" class="chat-option-btn w-full">
+                        📅 来週
+                    </button>
+                    <button onclick="selectVisitDate('after-next')" class="chat-option-btn w-full">
+                        📅 再来週以降
+                    </button>
+                    <button onclick="selectVisitDate('flexible')" class="chat-option-btn w-full">
+                        🤔 調整したい
+                    </button>
+                </div>
+            `;
+        };
+
+        window.selectVisitDate = (date) => {
+            const dateTexts = {
+                'this-week': '📅 今週中',
+                'next-week': '📅 来週',
+                'after-next': '📅 再来週以降',
+                'flexible': '🤔 調整したい'
+            };
+            
+            addUserMessage(dateTexts[date]);
+            chatbotState.visitDate = date;
+            
+            document.getElementById('chat-input-area').innerHTML = '';
+            
+            const typing = showTypingIndicator();
+            setTimeout(() => {
+                typing.remove();
+                addIepitaMessage('了解！何か特に伝えたいことはある？');
+                // 段階4で実装するshowMessageInput()を呼ぶ
+                setTimeout(() => {
+                    showMessageInput();
+                }, 500);
+            }, 1000);
+        };
+
+        // === 段階4: フォーム入力 ===
+        
+        // ステップ3: メッセージ入力
+        window.showMessageInput = () => {
+            const inputArea = document.getElementById('chat-input-area');
+            inputArea.innerHTML = `
+                <div class="space-y-2">
+                    <textarea id="chat-message-input" 
+                              class="chat-textarea"
+                              rows="3"
+                              placeholder="質問や要望があれば教えてね（スキップもOK）"></textarea>
+                    <button onclick="submitMessage()" class="chat-submit-btn w-full">
+                        次へ進む →
+                    </button>
+                </div>
+            `;
+            document.getElementById('chat-message-input').focus();
+        };
+
+        window.submitMessage = () => {
+            const input = document.getElementById('chat-message-input');
+            const message = input.value.trim();
+            
+            if (message) {
+                addUserMessage(message);
+                chatbotState.message = message;
+            } else {
+                addUserMessage('（特になし）');
+            }
+            
+            document.getElementById('chat-input-area').innerHTML = '';
+            
+            const typing = showTypingIndicator();
+            setTimeout(() => {
+                typing.remove();
+                addIepitaMessage('ありがとう！最後に連絡先を教えてね！');
+                setTimeout(() => showContactForm(), 500);
+            }, 1000);
+        };
+
+        // ステップ4: 連絡先フォーム
+        window.showContactForm = () => {
+            const inputArea = document.getElementById('chat-input-area');
+            inputArea.innerHTML = `
+                <div class="space-y-3">
+                    <input type="text" id="chat-name" 
+                           class="chat-input"
+                           placeholder="お名前 *" required>
+                    <input type="email" id="chat-email" 
+                           class="chat-input"
+                           placeholder="メールアドレス *" required>
+                    <input type="tel" id="chat-phone" 
+                           class="chat-input"
+                           placeholder="電話番号（任意）">
+                    <button onclick="submitInquiry()" class="chat-submit-btn w-full">
+                        📨 問い合わせを送信
+                    </button>
+                </div>
+            `;
+            document.getElementById('chat-name').focus();
+        };
+
+        window.submitInquiry = () => {
+            const name = document.getElementById('chat-name').value.trim();
+            const email = document.getElementById('chat-email').value.trim();
+            const phone = document.getElementById('chat-phone').value.trim();
+            
+            if (!name || !email) {
+                alert('お名前とメールアドレスは必須です');
+                return;
+            }
+            
+            // 簡易的なメールバリデーション
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('正しいメールアドレスを入力してください');
+                return;
+            }
+            
+            chatbotState.userName = name;
+            chatbotState.userEmail = email;
+            chatbotState.userPhone = phone;
+            
+            // === 段階5: localStorageに保存 ===
+            const property = dummyProperties.find(p => p.id === chatbotState.propertyId);
+            const inquiry = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                property: {
+                    id: property.id,
+                    title: property.title,
+                    address: property.address,
+                    price: property.price
+                },
+                inquiryType: chatbotState.inquiryType,
+                visitDate: chatbotState.visitDate,
+                message: chatbotState.message,
+                userName: name,
+                userEmail: email,
+                userPhone: phone,
+                status: 'new' // new, contacted, completed
+            };
+            
+            const inquiries = JSON.parse(localStorage.getItem('inquiries') || '[]');
+            inquiries.push(inquiry);
+            localStorage.setItem('inquiries', JSON.stringify(inquiries));
+            
+            console.log('✅ 問い合わせ保存完了:', inquiry);
+            console.log('📊 保存された問い合わせ総数:', inquiries.length);
+            
+            // ユーザーメッセージとして表示
+            addUserMessage(`${name} / ${email}${phone ? ' / ' + phone : ''}`);
+            
+            document.getElementById('chat-input-area').innerHTML = '';
+            
+            const typing = showTypingIndicator();
+            setTimeout(() => {
+                typing.remove();
+                addIepitaMessage('問い合わせを受け付けたよ！✨');
+                setTimeout(() => {
+                    addIepitaMessage('担当者から2営業日以内に連絡するから、楽しみに待っててね！');
+                    setTimeout(() => showCloseButton(), 500);
+                }, 1000);
+            }, 1000);
+        };
+
+        window.showCloseButton = () => {
+            const inputArea = document.getElementById('chat-input-area');
+            inputArea.innerHTML = `
+                <button onclick="closeChatbotModal()" class="w-full bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700 transition">
+                    閉じる
+                </button>
+            `;
+        };
+
+        // === 段階5: 管理用関数 ===
+        
+        // 問い合わせ一覧を表示（開発者ツールで使用）
+        window.showInquiries = () => {
+            const inquiries = JSON.parse(localStorage.getItem('inquiries') || '[]');
+            console.log('📋 問い合わせ一覧');
+            console.table(inquiries);
+            console.log(`総数: ${inquiries.length}件`);
+            return inquiries;
+        };
+
+        // 問い合わせをクリア（開発者ツールで使用）
+        window.clearInquiries = () => {
+            if (confirm('すべての問い合わせを削除しますか？')) {
+                localStorage.removeItem('inquiries');
+                console.log('✅ 問い合わせをクリアしました');
+            }
+        };
+
+        // 最新の問い合わせを表示（開発者ツールで使用）
+        window.showLatestInquiry = () => {
+            const inquiries = JSON.parse(localStorage.getItem('inquiries') || '[]');
+            if (inquiries.length > 0) {
+                const latest = inquiries[inquiries.length - 1];
+                console.log('📨 最新の問い合わせ:', latest);
+                return latest;
+            } else {
+                console.log('問い合わせがありません');
+                return null;
+            }
+        };
+
         // ========== 初期化処理 ==========
         const init = async () => {
             await loadData();
@@ -1977,8 +2637,8 @@ imagesToShow = [...exteriorImages, ...interiorImages];
                     <button class="toggle-dislike-btn-details flex flex-col items-center justify-center rounded-lg py-2 ${state.dislikes.includes(property.id) ? 'bg-slate-200 text-slate-500' : 'bg-slate-100 text-slate-600'}" data-id="${property.id}">
                         ${state.dislikes.includes(property.id) ? '<i class="fas fa-times text-xl"></i><span class="text-xs mt-1">興味なし済</span>' : '<i class="far fa-times text-xl"></i><span class="text-xs mt-1">興味なし</span>'}
                     </button>
-                    <button class="bg-slate-800 text-white font-bold rounded-lg col-span-2">
-                        問い合わせる
+                    <button class="bg-slate-800 text-white font-bold rounded-lg col-span-2 hover:bg-slate-700 transition-colors" onclick="openChatbotModal(${property.id})">
+                        💬 問い合わせる
                     </button>
                     <!-- <button class="bg-blue-500 text-white rounded-lg flex items-center justify-center"><i class="fas fa-map-marked-alt mr-2"></i>地図を開く</button> -->
                 </div>
@@ -2119,16 +2779,39 @@ if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.l
             document.getElementById('quiz-progress-bar').style.width = `${progress}%`;
             document.getElementById('quiz-progress-text').textContent = `質問 ${index + 1} / ${quizQuestions.length}`;
 
-            // 質問と選択肢
-            let optionsHTML = q.options.map(opt => `
-                <button class="quiz-option-btn w-full text-left p-4 border rounded-lg text-lg hover:bg-brand-50 transition" data-key="${q.key}" data-value="${opt.value}">
-                    ${opt.text}
+            // フェーズ3：カード型の質問デザイン
+            const selectedValue = state.quiz.answers[q.key];
+            let optionsHTML = q.options.map((opt, idx) => `
+                <button class="quiz-option-btn w-full text-left p-5 rounded-xl border-2 ${selectedValue === opt.value ? 'border-brand-500 bg-brand-100 shadow-lg' : 'border-slate-200 bg-white hover:border-brand-400 hover:bg-brand-50'} transition-all duration-200 transform hover:scale-102 hover:shadow-md" data-key="${q.key}" data-value="${opt.value}">
+                    <div class="flex items-center gap-3">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full ${selectedValue === opt.value ? 'bg-brand-500' : 'bg-slate-200'} flex items-center justify-center text-white font-bold text-sm">
+                            ${selectedValue === opt.value ? '✓' : idx + 1}
+                        </div>
+                        <span class="font-medium text-slate-700 flex-1 text-lg">${opt.text}</span>
+                    </div>
                 </button>
             `).join('');
 
             quizContent.innerHTML = `
-                <h2 class="text-2xl font-bold">${q.question}</h2>
-                <div class="space-y-4 mt-6">${optionsHTML}</div>
+                <div class="question-card bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-slate-100 animate-slide-up">
+                    <!-- いえっぴのコメント -->
+                    <div class="flex items-start gap-3 mb-6 p-4 bg-brand-50 rounded-xl">
+                        <img src="iepita.png" class="w-12 h-12 object-contain flex-shrink-0" alt="いえっぴ">
+                        <div class="speech-bubble flex-1">
+                            <p class="text-sm text-slate-700 font-medium">${q.iepitaComment || 'この質問に答えてね！'}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 質問文 -->
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6 leading-relaxed">
+                        ${q.question}
+                    </h2>
+                    
+                    <!-- 選択肢 -->
+                    <div class="space-y-3">
+                        ${optionsHTML}
+                    </div>
+                </div>
             `;
             
             // 戻るボタンの表示制御
@@ -3872,6 +4555,18 @@ return `
                 }
             });
             
+            // === チャットボット：段階1 - イベントリスナー ===
+            
+            // 閉じるボタン
+            document.getElementById('chatbot-close-btn').addEventListener('click', closeChatbotModal);
+
+            // モーダル背景クリックで閉じる
+            document.getElementById('chatbot-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'chatbot-modal') {
+                    closeChatbotModal();
+                }
+            });
+            
             document.querySelector('.p-0\\.5.bg-slate-200').addEventListener('click', e => {
                 const btn = e.target.closest('.filter-tag-mode-btn');
                 if (btn) {
@@ -3930,5 +4625,38 @@ return `
 
     });
     </script>
+
+    <!-- === チャットボットモーダル === -->
+    <div id="chatbot-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
+        <div class="bg-white rounded-t-3xl w-full max-w-lg h-[80vh] flex flex-col shadow-2xl">
+            <!-- ヘッダー -->
+            <div class="p-4 border-b flex items-center justify-between bg-gradient-to-r from-brand-100 to-amber-50">
+                <div class="flex items-center gap-2">
+                    <img src="iepita.png" class="w-10 h-10 animate-bounce-slow" alt="いえっぴ">
+                    <div>
+                        <h3 class="font-bold text-slate-800">いえっぴ</h3>
+                        <p class="text-xs text-green-500 flex items-center gap-1">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            オンライン
+                        </p>
+                    </div>
+                </div>
+                <button id="chatbot-close-btn" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- チャットエリア -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
+                <!-- メッセージがここに追加される -->
+            </div>
+            
+            <!-- 入力エリア -->
+            <div id="chat-input-area" class="p-4 border-t bg-white">
+                <!-- 選択肢やフォームがここに表示される -->
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
