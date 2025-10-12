@@ -2556,57 +2556,60 @@
             });
             targetElement.classList.add('onboarding-highlight');
             
-            // ターゲット要素の位置を取得
-            const rect = targetElement.getBoundingClientRect();
-            
-            // スポットライトを配置
-            spotlight.style.display = 'block';
-            spotlight.style.top = `${rect.top - 8}px`;
-            spotlight.style.left = `${rect.left - 8}px`;
-            spotlight.style.width = `${rect.width + 16}px`;
-            spotlight.style.height = `${rect.height + 16}px`;
-            
-            // ツールチップの位置を計算
-            tooltip.style.transform = 'none';
-            const tooltipRect = tooltip.getBoundingClientRect();
-            
-            // 矢印を表示
-            arrow.style.display = 'block';
-            
-            if (step.tooltipPosition === 'top') {
-                // ツールチップを上に配置
-                const tooltipTop = Math.max(16, rect.top - tooltipRect.height - 60);
-                const tooltipLeft = Math.max(16, Math.min(
-                    window.innerWidth - tooltipRect.width - 16,
-                    rect.left + rect.width / 2 - tooltipRect.width / 2
-                ));
-                
-                tooltip.style.top = `${tooltipTop}px`;
-                tooltip.style.left = `${tooltipLeft}px`;
-                
-                // 矢印を配置（ツールチップの下、ターゲットの上）
-                arrow.style.top = `${rect.top - 50}px`;
-                arrow.style.left = `${rect.left + rect.width / 2 - 20}px`;
-                arrow.innerHTML = '<i class="fas fa-arrow-down"></i>';
-            } else if (step.tooltipPosition === 'bottom') {
-                // ツールチップを下に配置
-                const tooltipTop = rect.bottom + 60;
-                const tooltipLeft = Math.max(16, Math.min(
-                    window.innerWidth - tooltipRect.width - 16,
-                    rect.left + rect.width / 2 - tooltipRect.width / 2
-                ));
-                
-                tooltip.style.top = `${tooltipTop}px`;
-                tooltip.style.left = `${tooltipLeft}px`;
-                
-                // 矢印を配置（ツールチップの上、ターゲットの下）
-                arrow.style.top = `${rect.bottom + 10}px`;
-                arrow.style.left = `${rect.left + rect.width / 2 - 20}px`;
-                arrow.innerHTML = '<i class="fas fa-arrow-up"></i>';
-            }
-            
-            // ターゲットまでスムーズにスクロール
+            // まずスクロール（スムーズ）
             targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // スクロール完了を待ってから位置を取得・配置
+            setTimeout(() => {
+                // ターゲット要素の位置を取得
+                const rect = targetElement.getBoundingClientRect();
+                
+                // スポットライトを配置
+                spotlight.style.display = 'block';
+                spotlight.style.top = `${rect.top - 8}px`;
+                spotlight.style.left = `${rect.left - 8}px`;
+                spotlight.style.width = `${rect.width + 16}px`;
+                spotlight.style.height = `${rect.height + 16}px`;
+                
+                // ツールチップの位置を計算
+                tooltip.style.transform = 'none';
+                const tooltipRect = tooltip.getBoundingClientRect();
+                
+                // 矢印を表示
+                arrow.style.display = 'block';
+                
+                if (step.tooltipPosition === 'top') {
+                    // ツールチップを上に配置
+                    const tooltipTop = Math.max(16, rect.top - tooltipRect.height - 60);
+                    const tooltipLeft = Math.max(16, Math.min(
+                        window.innerWidth - tooltipRect.width - 16,
+                        rect.left + rect.width / 2 - tooltipRect.width / 2
+                    ));
+                    
+                    tooltip.style.top = `${tooltipTop}px`;
+                    tooltip.style.left = `${tooltipLeft}px`;
+                    
+                    // 矢印を配置（ツールチップの下、ターゲットの上）
+                    arrow.style.top = `${rect.top - 50}px`;
+                    arrow.style.left = `${rect.left + rect.width / 2 - 20}px`;
+                    arrow.innerHTML = '<i class="fas fa-arrow-down"></i>';
+                } else if (step.tooltipPosition === 'bottom') {
+                    // ツールチップを下に配置
+                    const tooltipTop = rect.bottom + 60;
+                    const tooltipLeft = Math.max(16, Math.min(
+                        window.innerWidth - tooltipRect.width - 16,
+                        rect.left + rect.width / 2 - tooltipRect.width / 2
+                    ));
+                    
+                    tooltip.style.top = `${tooltipTop}px`;
+                    tooltip.style.left = `${tooltipLeft}px`;
+                    
+                    // 矢印を配置（ツールチップの上、ターゲットの下）
+                    arrow.style.top = `${rect.bottom + 10}px`;
+                    arrow.style.left = `${rect.left + rect.width / 2 - 20}px`;
+                    arrow.innerHTML = '<i class="fas fa-arrow-up"></i>';
+                }
+            }, 600);  // スクーズスクロール完了を待つ
         };
         
         // センター表示（ターゲットなし）
