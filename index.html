@@ -2627,11 +2627,9 @@
             const completed = localStorage.getItem('onboarding_completed');
             
             if (!completed) {
-                // 初回訪問：少し待ってからオンボーディング開始
+                // 初回訪問：すぐにオンボーディング開始
                 console.log('初回訪問を検出。オンボーディングを開始します...');
-                setTimeout(() => {
-                    startOnboarding();
-                }, 1500);
+                startOnboarding();
             } else {
                 console.log('オンボーディング完了済み');
             }
@@ -5073,7 +5071,7 @@ return `
         <div id="onboarding-spotlight" class="absolute rounded-xl transition-all duration-500"></div>
         
         <!-- ツールチップ -->
-        <div id="onboarding-tooltip" class="absolute bg-white rounded-2xl shadow-2xl p-6 max-w-sm transition-all duration-500">
+        <div id="onboarding-tooltip" class="absolute bg-white rounded-2xl shadow-2xl p-6 max-w-md transition-all duration-500">
             <!-- コンテンツエリア -->
             <div class="flex items-start gap-3 mb-4">
                 <img src="iepita.png" class="w-12 h-12 animate-bounce-slow" alt="いえっぴ">
