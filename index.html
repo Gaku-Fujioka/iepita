@@ -333,6 +333,11 @@
             transform: translateX(100%) rotate(30deg);
             opacity: 0;
         }
+        .swipe-card.swipe-up {
+            transform: translateY(-150%) rotate(0deg);
+            opacity: 0;
+            transition: all 0.3s ease-out;
+        }
         .swipe-overlay {
             position: absolute;
             top: 0;
@@ -2574,17 +2579,27 @@ return `
                 const starOverlay = currentCard.querySelector('.swipe-overlay.star');
                 const dislikeOverlay = currentCard.querySelector('.swipe-overlay.dislike');
                 
-                if (Math.abs(currentX) > 50) {
+                // 上スワイプを優先的にチェック（Y方向の移動が大きく、上向きの場合）
+                if (currentY < -50 && Math.abs(currentY) > Math.abs(currentX) * 1.5) {
+                    // 上スワイプ = 興味なし
+                    dislikeOverlay.classList.add('show');
+                    likeOverlay.classList.remove('show');
+                    starOverlay.classList.remove('show');
+                } else if (Math.abs(currentX) > 50) {
+                    // 横スワイプ
                     if (currentX > 0) {
+                        // 右スワイプ = スター
                         starOverlay.classList.add('show');
                         likeOverlay.classList.remove('show');
                         dislikeOverlay.classList.remove('show');
                     } else {
+                        // 左スワイプ = ハート
                         likeOverlay.classList.add('show');
                         starOverlay.classList.remove('show');
                         dislikeOverlay.classList.remove('show');
                     }
                 } else {
+                    // スワイプが不十分
                     likeOverlay.classList.remove('show');
                     starOverlay.classList.remove('show');
                     dislikeOverlay.classList.remove('show');
@@ -2599,8 +2614,21 @@ return `
                 
                 const threshold = 100;
                 
-                if (Math.abs(currentX) > threshold) {
-                    // スワイプが完了
+                // 上スワイプを優先的にチェック（Y方向の移動が大きく、上向きの場合）
+                if (currentY < -threshold && Math.abs(currentY) > Math.abs(currentX) * 1.2) {
+                    // 上スワイプ = 興味なし
+                    state.matching.isAnimating = true;
+                    currentCard.classList.add('swipe-up', 'swipe-success');
+                    toggleDislike(parseInt(currentCard.dataset.id));
+                    
+                    // アニメーション完了後に次のカードを表示
+                    setTimeout(() => {
+                        state.matching.currentIndex++;
+                        state.matching.isAnimating = false;
+                        renderMatchingCards();
+                    }, 300);
+                } else if (Math.abs(currentX) > threshold) {
+                    // 横スワイプが完了
                     state.matching.isAnimating = true;
                     
                     if (currentX > 0) {
