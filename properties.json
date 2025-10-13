@@ -30,12 +30,12 @@
     "tags": ["駅近", "リノベーション", "都市ガス"],
     "amenities": ["wifi", "kitchen", "ac", "bath"],
     "exterior_images": [
-      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop"
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1494526585095-c41746248156?w=800&h=600&fit=crop"
     ],
     "interior_images": [
       "https://images.unsplash.com/photo-1560448204-61dc36dc98c8?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop"
+      "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&h=600&fit=crop"
     ],
     "coordinates": [35.652, 139.544]
   },
@@ -58,5 +58,526 @@
       "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop"
     ],
     "coordinates": [35.662, 139.585]
+  },
+  {
+    "id": 4,
+    "title": "ファミリー向け広々一戸建て",
+    "address": "東京都調布市国領町",
+    "price": 145000,
+    "layout": "4LDK",
+    "age": 18,
+    "station_distance": 10,
+    "tags": ["ファミリー向け", "庭付き", "駐車場2台", "収納充実"],
+    "amenities": ["wifi", "kitchen", "parking", "ac", "bath", "desk"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [35.655, 139.557]
+  },
+  {
+    "id": 5,
+    "title": "札幌駅近！都会派マンション",
+    "address": "北海道札幌市中央区北3条",
+    "price": 75000,
+    "layout": "1LDK",
+    "age": 12,
+    "station_distance": 5,
+    "tags": ["駅近", "リノベーション", "都市ガス", "オートロック"],
+    "amenities": ["wifi", "kitchen", "ac", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [43.068, 141.351]
+  },
+  {
+    "id": 6,
+    "title": "函館の歴史的古民家",
+    "address": "北海道函館市元町",
+    "price": 68000,
+    "layout": "3DK",
+    "age": 80,
+    "station_distance": 15,
+    "tags": ["古民家", "歴史的建造物", "DIY可", "海が見える"],
+    "amenities": ["wifi", "kitchen", "parking", "ac"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1566908829550-e6551b00979b?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [41.769, 140.729]
+  },
+  {
+    "id": 7,
+    "title": "小樽運河沿い倉庫リノベ物件",
+    "address": "北海道小樽市色内",
+    "price": 82000,
+    "layout": "1SLDK",
+    "age": 45,
+    "station_distance": 12,
+    "tags": ["リノベーション", "デザイナーズ", "SOHO可", "倉庫改装"],
+    "amenities": ["wifi", "kitchen", "ac", "desk"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1511452885600-a3d2c9148a31?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1534598374948-8a2b5e2d63e3?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [43.191, 140.995]
+  },
+  {
+    "id": 8,
+    "title": "富良野ラベンダー畑近く田舎暮らし",
+    "address": "北海道富良野市北の峰町",
+    "price": 45000,
+    "layout": "2LDK",
+    "age": 35,
+    "station_distance": 25,
+    "tags": ["自然豊か", "家庭菜園可", "ペット可", "格安"],
+    "amenities": ["wifi", "kitchen", "parking", "ac"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1536345354502-38a44957e023?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [43.355, 142.383]
+  },
+  {
+    "id": 9,
+    "title": "旭川市中心部の広々3LDK",
+    "address": "北海道旭川市1条通",
+    "price": 62000,
+    "layout": "3LDK",
+    "age": 22,
+    "station_distance": 8,
+    "tags": ["ファミリー向け", "収納充実", "都市ガス", "日当たり良好"],
+    "amenities": ["wifi", "kitchen", "parking", "ac", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1600573472591-ee6b68d14f8d?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [43.771, 142.365]
+  },
+  {
+    "id": 10,
+    "title": "帯広・十勝平野の農地付き物件",
+    "address": "北海道帯広市西帯広",
+    "price": 52000,
+    "layout": "3DK",
+    "age": 40,
+    "station_distance": 20,
+    "tags": ["家庭菜園可", "自然豊か", "DIY可", "格安"],
+    "amenities": ["wifi", "kitchen", "parking", "ac"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1575517111478-7f6afd0973db?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [42.924, 143.195]
+  },
+  {
+    "id": 11,
+    "title": "釧路・海の見える絶景物件",
+    "address": "北海道釧路市幸町",
+    "price": 58000,
+    "layout": "2LDK",
+    "age": 28,
+    "station_distance": 18,
+    "tags": ["海が見える", "自然豊か", "ペット可", "格安"],
+    "amenities": ["wifi", "kitchen", "parking", "ac", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1594454928323-7845bf0d6f4c?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1533779283484-5ad4d0014389?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [42.985, 144.382]
+  },
+  {
+    "id": 12,
+    "title": "北見・格安シェアハウス",
+    "address": "北海道北見市北進町",
+    "price": 38000,
+    "layout": "個室8畳",
+    "age": 15,
+    "station_distance": 10,
+    "tags": ["シェアハウス", "格安", "共有スペース充実", "学生向け"],
+    "amenities": ["wifi", "kitchen", "ac", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1506126279433-22ce7d696a68?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1592066579122-9b2c7c756cbe?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [43.804, 143.896]
+  },
+  {
+    "id": 13,
+    "title": "苫小牧・港近く工業地帯アクセス良好",
+    "address": "北海道苫小牧市錦町",
+    "price": 48000,
+    "layout": "1K",
+    "age": 20,
+    "station_distance": 12,
+    "tags": ["格安", "駐車場付き", "工業地帯近く", "単身向け"],
+    "amenities": ["wifi", "kitchen", "parking", "ac"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1558036117-15d82a90b9b1?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1519947486511-46149fa0a254?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1523755231516-e43fd2e8dca5?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [42.634, 141.606]
+  },
+  {
+    "id": 14,
+    "title": "ニセコ・ペンション風一戸建て",
+    "address": "北海道虻田郡ニセコ町中央通",
+    "price": 95000,
+    "layout": "3LDK",
+    "age": 16,
+    "station_distance": 8,
+    "tags": ["リゾート", "ペット可", "自然豊か", "スキー場近く"],
+    "amenities": ["wifi", "kitchen", "parking", "ac", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1449844908441-8829872d2607?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1600573472605-af76c6c4a59d?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1615873968403-89e068629265?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [42.805, 140.687]
+  },
+  {
+    "id": 15,
+    "title": "室蘭・海沿いのモダンアパート",
+    "address": "北海道室蘭市海岸町",
+    "price": 55000,
+    "layout": "2DK",
+    "age": 25,
+    "station_distance": 14,
+    "tags": ["海が見える", "格安", "オーシャンビュー", "静か"],
+    "amenities": ["wifi", "kitchen", "ac", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1576941089067-2de3c901e126?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [42.315, 140.974]
+  },
+  {
+    "id": 16,
+    "title": "札幌円山エリア・高級住宅地",
+    "address": "北海道札幌市中央区円山",
+    "price": 125000,
+    "layout": "3LDK",
+    "age": 8,
+    "station_distance": 7,
+    "tags": ["高級住宅地", "リノベーション", "デザイナーズ", "駅近"],
+    "amenities": ["wifi", "kitchen", "parking", "ac", "bath", "desk"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1598228723793-52759bba239c?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1505873242700-f289a29e1e0f?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1611048264355-27a1c73a49e7?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1600573472591-ee6b68d14f8d?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [43.043, 141.322]
+  },
+  {
+    "id": 17,
+    "title": "美瑛の丘・農家住宅",
+    "address": "北海道上川郡美瑛町大町",
+    "price": 40000,
+    "layout": "4DK",
+    "age": 50,
+    "station_distance": 30,
+    "tags": ["農家住宅", "自然豊か", "家庭菜園可", "DIY可"],
+    "amenities": ["kitchen", "parking", "ac"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1529306263044-2d224e8d3156?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [43.589, 142.471]
+  },
+  {
+    "id": 18,
+    "title": "登別温泉街・ペンション併用物件",
+    "address": "北海道登別市登別温泉町",
+    "price": 88000,
+    "layout": "2LDK+客室2室",
+    "age": 30,
+    "station_distance": 10,
+    "tags": ["温泉付き", "店舗併用", "リゾート", "ペンション"],
+    "amenities": ["wifi", "kitchen", "parking", "ac", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1574873215043-441194611487?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1616137624113-a53c3e2f5b5c?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1617104679265-171b31a31d2a?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [42.491, 141.163]
+  },
+  {
+    "id": 19,
+    "title": "札幌すすきの徒歩圏内ワンルーム",
+    "address": "北海道札幌市中央区南5条",
+    "price": 52000,
+    "layout": "1R",
+    "age": 18,
+    "station_distance": 3,
+    "tags": ["駅近", "繁華街近く", "格安", "単身向け"],
+    "amenities": ["wifi", "kitchen", "ac"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1558969449-3a1a3a8b4e72?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1529408632839-a54911893d39?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1512412440431-a67879e54a8e?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [43.052, 141.353]
+  },
+  {
+    "id": 20,
+    "title": "仙台市青葉区・モダンデザイナーズ",
+    "address": "宮城県仙台市青葉区中央",
+    "price": 98000,
+    "layout": "1LDK",
+    "age": 5,
+    "station_distance": 7,
+    "tags": ["デザイナーズ", "駅近", "都市ガス", "SOHO可"],
+    "amenities": ["wifi", "kitchen", "ac", "bath", "desk"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1594894432932-d8a2d4215234?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [38.268, 140.872]
+  },
+  {
+    "id": 21,
+    "title": "青森りんご畑に囲まれた農家住宅",
+    "address": "青森県弘前市大字清水富田",
+    "price": 55000,
+    "layout": "4DK",
+    "age": 55,
+    "station_distance": 35,
+    "tags": ["農家住宅", "自然豊か", "家庭菜園可", "ペット可"],
+    "amenities": ["kitchen", "parking", "ac"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1587061949409-02df41d5e562?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [40.605, 140.475]
+  },
+  {
+    "id": 22,
+    "title": "秋田・武家屋敷通りの古民家",
+    "address": "秋田県仙北市角館町",
+    "price": 68000,
+    "layout": "3LDK",
+    "age": 70,
+    "station_distance": 15,
+    "tags": ["古民家", "歴史的建造物", "DIY可", "静寂"],
+    "amenities": ["wifi", "kitchen", "parking"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1528413244675-0b04c05332d6?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1613977257363-31161313331b?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1588691523619-a11c070f80e0?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1505692952047-1a78307da8f2?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [39.597, 140.567]
+  },
+  {
+    "id": 23,
+    "title": "盛岡市・北上川沿いのファミリー物件",
+    "address": "岩手県盛岡市中央通",
+    "price": 72000,
+    "layout": "3LDK",
+    "age": 20,
+    "station_distance": 18,
+    "tags": ["ファミリー向け", "リバーサイド", "日当たり良好", "収納充実"],
+    "amenities": ["wifi", "kitchen", "parking", "ac", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1449844908441-8829872d2607?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1475855581690-80accde3bf2b?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1560185007-c5ca9d2c015d?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1556020685-ae41abfc9365?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [39.702, 141.154]
+  },
+  {
+    "id": 24,
+    "title": "山形・蔵王温泉スキー場近くのロッジ",
+    "address": "山形県山形市蔵王温泉",
+    "price": 85000,
+    "layout": "2LDK",
+    "age": 25,
+    "station_distance": 40,
+    "tags": ["リゾート", "スキー場近く", "温泉付き", "自然豊か"],
+    "amenities": ["wifi", "kitchen", "parking", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1516591618741-a9a7a58a6d25?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1551524164-687a55dd1126?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbb563?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [38.163, 140.399]
+  },
+  {
+    "id": 25,
+    "title": "福島会津若松・城下町の町屋",
+    "address": "福島県会津若松市大町",
+    "price": 63000,
+    "layout": "2DK",
+    "age": 65,
+    "station_distance": 22,
+    "tags": ["古民家", "リノベーション", "DIY可", "店舗併用可"],
+    "amenities": ["kitchen", "ac", "desk"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1628744448842-1c71a4f8f435?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1503891450248-d248a8e323b4?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1617806118233-528237d26bb4?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [37.495, 139.929]
+  },
+  {
+    "id": 26,
+    "title": "松島海岸・オーシャンビューマンション",
+    "address": "宮城県宮城郡松島町",
+    "price": 105000,
+    "layout": "2LDK",
+    "age": 10,
+    "station_distance": 12,
+    "tags": ["海が見える", "オーシャンビュー", "駅近", "リゾート"],
+    "amenities": ["wifi", "kitchen", "ac", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1590794058392-49a3a9a7a82b?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [38.371, 141.060]
+  },
+  {
+    "id": 27,
+    "title": "いわき市・海辺のサーファーズハウス",
+    "address": "福島県いわき市平豊間",
+    "price": 78000,
+    "layout": "3DK",
+    "age": 30,
+    "station_distance": 25,
+    "tags": ["海が見える", "ペット可", "DIY可", "サーフィン"],
+    "amenities": ["wifi", "kitchen", "parking", "ac"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1613553424169-17483015fce3?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1594228805143-855e42b29a27?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1582294152434-a1e6878b105f?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [36.996, 140.913]
+  },
+  {
+    "id": 28,
+    "title": "十和田湖畔の静かな別荘",
+    "address": "青森県十和田市大字奥瀬",
+    "price": 60000,
+    "layout": "2LDK",
+    "age": 40,
+    "station_distance": 50,
+    "tags": ["自然豊か", "湖畔", "静寂", "格安"],
+    "amenities": ["kitchen", "parking", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1472224371017-08207f84aaae?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1530353457813-2b9148e6583d?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1512916568789-c5f1c9a41b7e?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [40.448, 140.875]
+  },
+  {
+    "id": 29,
+    "title": "米沢市・静かな住宅街の一戸建て",
+    "address": "山形県米沢市中央",
+    "price": 65000,
+    "layout": "4DK",
+    "age": 35,
+    "station_distance": 20,
+    "tags": ["ファミリー向け", "静かな環境", "駐車場付き", "収納充実"],
+    "amenities": ["kitchen", "parking", "ac", "bath"],
+    "exterior_images": [
+      "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1574362848149-11496d93a7c4?w=800&h=600&fit=crop"
+    ],
+    "interior_images": [
+      "https://images.unsplash.com/photo-1617104679265-171b31a31d2a?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1571175653924-75d3121f0237?w=800&h=600&fit=crop"
+    ],
+    "coordinates": [37.917, 140.117]
   }
 ]
+
