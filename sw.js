@@ -1,5 +1,5 @@
 // Service Worker for いえぴた！
-const CACHE_NAME = 'iepita-v1.1.0';
+const CACHE_NAME = 'iepita-v1.5.0';
 const urlsToCache = [
   '/',
   '/index.html',
