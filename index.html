@@ -652,6 +652,77 @@
             transform: scale(0.95);
             background-color: rgba(245, 158, 11, 0.1);
         }
+        
+        /* ナビゲーションボタンのカスタムカラー */
+        #bottom-nav .nav-btn-blue {
+            color: #3b82f6; /* 青 - 物件リスト */
+        }
+        
+        #bottom-nav .nav-btn-blue:active {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        
+        #bottom-nav .nav-btn-blue.active {
+            background-color: #3b82f6;
+            color: white;
+            font-weight: bold;
+        }
+        
+        #bottom-nav .nav-btn-pink {
+            color: #ec4899; /* ピンク - お気に入り */
+        }
+        
+        #bottom-nav .nav-btn-pink:active {
+            background-color: rgba(236, 72, 153, 0.1);
+        }
+        
+        #bottom-nav .nav-btn-pink.active {
+            background-color: #ec4899;
+            color: white;
+            font-weight: bold;
+        }
+        
+        #bottom-nav .nav-btn-yellow {
+            color: #eab308; /* 黄色 - スター */
+        }
+        
+        #bottom-nav .nav-btn-yellow:active {
+            background-color: rgba(234, 179, 8, 0.1);
+        }
+        
+        #bottom-nav .nav-btn-yellow.active {
+            background-color: #eab308;
+            color: white;
+            font-weight: bold;
+        }
+        
+        #bottom-nav .nav-btn-gray {
+            color: #64748b; /* グレー - 興味なし */
+        }
+        
+        #bottom-nav .nav-btn-gray:active {
+            background-color: rgba(100, 116, 139, 0.1);
+        }
+        
+        #bottom-nav .nav-btn-gray.active {
+            background-color: #64748b;
+            color: white;
+            font-weight: bold;
+        }
+        
+        #bottom-nav .nav-btn-orange {
+            color: #f97316; /* オレンジ - マッチング */
+        }
+        
+        #bottom-nav .nav-btn-orange:active {
+            background-color: rgba(249, 115, 22, 0.1);
+        }
+        
+        #bottom-nav .nav-btn-orange.active {
+            background-color: #f97316;
+            color: white;
+            font-weight: bold;
+        }
 
         /* コンテンツエリアの下部余白を動的に調整 */
         .pb-20 {
@@ -1250,23 +1321,23 @@
 
         <!-- ===== 下部ナビゲーション ===== -->
         <nav id="bottom-nav" class="hidden bg-white/95 shadow-lg grid grid-cols-6 border-t">
-            <button class="nav-btn p-2 text-brand-500" data-page="list">
+            <button class="nav-btn nav-btn-blue p-2" data-page="list">
                 <i class="fas fa-home text-lg"></i>
                 <span class="text-xs font-bold">物件リスト</span>
             </button>
-            <button class="nav-btn p-2 text-slate-500" data-page="favorites">
+            <button class="nav-btn nav-btn-pink p-2" data-page="favorites">
                 <i class="fas fa-heart text-lg"></i>
                 <span class="text-xs">お気に入り</span>
             </button>
-            <button class="nav-btn p-2 text-slate-500" data-page="stars">
+            <button class="nav-btn nav-btn-yellow p-2" data-page="stars">
                 <i class="fas fa-star text-lg"></i>
                 <span class="text-xs">スター</span>
             </button>
-            <button class="nav-btn p-2 text-slate-500" data-page="dislikes">
+            <button class="nav-btn nav-btn-gray p-2" data-page="dislikes">
                 <i class="fas fa-times text-lg"></i>
                 <span class="text-xs">興味なし</span>
             </button>
-            <button class="nav-btn p-2 text-slate-500" data-page="matching">
+            <button class="nav-btn nav-btn-orange p-2" data-page="matching">
                 <i class="fas fa-fire text-lg"></i>
                 <span class="text-xs">マッチング</span>
             </button>
@@ -2693,6 +2764,9 @@
                 return;
             }
             
+            // 効果音を初期化
+            initQuizSound();
+            
             // ユーザーデータの読み込み
             loadFavorites();
             loadStars();
@@ -3528,8 +3602,95 @@ if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.l
             }
         };
 
+        // ========== 効果音システム ==========
+        
+        // マッチングモード効果音
+        const swipeSounds = {
+            favorite: null,  // お気に入り（左スワイプ）
+            star: null,      // スター（右スワイプ）
+            dislike: null    // 興味なし（上スワイプ）
+        };
+        
+        // 診断（クイズ）効果音
+        let quizSound = null;
+
+        // マッチングモード効果音の初期化
+        const initSwipeSounds = () => {
+            // お気に入り: 明るい決定音
+            // 推奨: 効果音ラボ > ボタン・システム音 > 「決定ボタンを押す」系
+            swipeSounds.favorite = new Audio();
+            swipeSounds.favorite.src = 'sounds/favorite.mp3';
+            swipeSounds.favorite.volume = 0.5;
+            
+            // スター: キラキラした特別な音
+            // 推奨: 効果音ラボ > 演出・アニメ > 「キラーン」「輝き」系
+            swipeSounds.star = new Audio();
+            swipeSounds.star.src = 'sounds/star.mp3';
+            swipeSounds.star.volume = 0.5;
+            
+            // 興味なし: さっぱりしたキャンセル音
+            // 推奨: 効果音ラボ > ボタン・システム音 > 「キャンセル」系
+            swipeSounds.dislike = new Audio();
+            swipeSounds.dislike.src = 'sounds/dislike.mp3';
+            swipeSounds.dislike.volume = 0.4;
+        };
+        
+        // 診断（クイズ）効果音の初期化
+        const initQuizSound = () => {
+            // 診断: 素朴で優しいクリック音
+            // 推奨: 効果音ラボ > ボタン・システム音 > 「ボタン押下」系（決定音より軽やかな音）
+            quizSound = new Audio();
+            quizSound.src = 'sounds/quiz.mp3';
+            quizSound.volume = 0.3; // 控えめの音量
+        };
+
+        // マッチングモード効果音を再生（ハプティックフィードバック付き）
+        const playSwipeSound = (type) => {
+            try {
+                // 効果音再生
+                const sound = swipeSounds[type];
+                if (sound) {
+                    sound.currentTime = 0; // 最初から再生
+                    sound.play().catch(e => console.log('🔇 音声再生:', e.message));
+                }
+                
+                // ハプティックフィードバック（バイブレーション）
+                if (navigator.vibrate) {
+                    if (type === 'star') {
+                        navigator.vibrate([30, 50, 30]); // スターは特別なパターン
+                    } else if (type === 'favorite') {
+                        navigator.vibrate(30); // お気に入りは短く
+                    } else if (type === 'dislike') {
+                        navigator.vibrate(20); // 興味なしは軽く
+                    }
+                }
+            } catch (e) {
+                console.log('🔇 効果音エラー:', e);
+            }
+        };
+        
+        // 診断（クイズ）効果音を再生
+        const playQuizSound = () => {
+            try {
+                if (quizSound) {
+                    quizSound.currentTime = 0; // 最初から再生
+                    quizSound.play().catch(e => console.log('🔇 クイズ音声再生:', e.message));
+                }
+                
+                // 軽いハプティックフィードバック
+                if (navigator.vibrate) {
+                    navigator.vibrate(10); // 短く軽い振動
+                }
+            } catch (e) {
+                console.log('🔇 クイズ効果音エラー:', e);
+            }
+        };
+
         // ========== マッチングモードロジック ==========
         const initMatchingMode = () => {
+            // 効果音を初期化
+            initSwipeSounds();
+            
             // 診断結果に基づいて物件をフィルタリング
             const answerTags = Object.entries(state.quiz.answers).flatMap(([key, value]) => {
                 const question = quizQuestions.find(q => q.key === key);
@@ -3712,6 +3873,7 @@ return `
                     // 上スワイプ = 興味なし
                     state.matching.isAnimating = true;
                     currentCard.classList.add('swipe-up', 'swipe-success');
+                    playSwipeSound('dislike'); // 効果音再生
                     toggleDislike(parseInt(currentCard.dataset.id));
                     
                     // アニメーション完了後に次のカードを表示
@@ -3727,10 +3889,12 @@ return `
                     if (currentX > 0) {
                         // 右スワイプ = スター
                         currentCard.classList.add('swipe-right', 'swipe-success');
+                        playSwipeSound('star'); // 効果音再生
                         toggleStar(parseInt(currentCard.dataset.id));
                     } else {
                         // 左スワイプ = ハート
                         currentCard.classList.add('swipe-left', 'swipe-success');
+                        playSwipeSound('favorite'); // 効果音再生
                         toggleFavorite(parseInt(currentCard.dataset.id));
                     }
                     
@@ -3758,6 +3922,7 @@ return `
                     // ダブルクリック検出
                     state.matching.isAnimating = true;
                     currentCard.classList.add('swipe-left', 'swipe-success');
+                    playSwipeSound('dislike'); // 効果音再生
                     toggleDislike(parseInt(currentCard.dataset.id));
                     
                     setTimeout(() => {
@@ -4509,12 +4674,12 @@ return `
         // ========== UIヘルパー ==========
         const updateBottomNav = (pageKey) => {
             document.querySelectorAll('.nav-btn').forEach(btn => {
+                // activeクラスを削除
+                btn.classList.remove('active');
+                
                 if (btn.dataset.page === pageKey) {
-                    btn.classList.add('text-brand-500');
-                    btn.classList.remove('text-slate-500');
-                } else {
-                    btn.classList.add('text-slate-500');
-                    btn.classList.remove('text-brand-500');
+                    // 現在のページのボタンにactiveクラスを追加
+                    btn.classList.add('active');
                 }
             });
         };
@@ -4804,6 +4969,7 @@ return `
             document.getElementById('quiz-content').addEventListener('click', e => {
                 const btn = e.target.closest('.quiz-option-btn');
                 if (btn) {
+                    playQuizSound(); // 効果音再生
                     handleQuizAnswer(btn.dataset.key, btn.dataset.value);
                 }
             });
