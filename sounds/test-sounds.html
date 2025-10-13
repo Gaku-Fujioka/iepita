@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>効果音テスト - いえぴた！</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-button {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .test-button:active {
+            transform: translateY(0);
+        }
+        .btn-favorite {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .btn-star {
+            background: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%);
+            color: #764ba2;
+        }
+        .btn-dislike {
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            color: #667eea;
+        }
+        .status {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        .status h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .status-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+        .icon {
+            margin-right: 10px;
+        }
+        .check { color: #4caf50; }
+        .cross { color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 効果音テスト</h1>
+        <p>ボタンをタップして効果音とバイブレーションをテスト</p>
+        
+        <button class="test-button btn-favorite" onclick="testSound('favorite')">
+            ❤️ お気に入り音をテスト
+        </button>
+        
+        <button class="test-button btn-star" onclick="testSound('star')">
+            ⭐ スター音をテスト
+        </button>
+        
+        <button class="test-button btn-dislike" onclick="testSound('dislike')">
+            👎 興味なし音をテスト
+        </button>
+        
+        <div class="status">
+            <h3>📊 システムチェック</h3>
+            <div class="status-item">
+                <span class="icon" id="audio-icon">⏳</span>
+                <strong>Audio API:</strong> <span id="audio-status">チェック中...</span>
+            </div>
+            <div class="status-item">
+                <span class="icon" id="vibrate-icon">⏳</span>
+                <strong>バイブレーション:</strong> <span id="vibrate-status">チェック中...</span>
+            </div>
+            <div class="status-item">
+                <span class="icon" id="file-favorite-icon">⏳</span>
+                <strong>favorite.mp3:</strong> <span id="file-favorite-status">チェック中...</span>
+            </div>
+            <div class="status-item">
+                <span class="icon" id="file-star-icon">⏳</span>
+                <strong>star.mp3:</strong> <span id="file-star-status">チェック中...</span>
+            </div>
+            <div class="status-item">
+                <span class="icon" id="file-dislike-icon">⏳</span>
+                <strong>dislike.mp3:</strong> <span id="file-dislike-status">チェック中...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 効果音オブジェクト
+        const sounds = {
+            favorite: new Audio('favorite.mp3'),
+            star: new Audio('star.mp3'),
+            dislike: new Audio('dislike.mp3')
+        };
+
+        // システムチェック
+        window.addEventListener('DOMContentLoaded', () => {
+            // Audio API チェック
+            const audioSupported = typeof Audio !== 'undefined';
+            document.getElementById('audio-icon').textContent = audioSupported ? '✅' : '❌';
+            document.getElementById('audio-icon').className = audioSupported ? 'icon check' : 'icon cross';
+            document.getElementById('audio-status').textContent = audioSupported ? '対応' : '非対応';
+
+            // バイブレーションチェック
+            const vibrateSupported = 'vibrate' in navigator;
+            document.getElementById('vibrate-icon').textContent = vibrateSupported ? '✅' : '❌';
+            document.getElementById('vibrate-icon').className = vibrateSupported ? 'icon check' : 'icon cross';
+            document.getElementById('vibrate-status').textContent = vibrateSupported ? '対応' : '非対応';
+
+            // ファイル存在チェック
+            checkFile('favorite');
+            checkFile('star');
+            checkFile('dislike');
+        });
+
+        // ファイル存在チェック
+        function checkFile(type) {
+            const audio = new Audio(`${type}.mp3`);
+            audio.addEventListener('canplaythrough', () => {
+                document.getElementById(`file-${type}-icon`).textContent = '✅';
+                document.getElementById(`file-${type}-icon`).className = 'icon check';
+                document.getElementById(`file-${type}-status`).textContent = 'ファイル検出';
+            });
+            audio.addEventListener('error', () => {
+                document.getElementById(`file-${type}-icon`).textContent = '❌';
+                document.getElementById(`file-${type}-icon`).className = 'icon cross';
+                document.getElementById(`file-${type}-status`).textContent = 'ファイル未検出';
+            });
+            audio.load();
+        }
+
+        // テスト関数
+        function testSound(type) {
+            console.log(`🎵 テスト: ${type}`);
+            
+            // 効果音再生
+            const sound = sounds[type];
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().then(() => {
+                    console.log(`✅ ${type} 音声再生成功`);
+                }).catch(err => {
+                    console.log(`❌ ${type} 音声再生失敗:`, err.message);
+                    alert(`⚠️ 音声ファイルが見つかりません\n\n${type}.mp3 を sounds/ フォルダに配置してください。`);
+                });
+            }
+            
+            // バイブレーション
+            if (navigator.vibrate) {
+                if (type === 'star') {
+                    navigator.vibrate([30, 50, 30]);
+                    console.log('📳 スター振動: 30-50-30ms');
+                } else if (type === 'favorite') {
+                    navigator.vibrate(30);
+                    console.log('📳 お気に入り振動: 30ms');
+                } else if (type === 'dislike') {
+                    navigator.vibrate(20);
+                    console.log('📳 興味なし振動: 20ms');
+                }
+            } else {
+                console.log('❌ バイブレーション非対応');
+            }
+        }
+    </script>
+</body>
+</html>
+
+
