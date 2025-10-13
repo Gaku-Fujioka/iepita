@@ -647,7 +647,6 @@
             transition: all 0.2s ease;
             -webkit-tap-highlight-color: transparent;
         }
-
         #bottom-nav .nav-btn:active {
             transform: scale(0.95);
             background-color: rgba(245, 158, 11, 0.1);
@@ -724,6 +723,23 @@
             font-weight: bold;
         }
 
+        /* ページタイトルのカラー */
+        .page-title-pink {
+            color: #ec4899; /* ピンク - お気に入り */
+        }
+        
+        .page-title-yellow {
+            color: #eab308; /* 黄色 - スター */
+        }
+        
+        .page-title-gray {
+            color: #64748b; /* グレー - 興味なし */
+        }
+        
+        .page-title-orange {
+            color: #f97316; /* オレンジ - マッチング */
+        }
+
         /* コンテンツエリアの下部余白を動的に調整 */
         .pb-20 {
             padding-bottom: calc(5rem + var(--safe-area-bottom)) !important;
@@ -751,7 +767,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             cursor: grab;
             user-select: none;
-            transition: transform 0.2s ease-out;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
             overflow: hidden;
         }
         .swipe-card:active {
@@ -761,17 +777,19 @@
             transition: none;
         }
         .swipe-card.swipe-left {
-            transform: translateX(-100%) rotate(-30deg);
+            transform: translateX(-150%) rotate(-30deg);
             opacity: 0;
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
         }
         .swipe-card.swipe-right {
-            transform: translateX(100%) rotate(30deg);
+            transform: translateX(150%) rotate(30deg);
             opacity: 0;
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
         }
         .swipe-card.swipe-up {
             transform: translateY(-150%) rotate(0deg);
             opacity: 0;
-            transition: all 0.3s ease-out;
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
         }
         .swipe-overlay {
             position: absolute;
@@ -800,8 +818,20 @@
             background: linear-gradient(45deg, rgba(234, 179, 8, 0.1), transparent);
         }
         .swipe-overlay.dislike {
-            color: #64748b;
-            background: linear-gradient(45deg, rgba(100, 116, 139, 0.1), transparent);
+            color: #ffffff;
+            background: radial-gradient(
+                circle at center,
+                rgba(100, 116, 139, 0.95) 0%,
+                rgba(100, 116, 139, 0.85) 25%,
+                rgba(100, 116, 139, 0.6) 40%,
+                rgba(100, 116, 139, 0.3) 60%,
+                transparent 80%
+            );
+            text-shadow: 
+                0 0 20px rgba(0, 0, 0, 0.9),
+                0 0 40px rgba(0, 0, 0, 0.7),
+                0 4px 8px rgba(0, 0, 0, 0.9),
+                0 0 4px rgba(255, 255, 255, 0.3);
         }
     </style>
 </head>
@@ -1083,7 +1113,7 @@
         <!-- ===== お気に入りページ ===== -->
         <div id="page-favorites" class="page page-hidden flex flex-col">
              <header class="p-4 bg-white/80 backdrop-blur-sm shadow-sm">
-                <h1 class="text-xl font-bold text-brand-600">お気に入り</h1>
+                <h1 class="text-xl font-bold page-title-pink">お気に入り</h1>
             </header>
             <main id="favorites-list-container" class="flex-grow p-4 space-y-4 pb-20">
                 <!-- お気に入り物件がここに挿入されます -->
@@ -1093,7 +1123,7 @@
         <!-- ===== スターマークページ ===== -->
         <div id="page-stars" class="page page-hidden flex flex-col">
              <header class="p-4 bg-white/80 backdrop-blur-sm shadow-sm">
-                <h1 class="text-xl font-bold text-brand-600">スターマーク</h1>
+                <h1 class="text-xl font-bold page-title-yellow">スターマーク</h1>
             </header>
             <main id="stars-list-container" class="flex-grow p-4 space-y-4 pb-20">
                 <!-- スターマーク物件がここに挿入されます -->
@@ -1103,7 +1133,7 @@
         <!-- ===== 興味なしページ ===== -->
         <div id="page-dislikes" class="page page-hidden flex flex-col">
              <header class="p-4 bg-white/80 backdrop-blur-sm shadow-sm">
-                <h1 class="text-xl font-bold text-brand-600">興味なし</h1>
+                <h1 class="text-xl font-bold page-title-gray">興味なし</h1>
             </header>
             <main id="dislikes-list-container" class="flex-grow p-4 space-y-4 pb-20">
                 <!-- 興味なし物件がここに挿入されます -->
@@ -1113,9 +1143,48 @@
         <!-- ===== マッチングモードページ ===== -->
         <div id="page-matching" class="page page-hidden flex flex-col">
             <header class="p-4 bg-white/80 backdrop-blur-sm shadow-sm">
-                <h1 class="text-xl font-bold text-brand-600">マッチングモード</h1>
+                <h1 class="text-xl font-bold page-title-orange">マッチングモード</h1>
                 <p class="text-sm text-slate-500 mt-1">スワイプで物件を評価しよう！</p>
             </header>
+            
+            <!-- スワイプ操作説明 -->
+            <div class="px-3 py-2.5 bg-gradient-to-r from-orange-50 to-pink-50 border-b border-orange-100">
+                <div class="flex items-center justify-center gap-3 text-xs max-w-md mx-auto flex-wrap">
+                    <!-- 左スワイプ -->
+                    <button class="swipe-hint-btn flex items-center gap-1.5 bg-white/60 px-2.5 py-1.5 rounded-full shadow-sm hover:bg-white hover:shadow-md transition-all cursor-pointer" data-swipe="left">
+                        <div class="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center text-white">
+                            <i class="fas fa-arrow-left" style="font-size: 10px;"></i>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="font-bold text-pink-600">左</span>
+                            <i class="fas fa-heart text-pink-500" style="font-size: 10px;"></i>
+                        </div>
+                    </button>
+                    
+                    <!-- 右スワイプ -->
+                    <button class="swipe-hint-btn flex items-center gap-1.5 bg-white/60 px-2.5 py-1.5 rounded-full shadow-sm hover:bg-white hover:shadow-md transition-all cursor-pointer" data-swipe="right">
+                        <div class="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center text-white">
+                            <i class="fas fa-arrow-right" style="font-size: 10px;"></i>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="font-bold text-yellow-600">右</span>
+                            <i class="fas fa-star text-yellow-500" style="font-size: 10px;"></i>
+                        </div>
+                    </button>
+                    
+                    <!-- 上スワイプ -->
+                    <button class="swipe-hint-btn flex items-center gap-1.5 bg-white/60 px-2.5 py-1.5 rounded-full shadow-sm hover:bg-white hover:shadow-md transition-all cursor-pointer" data-swipe="up">
+                        <div class="w-6 h-6 rounded-full bg-slate-500 flex items-center justify-center text-white">
+                            <i class="fas fa-arrow-up" style="font-size: 10px;"></i>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="font-bold text-slate-600">上</span>
+                            <i class="fas fa-times text-slate-500" style="font-size: 10px;"></i>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
             <main class="flex-grow p-4 pb-20 relative">
                 <div id="matching-container" class="relative w-full h-full max-w-sm mx-auto">
                     <!-- スワイプカードがここに挿入されます -->
@@ -1132,7 +1201,6 @@
                 </div>
             </main>
         </div>
-
         <!-- ===== 売り手ページ ===== -->
         <div id="page-seller" class="page page-hidden flex flex-col">
             <header class="p-4 bg-white/80 backdrop-blur-sm shadow-sm">
@@ -1443,69 +1511,8 @@
         };
 
         // ========== ダミーデータ ==========
-        let dummyProperties = [
-    { 
-        id: 1, 
-        title: '緑に囲まれた静かな古民家', 
-        address: '東京都調布市深大寺元町', 
-        price: 85000, 
-        layout: '3DK', 
-        age: 60, 
-        station_distance: 20, 
-        tags: ['古民家', '自然豊か', 'DIY可', 'ペット可'], 
-        amenities: ['wifi', 'kitchen', 'parking', 'ac'], 
-        exterior_images: [
-            'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop'
-        ],
-        interior_images: [
-            'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop'
-        ],
-        coordinates: [35.698, 139.553] 
-    },
-    { 
-        id: 2, 
-        title: '駅近！リノベーション済みアパート', 
-        address: '東京都調布市布田', 
-        price: 110000, 
-        layout: '1LDK', 
-        age: 15, 
-        station_distance: 5, 
-        tags: ['駅近', 'リノベーション', '都市ガス'], 
-        amenities: ['wifi', 'kitchen', 'ac', 'bath'], 
-        exterior_images: [
-            'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop'
-        ],
-        interior_images: [
-            'https://images.unsplash.com/photo-1560448204-61dc36dc98c8?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop'
-        ],
-        coordinates: [35.652, 139.544] 
-    },
-    { 
-        id: 3, 
-        title: 'クリエイター向けSOHO可能物件', 
-        address: '東京都調布市仙川町', 
-        price: 130000, 
-        layout: '2DK', 
-        age: 25, 
-        station_distance: 8, 
-        tags: ['SOHO可', 'デザイナーズ', '日当たり良好'], 
-        amenities: ['wifi', 'kitchen', 'ac', 'desk'], 
-        exterior_images: [
-            'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop'
-        ],
-        interior_images: [
-            'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop'
-        ],
-        coordinates: [35.662, 139.585] 
-    }
-];
-
+        // properties.jsonから読み込むため、初期値は空配列
+        let dummyProperties = [];
         // ========== 診断データ ==========
         const quizData = [
             {
@@ -1970,22 +1977,60 @@
                 state.api.isLoading = false;
                 state.api.lastError = error.message;
 
-                // エラー表示UIを更新
-                showDataLoadError(error.message);
-
-                // フォールバック（既存のハードコードされたデータを使用）
-                console.warn('🔄 フォールバックモードに切り替え...');
-                
-                // デフォルト値での初期化
-                dummyProperties = dummyProperties || [];
-                quizQuestions = quizQuestions || [];
-                resultTypes = resultTypes || {};
-                
-                // 部分的なデータ読み込み成功の場合の処理
-                if (dummyProperties.length > 0 || quizQuestions.length > 0) {
-                    console.log('🟡 部分的なデータ読み込み成功 - 基本機能は利用可能');
-                    state.api.dataLoaded = true; // 一部のデータは読み込み成功
+                // エラー表示UIを更新（file://プロトコルの場合は非表示）
+                const isFileProtocol = window.location.protocol === 'file:';
+                if (!isFileProtocol) {
+                    showDataLoadError(error.message);
+                } else {
+                    console.warn('📢 file://プロトコルで実行中 - JSONファイルが読み込めません');
+                    console.warn('💡 ローカルサーバーを起動すると19件の物件データが利用できます');
                 }
+
+                // フォールバック: 最小限のサンプルデータを使用
+                console.warn('🔄 フォールバックモードに切り替え - 最小限のサンプルデータを使用');
+                
+                // 物件データが空の場合、フォールバックデータを設定（19件）
+                if (!dummyProperties || dummyProperties.length === 0) {
+                    console.log('🆘 緊急フォールバックデータを使用（19件）');
+                    dummyProperties = [
+                        { id: 1, title: '緑に囲まれた静かな古民家', address: '東京都調布市深大寺元町', price: 85000, layout: '3DK', age: 60, station_distance: 20, tags: ['古民家', '自然豊か', 'DIY可', 'ペット可'], amenities: ['wifi', 'kitchen', 'parking', 'ac'], exterior_images: ['https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop'], coordinates: [35.698, 139.553] },
+                        { id: 2, title: '駅近！リノベーション済みアパート', address: '東京都調布市布田', price: 110000, layout: '1LDK', age: 15, station_distance: 5, tags: ['駅近', 'リノベーション', '都市ガス'], amenities: ['wifi', 'kitchen', 'ac', 'bath'], exterior_images: ['https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1560448204-61dc36dc98c8?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop'], coordinates: [35.652, 139.544] },
+                        { id: 3, title: 'クリエイター向けSOHO可能物件', address: '東京都調布市仙川町', price: 130000, layout: '2DK', age: 25, station_distance: 8, tags: ['SOHO可', 'デザイナーズ', '日当たり良好'], amenities: ['wifi', 'kitchen', 'ac', 'desk'], exterior_images: ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop'], coordinates: [35.662, 139.585] },
+                        { id: 4, title: 'ファミリー向け広々一戸建て', address: '東京都調布市国領町', price: 145000, layout: '4LDK', age: 18, station_distance: 10, tags: ['ファミリー向け', '庭付き', '駐車場2台', '収納充実'], amenities: ['wifi', 'kitchen', 'parking', 'ac', 'bath', 'desk'], exterior_images: ['https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&h=600&fit=crop'], coordinates: [35.655, 139.557] },
+                        { id: 5, title: '札幌駅近！都会派マンション', address: '北海道札幌市中央区北3条', price: 75000, layout: '1LDK', age: 12, station_distance: 5, tags: ['駅近', 'リノベーション', '都市ガス', 'オートロック'], amenities: ['wifi', 'kitchen', 'ac', 'bath'], exterior_images: ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop'], coordinates: [43.068, 141.351] },
+                        { id: 6, title: '函館の歴史的古民家', address: '北海道函館市元町', price: 68000, layout: '3DK', age: 80, station_distance: 15, tags: ['古民家', '歴史的建造物', 'DIY可', '海が見える'], amenities: ['wifi', 'kitchen', 'parking', 'ac'], exterior_images: ['https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1566908829550-e6551b00979b?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&h=600&fit=crop'], coordinates: [41.769, 140.729] },
+                        { id: 7, title: '小樽運河沿い倉庫リノベ物件', address: '北海道小樽市色内', price: 82000, layout: '1SLDK', age: 45, station_distance: 12, tags: ['リノベーション', 'デザイナーズ', 'SOHO可', '倉庫改装'], amenities: ['wifi', 'kitchen', 'ac', 'desk'], exterior_images: ['https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1511452885600-a3d2c9148a31?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&h=600&fit=crop'], coordinates: [43.191, 140.995] },
+                        { id: 8, title: '富良野ラベンダー畑近く田舎暮らし', address: '北海道富良野市北の峰町', price: 45000, layout: '2LDK', age: 35, station_distance: 25, tags: ['自然豊か', '家庭菜園可', 'ペット可', '格安'], amenities: ['wifi', 'kitchen', 'parking', 'ac'], exterior_images: ['https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&h=600&fit=crop'], coordinates: [43.355, 142.383] },
+                        { id: 9, title: '旭川市中心部の広々3LDK', address: '北海道旭川市1条通', price: 62000, layout: '3LDK', age: 22, station_distance: 8, tags: ['ファミリー向け', '収納充実', '都市ガス', '日当たり良好'], amenities: ['wifi', 'kitchen', 'parking', 'ac', 'bath'], exterior_images: ['https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600573472591-ee6b68d14f8d?w=800&h=600&fit=crop'], coordinates: [43.771, 142.365] },
+                        { id: 10, title: '帯広・十勝平野の農地付き物件', address: '北海道帯広市西帯広', price: 52000, layout: '3DK', age: 40, station_distance: 20, tags: ['家庭菜園可', '自然豊か', 'DIY可', '格安'], amenities: ['wifi', 'kitchen', 'parking', 'ac'], exterior_images: ['https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?w=800&h=600&fit=crop'], coordinates: [42.924, 143.195] },
+                        { id: 11, title: '釧路・海の見える絶景物件', address: '北海道釧路市幸町', price: 58000, layout: '2LDK', age: 28, station_distance: 18, tags: ['海が見える', '自然豊か', 'ペット可', '格安'], amenities: ['wifi', 'kitchen', 'parking', 'ac', 'bath'], exterior_images: ['https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1560448204-61dc36dc98c8?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?w=800&h=600&fit=crop'], coordinates: [42.985, 144.382] },
+                        { id: 12, title: '北見・格安シェアハウス', address: '北海道北見市北進町', price: 38000, layout: '個室8畳', age: 15, station_distance: 10, tags: ['シェアハウス', '格安', '共有スペース充実', '学生向け'], amenities: ['wifi', 'kitchen', 'ac', 'bath'], exterior_images: ['https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&h=600&fit=crop'], coordinates: [43.804, 143.896] },
+                        { id: 13, title: '苫小牧・港近く工業地帯アクセス良好', address: '北海道苫小牧市錦町', price: 48000, layout: '1K', age: 20, station_distance: 12, tags: ['格安', '駐車場付き', '工業地帯近く', '単身向け'], amenities: ['wifi', 'kitchen', 'parking', 'ac'], exterior_images: ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1560448204-61dc36dc98c8?w=800&h=600&fit=crop'], coordinates: [42.634, 141.606] },
+                        { id: 14, title: 'ニセコ・ペンション風一戸建て', address: '北海道虻田郡ニセコ町中央通', price: 95000, layout: '3LDK', age: 16, station_distance: 8, tags: ['リゾート', 'ペット可', '自然豊か', 'スキー場近く'], amenities: ['wifi', 'kitchen', 'parking', 'ac', 'bath'], exterior_images: ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600573472605-af76c6c4a59d?w=800&h=600&fit=crop'], coordinates: [42.805, 140.687] },
+                        { id: 15, title: '室蘭・海沿いのモダンアパート', address: '北海道室蘭市海岸町', price: 55000, layout: '2DK', age: 25, station_distance: 14, tags: ['海が見える', '格安', 'オーシャンビュー', '静か'], amenities: ['wifi', 'kitchen', 'ac', 'bath'], exterior_images: ['https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1560448204-61dc36dc98c8?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop'], coordinates: [42.315, 140.974] },
+                        { id: 16, title: '札幌円山エリア・高級住宅地', address: '北海道札幌市中央区円山', price: 125000, layout: '3LDK', age: 8, station_distance: 7, tags: ['高級住宅地', 'リノベーション', 'デザイナーズ', '駅近'], amenities: ['wifi', 'kitchen', 'parking', 'ac', 'bath', 'desk'], exterior_images: ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&h=600&fit=crop'], coordinates: [43.043, 141.322] },
+                        { id: 17, title: '美瑛の丘・農家住宅', address: '北海道上川郡美瑛町大町', price: 40000, layout: '4DK', age: 50, station_distance: 30, tags: ['農家住宅', '自然豊か', '家庭菜園可', 'DIY可'], amenities: ['kitchen', 'parking', 'ac'], exterior_images: ['https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?w=800&h=600&fit=crop'], coordinates: [43.589, 142.471] },
+                        { id: 18, title: '登別温泉街・ペンション併用物件', address: '北海道登別市登別温泉町', price: 88000, layout: '2LDK+客室2室', age: 30, station_distance: 10, tags: ['温泉付き', '店舗併用', 'リゾート', 'ペンション'], amenities: ['wifi', 'kitchen', 'parking', 'ac', 'bath'], exterior_images: ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1566908829550-e6551b00979b?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&h=600&fit=crop'], coordinates: [42.491, 141.163] },
+                        { id: 19, title: '札幌すすきの徒歩圏内ワンルーム', address: '北海道札幌市中央区南5条', price: 52000, layout: '1R', age: 18, station_distance: 3, tags: ['駅近', '繁華街近く', '格安', '単身向け'], amenities: ['wifi', 'kitchen', 'ac'], exterior_images: ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop'], interior_images: ['https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&h=600&fit=crop', 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop'], coordinates: [43.052, 141.353] }
+                    ];
+                    state.api.dataLoaded = true;
+                    console.log('✅ フォールバックデータ設定完了:', dummyProperties.length, '件');
+                }
+                
+                // 診断データも同様
+                if (!quizQuestions || quizQuestions.length === 0) {
+                    quizQuestions = quizData;  // index.html内の診断データを使用
+                    console.log('✅ フォールバック診断データを使用');
+                }
+                
+                if (!resultTypes || Object.keys(resultTypes).length === 0) {
+                    // index.html内のresultTypesを使用
+                    console.log('✅ フォールバック診断結果タイプを使用');
+                }
+                
+                // フォールバックデータが設定されたので、APIデータとしてマーク
+                state.api.dataLoaded = true;
+                console.log('🟡 フォールバックモードで動作中 - 基本機能は利用可能');
             }
         };
 
@@ -2151,9 +2196,7 @@
             userEmail: null,
             userPhone: null
         };
-        
         // === 段階1: モーダル開閉 ===
-        
         // グローバルスコープに公開（HTMLのonclickから呼び出せるように）
         window.openChatbotModal = (propertyId) => {
             const property = dummyProperties.find(p => p.id === propertyId);
@@ -2517,6 +2560,9 @@
         
         // オンボーディングを開始
         window.startOnboarding = () => {
+            console.log('📖 チュートリアル（オンボーディング）を開始します...');
+            playTutorialSound(); // チュートリアル開始効果音を再生
+            
             onboardingState.currentStep = 0;
             onboardingState.isActive = true;
             
@@ -2546,11 +2592,16 @@
         
         // 次のステップへ
         window.nextOnboardingStep = () => {
+            // チュートリアルのステップ移動音を再生
+            playQuizSound(); // 軽快なクリック音
+            
             if (onboardingState.currentStep < onboardingSteps.length - 1) {
                 onboardingState.currentStep++;
+                console.log(`📖 チュートリアル: ステップ ${onboardingState.currentStep + 1}/${onboardingSteps.length} へ移動`);
                 showOnboardingStep(onboardingState.currentStep);
             } else {
                 // 最後のステップ→完了
+                console.log('🎉 チュートリアル完了！');
                 closeOnboarding(true);
                 // スタートページに戻る
                 navigateTo('start');
@@ -2719,7 +2770,8 @@
         // オンボーディングをリセット（設定から再度表示）
         window.resetOnboarding = () => {
             localStorage.removeItem('onboarding_completed');
-            console.log('オンボーディングをリセットしました');
+            console.log('🔄 オンボーディングをリセットしました');
+            console.log('💡 ヒント: ページをリロードすると、チュートリアルが自動的に開始されます');
         };
         
         // === チャットボット管理用関数 ===
@@ -2756,16 +2808,14 @@
 
         // ========== 初期化処理 ==========
         const init = async () => {
+            // loadData()内でエラーハンドリングされるため、try-catchで囲まない
             await loadData();
-            
-            // データチェック
-            if (!checkDataAvailability()) {
-                showDataLoadError('初期データの読み込みに失敗しました。ページを再読み込みしてください。');
-                return;
-            }
             
             // 効果音を初期化
             initQuizSound();
+            initQuizStartSound();
+            initTutorialSound();
+            initMenuSound();
             
             // ユーザーデータの読み込み
             loadFavorites();
@@ -2785,8 +2835,9 @@
             
             // === 段階4: オンボーディング自動起動 ===
             checkOnboarding();
+            
+            console.log('✅ アプリケーション初期化完了 - 物件数:', dummyProperties.length);
         };
-
         // ========== ナビゲーション ==========
         const navigateTo = (pageKey, params = {}) => {
             const oldPage = pages[state.currentPage];
@@ -2930,8 +2981,14 @@
 
         // 物件リストのレンダリング
         const renderPropertyList = (showSkeleton = true) => {
-            // データロードチェック
-            if (!checkDataAvailability()) {
+            console.log('🏠 renderPropertyList() 実行', {
+                dataLoaded: state.api.dataLoaded,
+                propertiesCount: dummyProperties.length,
+                showSkeleton
+            });
+            
+            // データが全くない場合のみエラー表示
+            if (dummyProperties.length === 0 && !state.api.dataLoaded) {
                 propertyListContainer.innerHTML = `
                     <div class="text-center py-8 text-slate-500">
                         <i class="fas fa-home text-4xl mb-4"></i>
@@ -2941,6 +2998,17 @@
                         </button>
                     </div>
                 `;
+                console.warn('⚠️ 物件データなし & データ未ロード');
+                return;
+            }
+            
+            // 物件データが0件の場合
+            if (dummyProperties.length === 0) {
+                propertyListContainer.innerHTML = createEmptyStateHTML(
+                    '物件データがありません',
+                    'properties.jsonの読み込みに失敗しました。ローカルサーバーを使用してください。'
+                );
+                console.error('❌ 物件データが空です');
                 return;
             }
 
@@ -2951,12 +3019,15 @@
             setTimeout(() => {
                 const filteredProperties = getFilteredProperties();
                 
+                console.log('📋 フィルター後の物件数:', filteredProperties.length);
+                
                 if (filteredProperties.length === 0) {
                     propertyListContainer.innerHTML = createEmptyStateHTML('物件が見つかりません', '絞り込み条件を変更してみてください。');
                     return;
                 }
                 
                 propertyListContainer.innerHTML = filteredProperties.map(createPropertyCardHTML).join('');
+                console.log('✅ 物件リスト表示完了:', filteredProperties.length, '件');
             }, showSkeleton ? 500 : 0);
         };
 
@@ -3151,18 +3222,23 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             const isFavorited = state.favorites.includes(property.id);
             const isStarred = state.stars.includes(property.id);
             const isDisliked = state.dislikes.includes(property.id);
-            // 画像の表示を決定
-           // 外観の最初の画像を使用
-const imgFile = property.exterior_images[0];
-let imageSrc;
-
-if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.length > 0) {
-    imageSrc = property.uploadedPhotos[0].dataUrl;
-} else {
-    // URLの場合はそのまま使用
-    imageSrc = imgFile;
-}
             
+            // 画像の表示を決定（安全にチェック）
+            const imgFile = Array.isArray(property.exterior_images) && property.exterior_images.length > 0 
+                ? property.exterior_images[0] 
+                : null;
+            
+            let imageSrc;
+            
+            if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.length > 0) {
+                imageSrc = property.uploadedPhotos[0].dataUrl;
+            } else if (imgFile) {
+                // URLの場合はそのまま使用
+                imageSrc = imgFile;
+            } else {
+                // 画像がない場合のフォールバック
+                imageSrc = `https://placehold.co/800x600/e2e8f0/64748b?text=${encodeURIComponent(property.title || '物件画像')}`;
+            }
             return `
                 <div class="property-card bg-white rounded-xl overflow-hidden shadow-md cursor-pointer" onclick="navigateTo('details', { id: ${property.id} })">
                     <div class="relative">
@@ -3236,6 +3312,8 @@ if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.l
         
         // ========== 診断ロジック ==========
         const startQuiz = () => {
+            console.log('📋 診断を開始します...');
+            playQuizStartSound(); // 診断開始効果音を再生
             state.quiz.currentQuestion = 0;
             state.quiz.answers = {};
             renderQuizQuestion();
@@ -3613,6 +3691,15 @@ if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.l
         
         // 診断（クイズ）効果音
         let quizSound = null;
+        
+        // 診断開始効果音
+        let quizStartSound = null;
+        
+        // チュートリアル（オンボーディング）効果音
+        let tutorialSound = null;
+        
+        // メニュー（ナビゲーション）効果音
+        let menuSound = null;
 
         // マッチングモード効果音の初期化
         const initSwipeSounds = () => {
@@ -3642,6 +3729,85 @@ if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.l
             quizSound = new Audio();
             quizSound.src = 'sounds/quiz.mp3';
             quizSound.volume = 0.3; // 控えめの音量
+            
+            // 音声ファイルのロード確認
+            quizSound.addEventListener('canplaythrough', () => {
+                console.log('✅ 診断効果音 (quiz.mp3) の読み込み完了');
+            });
+            
+            quizSound.addEventListener('error', (e) => {
+                console.error('❌ 診断効果音の読み込み失敗:', e);
+            });
+            
+            // プリロード
+            quizSound.load();
+            console.log('🔊 診断効果音を初期化しました (sounds/quiz.mp3)');
+        };
+        
+        // 診断開始効果音の初期化
+        const initQuizStartSound = () => {
+            // 診断開始: ゲームスタートのような華やかな音
+            // 推奨: 効果音ラボ > ボタン・システム音 > 「決定」「スタート」系
+            quizStartSound = new Audio();
+            quizStartSound.src = 'sounds/quizstart.mp3';
+            quizStartSound.volume = 0.5; // やや大きめの音量
+            
+            // 音声ファイルのロード確認
+            quizStartSound.addEventListener('canplaythrough', () => {
+                console.log('✅ 診断開始効果音 (quizstart.mp3) の読み込み完了');
+            });
+            
+            quizStartSound.addEventListener('error', (e) => {
+                console.error('❌ 診断開始効果音の読み込み失敗:', e);
+            });
+            
+            // プリロード
+            quizStartSound.load();
+            console.log('🔊 診断開始効果音を初期化しました (sounds/quizstart.mp3)');
+        };
+        
+        // チュートリアル（オンボーディング）効果音の初期化
+        const initTutorialSound = () => {
+            // チュートリアル: ガイド開始を示す親しみやすい音
+            // 推奨: 効果音ラボ > ボタン・システム音 > 「システム音」「通知音」系
+            tutorialSound = new Audio();
+            tutorialSound.src = 'sounds/chuto.mp3';
+            tutorialSound.volume = 0.5; // やや大きめの音量
+            
+            // 音声ファイルのロード確認
+            tutorialSound.addEventListener('canplaythrough', () => {
+                console.log('✅ チュートリアル効果音 (chuto.mp3) の読み込み完了');
+            });
+            
+            tutorialSound.addEventListener('error', (e) => {
+                console.error('❌ チュートリアル効果音の読み込み失敗:', e);
+            });
+            
+            // プリロード
+            tutorialSound.load();
+            console.log('🔊 チュートリアル効果音を初期化しました (sounds/chuto.mp3)');
+        };
+        
+        // メニュー（ナビゲーション）効果音の初期化
+        const initMenuSound = () => {
+            // メニュー: ページ遷移時の軽快な音
+            // 推奨: 効果音ラボ > ボタン・システム音 > 「カーソル移動」「選択」系
+            menuSound = new Audio();
+            menuSound.src = 'sounds/menu.mp3';
+            menuSound.volume = 0.4; // 控えめの音量
+            
+            // 音声ファイルのロード確認
+            menuSound.addEventListener('canplaythrough', () => {
+                console.log('✅ メニュー効果音 (menu.mp3) の読み込み完了');
+            });
+            
+            menuSound.addEventListener('error', (e) => {
+                console.error('❌ メニュー効果音の読み込み失敗:', e);
+            });
+            
+            // プリロード
+            menuSound.load();
+            console.log('🔊 メニュー効果音を初期化しました (sounds/menu.mp3)');
         };
 
         // マッチングモード効果音を再生（ハプティックフィードバック付き）
@@ -3683,6 +3849,98 @@ if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.l
                 }
             } catch (e) {
                 console.log('🔇 クイズ効果音エラー:', e);
+            }
+        };
+        
+        // 診断開始効果音を再生
+        const playQuizStartSound = () => {
+            try {
+                if (quizStartSound) {
+                    console.log('🎮 診断開始効果音を再生します...');
+                    quizStartSound.currentTime = 0; // 最初から再生
+                    quizStartSound.play()
+                        .then(() => {
+                            console.log('✅ 診断開始効果音の再生成功');
+                        })
+                        .catch(e => {
+                            console.warn('⚠️ 診断開始音声再生エラー:', e.message);
+                            // ブラウザのオートプレイポリシーの可能性を示唆
+                            if (e.name === 'NotAllowedError') {
+                                console.log('💡 ヒント: ブラウザのオートプレイポリシーにより、最初のクリックでは再生できない場合があります');
+                            }
+                        });
+                } else {
+                    console.warn('⚠️ 診断開始効果音が初期化されていません');
+                }
+                
+                // やや強めのハプティックフィードバック
+                if (navigator.vibrate) {
+                    navigator.vibrate([50, 30, 50]); // スタート感のあるパターン
+                    console.log('📳 ハプティックフィードバック: 50-30-50ms');
+                }
+            } catch (e) {
+                console.error('❌ 診断開始効果音エラー:', e);
+            }
+        };
+        // チュートリアル（オンボーディング）効果音を再生
+        const playTutorialSound = () => {
+            try {
+                if (tutorialSound) {
+                    console.log('📖 チュートリアル効果音を再生します...');
+                    tutorialSound.currentTime = 0; // 最初から再生
+                    tutorialSound.play()
+                        .then(() => {
+                            console.log('✅ チュートリアル効果音の再生成功');
+                        })
+                        .catch(e => {
+                            console.warn('⚠️ チュートリアル音声再生エラー:', e.message);
+                            // ブラウザのオートプレイポリシーの可能性を示唆
+                            if (e.name === 'NotAllowedError') {
+                                console.log('💡 ヒント: ブラウザのオートプレイポリシーにより、最初のクリックでは再生できない場合があります');
+                            }
+                        });
+                } else {
+                    console.warn('⚠️ チュートリアル効果音が初期化されていません');
+                }
+                
+                // 軽いハプティックフィードバック
+                if (navigator.vibrate) {
+                    navigator.vibrate([30, 20, 30]); // ガイド開始を示すパターン
+                    console.log('📳 ハプティックフィードバック: 30-20-30ms');
+                }
+            } catch (e) {
+                console.error('❌ チュートリアル効果音エラー:', e);
+            }
+        };
+        
+        // メニュー（ナビゲーション）効果音を再生
+        const playMenuSound = () => {
+            try {
+                if (menuSound) {
+                    console.log('🔊 メニュー効果音を再生します...');
+                    menuSound.currentTime = 0; // 最初から再生
+                    menuSound.play()
+                        .then(() => {
+                            console.log('✅ メニュー効果音の再生成功');
+                        })
+                        .catch(e => {
+                            console.warn('⚠️ メニュー音声再生エラー:', e.message);
+                            // ブラウザのオートプレイポリシーの可能性を示唆
+                            if (e.name === 'NotAllowedError') {
+                                console.log('💡 ヒント: ブラウザのオートプレイポリシーにより、最初のクリックでは再生できない場合があります');
+                            }
+                        });
+                } else {
+                    console.warn('⚠️ メニュー効果音が初期化されていません');
+                }
+                
+                // 軽いハプティックフィードバック
+                if (navigator.vibrate) {
+                    navigator.vibrate(15); // 短く軽い振動
+                    console.log('📳 ハプティックフィードバック: 15ms');
+                }
+            } catch (e) {
+                console.error('❌ メニュー効果音エラー:', e);
             }
         };
 
@@ -3742,17 +4000,16 @@ if (property.isUserAdded && property.uploadedPhotos && property.uploadedPhotos.l
         };
 
         const createSwipeCardHTML = (property, position) => {
-            // 外観の最初の画像を使用
-// 外観の最初の画像を安全に取得
-const imgFile = Array.isArray(property.exterior_images) && property.exterior_images.length > 0 ? property.exterior_images[0] : null;
-const isRealPhoto = imgFile && (String(imgFile).startsWith('http') || String(imgFile).startsWith('data:'));
-const imgSrc = isRealPhoto ? imgFile : `https://placehold.co/1200x800/e2e8f0/64748b?text=${encodeURIComponent(imgFile || property.title)}`;
+            // 外観の最初の画像を安全に取得
+            const imgFile = Array.isArray(property.exterior_images) && property.exterior_images.length > 0 ? property.exterior_images[0] : null;
+            const isRealPhoto = imgFile && (String(imgFile).startsWith('http') || String(imgFile).startsWith('data:'));
+            const imgSrc = isRealPhoto ? imgFile : `https://placehold.co/1200x800/e2e8f0/64748b?text=${encodeURIComponent(imgFile || property.title)}`;
 
-return `
-    <div class="swipe-card ${position}" data-id="${property.id}">
-        <div class="relative h-full">
-            <img src="${imgSrc}" 
-                 alt="${property.title}" class="w-full h-2/3 object-cover">
+            return `
+                <div class="swipe-card ${position}" data-id="${property.id}">
+                    <div class="relative h-full">
+                        <img src="${imgSrc}" 
+                             alt="${property.title}" class="w-full h-2/3 object-cover">
                         <div class="absolute top-4 left-4 bg-slate-800/60 text-white text-sm font-bold px-3 py-1.5 rounded-full flex items-center">
                             <i class="fas fa-bolt text-yellow-300 mr-2"></i> マッチ度 ${property.matchScore || '??'}%
                         </div>
@@ -3944,6 +4201,62 @@ return `
             currentCard.addEventListener('touchstart', startDrag, { passive: false });
             document.addEventListener('touchmove', drag, { passive: false });
             document.addEventListener('touchend', endDrag);
+        };
+        
+        // プログラム的にスワイプを実行する関数
+        const programmaticSwipe = (direction) => {
+            // アニメーション中やカードがない場合はスキップ
+            if (state.matching.isAnimating) {
+                console.log('⏸️ スワイプアニメーション中です...');
+                return;
+            }
+            
+            const currentCard = matchingContainer.querySelector('.swipe-card.current');
+            if (!currentCard) {
+                console.log('⚠️ スワイプするカードがありません');
+                return;
+            }
+            
+            const propertyId = parseInt(currentCard.dataset.id);
+            state.matching.isAnimating = true;
+            
+            console.log(`🎯 プログラム的スワイプを実行: ${direction}`);
+            
+            switch (direction) {
+                case 'left':
+                    // 左スワイプ = お気に入り
+                    currentCard.classList.add('swipe-left', 'swipe-success');
+                    playSwipeSound('favorite');
+                    toggleFavorite(propertyId);
+                    break;
+                    
+                case 'right':
+                    // 右スワイプ = スター
+                    currentCard.classList.add('swipe-right', 'swipe-success');
+                    playSwipeSound('star');
+                    toggleStar(propertyId);
+                    break;
+                    
+                case 'up':
+                    // 上スワイプ = 興味なし
+                    currentCard.classList.add('swipe-up', 'swipe-success');
+                    playSwipeSound('dislike');
+                    toggleDislike(propertyId);
+                    break;
+                    
+                default:
+                    console.warn(`⚠️ 未知のスワイプ方向: ${direction}`);
+                    state.matching.isAnimating = false;
+                    return;
+            }
+            
+            // アニメーション完了後に次のカードを表示
+            setTimeout(() => {
+                state.matching.currentIndex++;
+                state.matching.isAnimating = false;
+                renderMatchingCards();
+                console.log('✅ スワイプ完了、次のカードを表示');
+            }, 450); // アニメーション時間(0.4s)より少し長めに設定
         };
 
         // ========== フィルター/ソートロジック ==========
@@ -4206,7 +4519,6 @@ return `
                 state.filters.city = e.target.value;
             });
         };
-
         // 地域検索候補を表示
         const showRegionSuggestions = (query, suggestionsContainer) => {
             const { prefectures, cityData } = extractRegionData();
@@ -4854,7 +5166,6 @@ return `
             uploadedPhotos.splice(index, 1);
             updatePhotoPreview();
         };
-
         // 写真アップロード関連のイベントリスナー
         const setupPhotoUploadListeners = () => {
             const photoInput = document.getElementById('photo-input');
@@ -4896,29 +5207,32 @@ return `
             const formData = new FormData(e.target);
             const selectedFacilities = Array.from(document.querySelectorAll('input[name="facilities"]:checked')).map(cb => cb.value);
             
-            // アップロードされた写真のファイル名を生成
-            const photoFileNames = uploadedPhotos.map((photo, index) => {
-                const timestamp = Date.now();
-                const extension = photo.file.name.split('.').pop();
-                return `user_photo_${timestamp}_${index + 1}.${extension}`;
-            });
+            // アップロードされた写真のデータURLを取得
+            const photoDataUrls = uploadedPhotos.map(photo => photo.dataUrl);
             
-            // デフォルト画像が1枚もない場合は、最初の画像をデフォルトとして使用
-            const images = photoFileNames.length > 0 ? photoFileNames : ['p001.png'];
+            // デフォルト画像が1枚もない場合は、プレースホルダーを使用
+            const exterior_images = photoDataUrls.length > 0 
+                ? photoDataUrls.slice(0, 2)  // 最初の2枚を外観写真として使用
+                : ['https://placehold.co/800x600/e2e8f0/64748b?text=' + encodeURIComponent('外観写真')];
             
-            // 新しい物件オブジェクトを作成
+            const interior_images = photoDataUrls.length > 2 
+                ? photoDataUrls.slice(2, 4)  // 3枚目以降を内観写真として使用
+                : ['https://placehold.co/800x600/e2e8f0/64748b?text=' + encodeURIComponent('内観写真')];
+            
+            // 新しい物件オブジェクトを作成（既存物件と同じ構造）
             const newProperty = {
                 id: Date.now(), // 簡単なID生成
                 title: formData.get('title'),
                 address: formData.get('address'),
                 price: parseInt(formData.get('price')) * 10000, // 万円を円に変換
                 layout: formData.get('layout'),
-                age: formData.get('age'),
+                age: parseInt(formData.get('age')),
                 station_distance: parseInt(formData.get('walkTime')),
                 station_name: formData.get('station'),
                 tags: [formData.get('age'), formData.get('layout')].filter(Boolean),
                 amenities: selectedFacilities,
-                images: images,
+                exterior_images: exterior_images,  // ✅ 既存物件と同じ構造
+                interior_images: interior_images,  // ✅ 既存物件と同じ構造
                 coordinates: [35.652, 139.544], // デフォルト座標（調布市）
                 description: formData.get('description') || '',
                 isUserAdded: true, // ユーザーが追加した物件であることを示すフラグ
@@ -4963,7 +5277,10 @@ return `
 
         // ========== イベントリスナー設定 ==========
         const setupEventListeners = () => {
-            document.getElementById('start-quiz-btn').addEventListener('click', () => navigateTo('quiz'));
+            document.getElementById('start-quiz-btn').addEventListener('click', () => {
+                console.log('🎯 診断をはじめるボタンがクリックされました');
+                navigateTo('quiz');
+            });
             
             // 診断ページ
             document.getElementById('quiz-content').addEventListener('click', e => {
@@ -4989,6 +5306,8 @@ return `
             bottomNav.addEventListener('click', e => {
                 const btn = e.target.closest('.nav-btn');
                 if (btn) {
+                    console.log(`🎯 下部ナビゲーションボタンがクリックされました: ${btn.dataset.page}`);
+                    playMenuSound(); // メニュー効果音を再生
                     navigateTo(btn.dataset.page);
                 }
             });
@@ -4999,6 +5318,12 @@ return `
                 if (btn) {
                     e.preventDefault();
                     e.stopPropagation();
+                    // マッチングページでは左スワイプとして処理
+                    const pageMatching = document.getElementById('page-matching');
+                    if (pageMatching && !pageMatching.classList.contains('page-hidden') && btn.classList.contains('toggle-favorite-btn')) {
+                        programmaticSwipe('left');
+                        return;
+                    }
                     toggleFavorite(parseInt(btn.dataset.id));
                 }
             }, true);
@@ -5009,6 +5334,12 @@ return `
                 if (btn) {
                     e.preventDefault();
                     e.stopPropagation();
+                    // マッチングページでは右スワイプとして処理
+                    const pageMatching = document.getElementById('page-matching');
+                    if (pageMatching && !pageMatching.classList.contains('page-hidden') && btn.classList.contains('toggle-star-btn')) {
+                        programmaticSwipe('right');
+                        return;
+                    }
                     toggleStar(parseInt(btn.dataset.id));
                 }
             }, true);
@@ -5019,6 +5350,12 @@ return `
                 if (btn) {
                     e.preventDefault();
                     e.stopPropagation();
+                    // マッチングページでは上スワイプとして処理
+                    const pageMatching = document.getElementById('page-matching');
+                    if (pageMatching && !pageMatching.classList.contains('page-hidden') && btn.classList.contains('toggle-dislike-btn')) {
+                        programmaticSwipe('up');
+                        return;
+                    }
                     toggleDislike(parseInt(btn.dataset.id));
                 }
             }, true);
@@ -5132,11 +5469,24 @@ return `
                 }
             });
             
+            // === マッチングモード：スワイプヒントボタン ===
+            
+            // スワイプヒントボタンのクリックイベント
+            document.querySelectorAll('.swipe-hint-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const swipeDirection = btn.dataset.swipe;
+                    console.log(`💡 スワイプヒントボタンがクリックされました: ${swipeDirection}`);
+                    programmaticSwipe(swipeDirection);
+                });
+            });
+            
             // === オンボーディング：段階2 - イベントリスナー ===
             
             // スキップボタン
             document.getElementById('onboarding-skip').addEventListener('click', () => {
                 if (confirm('チュートリアルをスキップしますか？\n（設定からいつでも見られます）')) {
+                    console.log('⏭️ チュートリアルをスキップしました');
+                    playMenuSound(); // スキップ音
                     closeOnboarding(true);
                     navigateTo('start');
                 }
