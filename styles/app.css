@@ -1,0 +1,792 @@
+        /* Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap');
+
+        /* ===== モバイル対応: ビューポート高さ管理 ===== */
+        :root {
+            --vh: 1vh;
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+            --nav-height: 60px;
+            --total-bottom-space: calc(var(--nav-height) + var(--safe-area-bottom));
+        }
+
+        /* 基本スタイル */
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-color: #f1f5f9;
+            overscroll-behavior-y: none;
+        }
+
+        /* ページ遷移アニメーション */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s;
+            overflow-y: auto;
+            background-color: #f8fafc; /* bg-slate-50 */
+        }
+        .page-enter {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        .page-exit {
+            transform: translateX(-20%);
+            opacity: 0;
+        }
+        .page-active {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .page-hidden {
+            display: none !important;
+        }
+
+        /* スケルトンローディング */
+        .skeleton {
+            background-color: #e2e8f0; /* bg-slate-200 */
+            border-radius: 0.5rem;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            50% { opacity: .5; }
+        }
+
+        /* カードUI */
+        .property-card {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .property-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+
+        /* 固定CTAバー */
+        .cta-bar {
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* スワイプギャラリー */
+        .gallery-container {
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+        }
+        .gallery-item {
+            scroll-snap-align: center;
+        }
+
+        /* カスタムカラー */
+        .bg-brand-50 { background-color: #fefce8; }
+        .bg-brand-100 { background-color: #fef9c3; }
+        .bg-brand-500 { background-color: #eab308; }
+        .bg-brand-600 { background-color: #ca8a04; }
+        .text-brand-600 { color: #ca8a04; }
+        .border-brand-500 { border-color: #eab308; }
+        .ring-brand-500 { --tw-ring-color: #eab308; }
+
+        /* いえっぴのアニメーション */
+        .iepita-bounce {
+            animation: iepitaBounce 2s ease-in-out infinite;
+        }
+        @keyframes iepitaBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* 吹き出しのアニメーション */
+        .speech-bubble {
+            animation: speechBubble 0.6s ease-out;
+        }
+        @keyframes speechBubble {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* トースト通知のアニメーション */
+        .toast-show {
+            animation: toastSlideIn 0.3s ease-out;
+        }
+        @keyframes toastSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* スワイプ成功時のエフェクト */
+        .swipe-success {
+            animation: swipeSuccess 0.4s ease-out;
+        }
+        @keyframes swipeSuccess {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Leaflet Mapの高さ */
+        #map {
+            height: 250px;
+            border-radius: 0.75rem; /* rounded-xl */
+        }
+
+        /* トースト通知 */
+        #toast {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* いえっぴトースト通知 */
+        .iepita-toast {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .iepita-speech-bubble {
+            position: relative;
+            background: white;
+            border-radius: 15px;
+            padding: 12px 16px;
+            margin-left: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .iepita-speech-bubble::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 8px solid white;
+        }
+
+        /* いえっぴアニメーション */
+        .iepita-bounce {
+            animation: iepitaBounce 2s infinite;
+        }
+
+        @keyframes iepitaBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .iepita-wiggle {
+            animation: iepitaWiggle 0.5s ease-in-out;
+        }
+
+        @keyframes iepitaWiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        /* === フェーズ1：新しいアニメーション === */
+
+        /* ゆっくりバウンス（スタートページのいえっぴ用） */
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 3s ease-in-out infinite;
+        }
+
+        /* ゆっくりパルス（ボタン用） */
+        @keyframes pulse-slow {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.95;
+                transform: scale(1.02);
+            }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+
+        /* キラキラエフェクト（プログレスバー用） */
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+            animation: shimmer 2s infinite;
+        }
+
+        /* スライドアップ（質問カード用） */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        /* ホバー時のスケール */
+        .hover\:scale-102:hover {
+            transform: scale(1.02);
+        }
+
+        /* === フェーズ1終了 === */
+
+        /* === チャットボットUI === */
+
+        /* チャットメッセージのアニメーション */
+        @keyframes slideInChat {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message {
+            animation: slideInChat 0.3s ease-out;
+        }
+
+        /* スクロールバーのカスタマイズ */
+        #chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chat-messages::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        #chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* いえっぴのメッセージ（左） */
+        .chat-message.iepita {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .chat-bubble.iepita {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 16px 16px 16px 4px;
+            max-width: 75%;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        /* ユーザーのメッセージ（右） */
+        .chat-message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .chat-bubble.user {
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 12px 16px;
+            border-radius: 16px 16px 4px 16px;
+            max-width: 75%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* タイピングインジケータ */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            border-radius: 16px 16px 16px 4px;
+            width: fit-content;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        /* 選択肢ボタン */
+        .chat-option-btn {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 14px 16px;
+            border-radius: 12px;
+            text-align: left;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .chat-option-btn:hover {
+            border-color: #f59e0b;
+            background: #fef9c3;
+            transform: translateX(4px);
+        }
+
+        .chat-option-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* フォーム入力フィールド */
+        .chat-input, .chat-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .chat-input:focus, .chat-textarea:focus {
+            border-color: #f59e0b;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .chat-textarea {
+            resize: none;
+            font-family: inherit;
+        }
+
+        .chat-submit-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: white;
+            font-weight: bold;
+            padding: 14px;
+            border-radius: 12px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .chat-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+        }
+
+        .chat-submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* === オンボーディングUI === */
+
+        /* オーバーレイの暗さ */
+        #onboarding-overlay {
+            opacity: 0.6;
+        }
+
+        /* スポットライト効果 */
+        #onboarding-spotlight {
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6),
+                        0 0 0 5px rgba(245, 158, 11, 0.8),
+                        0 0 30px 10px rgba(245, 158, 11, 0.5),
+                        inset 0 0 0 3px rgba(255, 255, 255, 1);
+            pointer-events: none;
+            z-index: 10001;
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ツールチップのアニメーション */
+        #onboarding-tooltip {
+            z-index: 10002;
+            animation: tooltipBounce 0.5s ease-out;
+        }
+
+        @keyframes tooltipBounce {
+            0% {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* プログレスドット */
+        .onboarding-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            transition: all 0.3s;
+        }
+
+        .onboarding-dot.active {
+            width: 24px;
+            border-radius: 4px;
+            background: #f59e0b;
+        }
+
+        /* 矢印のアニメーション */
+        #onboarding-arrow {
+            z-index: 10002;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        /* ハイライトされた要素の強調 */
+        .onboarding-highlight {
+            position: relative;
+            z-index: 10003 !important;
+        }
+
+        /* オンボーディングボタンのフォントサイズ調整 */
+        #onboarding-skip,
+        #onboarding-next {
+            font-size: 0.875rem;  /* 14px（text-smと同じ） */
+            white-space: nowrap;  /* 改行を防ぐ */
+        }
+
+        /* === スタートページの最適化 === */
+        #page-start .relative.z-10 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+
+        #page-start .mascot {
+            margin-bottom: 0.75rem !important;
+        }
+
+        #page-start .mascot img {
+            width: 6rem !important;
+            height: 6rem !important;
+        }
+
+        #page-start h1 {
+            font-size: 2.5rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        #page-start h1 + p {
+            font-size: 1rem !important;
+            margin-bottom: 1rem !important;
+        }
+
+        #page-start .grid.grid-cols-3 {
+            margin-bottom: 1rem !important;
+            gap: 0.5rem !important;
+        }
+
+        #page-start .grid.grid-cols-3 > div {
+            padding: 0.75rem !important;
+        }
+
+        #page-start .grid.grid-cols-3 .text-3xl {
+            font-size: 2rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+
+        #page-start .bg-white\/90 {
+            padding: 1rem !important;
+            margin-bottom: 1.25rem !important;
+        }
+
+        #page-start .bg-white\/90 h2 {
+            font-size: 1rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+
+        #page-start .bg-white\/90 .space-y-3 {
+            gap: 0.5rem !important;
+        }
+
+        #page-start .bg-white\/90 .space-y-3 > div {
+            gap: 0.5rem !important;
+        }
+
+        #page-start .bg-white\/90 p {
+            font-size: 0.8rem !important;
+            padding-top: 0 !important;
+        }
+
+        #page-start #start-quiz-btn {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+            padding-left: 3rem !important;
+            padding-right: 3rem !important;
+        }
+
+        #page-start #start-quiz-btn + p {
+            margin-top: 0.75rem !important;
+        }
+
+        /* 診断中のいえっぴ */
+        .quiz-iepita {
+            position: fixed;
+            bottom: 100px;
+            bottom: calc(100px + env(safe-area-inset-bottom));
+            right: 20px;
+            right: calc(20px + env(safe-area-inset-right));
+            z-index: 50;
+            animation: iepitaBounce 3s infinite;
+            transition: bottom 0.3s ease;
+        }
+
+        .quiz-iepita img {
+            width: 60px;
+            height: 60px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        /* タブレット・PC（大画面）では下の方に配置 */
+        @media (min-width: 768px) {
+            .quiz-iepita {
+                bottom: 30px;
+                bottom: calc(30px + env(safe-area-inset-bottom));
+            }
+        }
+
+        /* ===== 下部ナビゲーションの最適化 ===== */
+        #bottom-nav {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0;
+            right: 0;
+            height: var(--nav-height);
+            padding-bottom: var(--safe-area-bottom);
+            z-index: 9999 !important;
+            transition: transform 0.3s ease-in-out;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* ナビゲーションボタンのタップフィードバック */
+        #bottom-nav .nav-btn {
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #bottom-nav .nav-btn:active {
+            transform: scale(0.95);
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        /* ナビゲーションボタンのカスタムカラー */
+        #bottom-nav .nav-btn-blue {
+            color: #3b82f6; /* 青 - 物件リスト */
+        }
+
+        #bottom-nav .nav-btn-blue:active {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        #bottom-nav .nav-btn-blue.active {
+            background-color: #3b82f6;
+            color: white;
+            font-weight: bold;
+        }
+
+        #bottom-nav .nav-btn-pink {
+            color: #ec4899; /* ピンク - お気に入り */
+        }
+
+        #bottom-nav .nav-btn-pink:active {
+            background-color: rgba(236, 72, 153, 0.1);
+        }
+
+        #bottom-nav .nav-btn-pink.active {
+            background-color: #ec4899;
+            color: white;
+            font-weight: bold;
+        }
+
+        #bottom-nav .nav-btn-yellow {
+            color: #eab308; /* 黄色 - スター */
+        }
+
+        #bottom-nav .nav-btn-yellow:active {
+            background-color: rgba(234, 179, 8, 0.1);
+        }
+
+        #bottom-nav .nav-btn-yellow.active {
+            background-color: #eab308;
+            color: white;
+            font-weight: bold;
+        }
+
+        #bottom-nav .nav-btn-gray {
+            color: #64748b; /* グレー - 興味なし */
+        }
+
+        #bottom-nav .nav-btn-gray:active {
+            background-color: rgba(100, 116, 139, 0.1);
+        }
+
+        #bottom-nav .nav-btn-gray.active {
+            background-color: #64748b;
+            color: white;
+            font-weight: bold;
+        }
+
+        #bottom-nav .nav-btn-orange {
+            color: #f97316; /* オレンジ - マッチング */
+        }
+
+        #bottom-nav .nav-btn-orange:active {
+            background-color: rgba(249, 115, 22, 0.1);
+        }
+
+        #bottom-nav .nav-btn-orange.active {
+            background-color: #f97316;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* ページタイトルのカラー */
+        .page-title-pink {
+            color: #ec4899; /* ピンク - お気に入り */
+        }
+
+        .page-title-yellow {
+            color: #eab308; /* 黄色 - スター */
+        }
+
+        .page-title-gray {
+            color: #64748b; /* グレー - 興味なし */
+        }
+
+        .page-title-orange {
+            color: #f97316; /* オレンジ - マッチング */
+        }
+
+        /* コンテンツエリアの下部余白を動的に調整 */
+        .pb-20 {
+            padding-bottom: calc(5rem + var(--safe-area-bottom)) !important;
+        }
+
+        .pb-24 {
+            padding-bottom: calc(6rem + var(--safe-area-bottom)) !important;
+        }
+
+        /* ページ全体の高さをビューポートに合わせる */
+        .page {
+            min-height: 100vh;
+            min-height: calc(var(--vh, 1vh) * 100);
+        }
+
+        /* マッチングモード用スタイル */
+        .swipe-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            overflow: hidden;
+        }
+        .swipe-card:active {
+            cursor: grabbing;
+        }
+        .swipe-card.swiping {
+            transition: none;
+        }
+        .swipe-card.swipe-left {
+            transform: translateX(-150%) rotate(-30deg);
+            opacity: 0;
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+        }
+        .swipe-card.swipe-right {
+            transform: translateX(150%) rotate(30deg);
+            opacity: 0;
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+        }
+        .swipe-card.swipe-up {
+            transform: translateY(-150%) rotate(0deg);
+            opacity: 0;
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+        }
+        .swipe-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .swipe-overlay.show {
+            opacity: 0.8;
+        }
+        .swipe-overlay.like {
+            color: #ef4444;
+            background: linear-gradient(45deg, rgba(239, 68, 68, 0.1), transparent);
+        }
+        .swipe-overlay.star {
+            color: #eab308;
+            background: linear-gradient(45deg, rgba(234, 179, 8, 0.1), transparent);
+        }
+        .swipe-overlay.dislike {
+            color: #ffffff;
+            background: radial-gradient(
+                circle at center,
+                rgba(100, 116, 139, 0.95) 0%,
+                rgba(100, 116, 139, 0.85) 25%,
+                rgba(100, 116, 139, 0.6) 40%,
+                rgba(100, 116, 139, 0.3) 60%,
+                transparent 80%
+            );
+            text-shadow:
+                0 0 20px rgba(0, 0, 0, 0.9),
+                0 0 40px rgba(0, 0, 0, 0.7),
+                0 4px 8px rgba(0, 0, 0, 0.9),
+                0 0 4px rgba(255, 255, 255, 0.3);
+        }
