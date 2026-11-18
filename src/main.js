@@ -1450,8 +1450,9 @@
             switch (pageKey) {
                 case 'list':
                     if (params.fromQuiz) {
-                        calculateMatchScores();
-                        renderResultType();
+                        const diagnosis = quizScoring.evaluate(state.quiz.answers, quizQuestions, resultTypes);
+                        updateMatchScores(diagnosis.matchTags);
+                        renderResultType(diagnosis);
                     }
                     renderPropertyList();
                     bottomNav.classList.remove('hidden');
@@ -1491,40 +1492,9 @@
         // ========== レンダリング ==========
 
         // 診断結果タイプの表示
-        const renderResultType = () => {
+        const renderResultType = ({ typeName, type }) => {
             const display = document.getElementById('result-type-display');
-            const answers = Object.values(state.quiz.answers);
-            let bestMatch = 'あなたにぴったりのタイプ';
-            let bestMatchData = null;
-            let maxScore = 0;
-
-            // 診断回答からタグを抽出（一度だけ計算）
-            const answerTags = Object.entries(state.quiz.answers).flatMap(([key, value]) => {
-                const question = quizQuestions.find(q => q.key === key);
-                const option = question?.options?.find(o => o.value === value);
-                return option ? option.tags : [];
-            });
-
-            // 新しいタイプ分類ロジック
-            for (const typeName in resultTypes) {
-                const typeData = resultTypes[typeName];
-
-                // タグベースのスコア計算
-                let score = 0;
-                if (typeData.tagWeights) {
-                    Object.entries(typeData.tagWeights).forEach(([tag, weight]) => {
-                        if (answerTags.includes(tag)) {
-                            score += weight;
-                        }
-                    });
-                }
-
-                if (score > maxScore) {
-                    maxScore = score;
-                    bestMatch = typeName;
-                    bestMatchData = typeData;
-                }
-            }
+            const bestMatch = typeName ?? 'あなたにぴったりのタイプ';
 
             // いえっぴの吹き出しで結果を表示
             display.innerHTML = `
@@ -1545,7 +1515,7 @@
                             <p class="font-bold text-brand-600 text-xs mb-1">${bestMatch}</p>
                             <div class="bg-brand-50 p-1.5 rounded">
                                 <p class="text-xs text-brand-700 font-medium">
-                                    いえっぴ「${bestMatchData ? bestMatchData.comment : 'きっと素敵な住まいが見つかるよ♪'}」
+                                    いえっぴ「${type ? type.comment : 'きっと素敵な住まいが見つかるよ♪'}」
                                 </p>
                             </div>
                         </div>
@@ -1961,68 +1931,11 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             }
         };
 
-        const calculateMatchScores = () => {
-            // 診断回答からタグを抽出
-            const answerTags = Object.entries(state.quiz.answers).flatMap(([key, value]) => {
-                const question = quizQuestions.find(q => q.key === key);
-                const option = question.options.find(o => o.value === value);
-                return option ? option.tags : [];
-            });
-
-            // 診断結果タイプのタグも追加
-            const answers = Object.values(state.quiz.answers);
-            let bestMatchType = null;
-            let maxScore = 0;
-
-            for (const typeName in resultTypes) {
-                const typeData = resultTypes[typeName];
-
-                // タグベースのスコア計算
-                let score = 0;
-                if (typeData.tagWeights) {
-                    Object.entries(typeData.tagWeights).forEach(([tag, weight]) => {
-                        if (answerTags.includes(tag)) {
-                            score += weight;
-                        }
-                    });
-                }
-
-                if (score > maxScore) {
-                    maxScore = score;
-                    bestMatchType = typeData;
-                }
-            }
-
-            // タイプのタグも追加（tagWeightsからタグを抽出）
-            if (bestMatchType && bestMatchType.tagWeights) {
-                const typeTags = Object.keys(bestMatchType.tagWeights);
-                answerTags.push(...typeTags);
-            }
-
-            dummyProperties.forEach(p => {
-                // 診断結果とのタグマッチング
-                const commonTags = p.tags.filter(tag => answerTags.includes(tag));
-                const uniqueTags = [...new Set(answerTags)]; // 重複を除去
-
-                // 基本スコア計算（より精密に）
-                let baseScore = 30; // 基本点
-                baseScore += (commonTags.length / uniqueTags.length) * 50; // マッチ率による点数
-                baseScore += commonTags.length * 8; // マッチタグ数によるボーナス
-
-                // ユーザーの評価による調整
-                if (state.favorites.includes(p.id)) {
-                    baseScore += 15; // お気に入り +15点
-                }
-                if (state.stars.includes(p.id)) {
-                    baseScore += 25; // スターマーク +25点
-                }
-                if (state.dislikes.includes(p.id)) {
-                    baseScore -= 35; // 興味なし -35点
-                }
-
-                // ランダム要素を追加（±8点）
-                const randomFactor = Math.floor(Math.random() * 17) - 8;
-                p.matchScore = Math.max(0, Math.min(100, Math.round(baseScore + randomFactor)));
+        const updateMatchScores = (tags) => {
+            const { favorites, stars, dislikes } = state;
+            const ratings = { favorites, stars, dislikes };
+            dummyProperties.forEach(property => {
+                property.matchScore = quizScoring.scoreProperty(property, tags, ratings);
             });
         };
 
@@ -2835,76 +2748,8 @@ imagesToShow = [...exteriorImages, ...interiorImages];
         };
 
         // ========== フィルター/ソートロジック ==========
-        const getFilteredProperties = () => {
-            let properties = [...dummyProperties];
-            const { sort, tags, tagMode, maxPrice, maxAge, prefecture, city } = state.filters;
-
-            // Filter
-            properties = properties.filter(p => p.price <= maxPrice && p.age <= maxAge);
-
-            // 地域フィルター
-            if (prefecture) {
-                properties = properties.filter(p => {
-                    const match = p.address.match(/^([^都道府県]{1,4}[都道府県])/);
-                    const propPrefecture = match ? match[1] : p.address.split(' ')[0];
-                    return propPrefecture === prefecture;
-                });
-            }
-
-            if (city && prefecture) {
-                properties = properties.filter(p => {
-                    // 都道府県の後の部分から市区町村を抽出
-                    const prefectureMatch = p.address.match(/^([^都道府県]{1,4}[都道府県])/);
-                    if (prefectureMatch) {
-                        const remaining = p.address.substring(prefectureMatch[1].length);
-                        const cityMatch = remaining.match(/^([^区市町村]{1,10}[区市町村])/);
-                        return cityMatch ? cityMatch[1] === city : false;
-                    }
-                    const addressParts = p.address.split(' ');
-                    return addressParts.length > 1 ? addressParts[1] === city : false;
-                });
-            }
-
-            if (tags.length > 0) {
-                if (tagMode === 'AND') {
-                    properties = properties.filter(p => tags.every(tag => p.tags.includes(tag)));
-                } else { // OR
-                    properties = properties.filter(p => tags.some(tag => p.tags.includes(tag)));
-                }
-            }
-
-            // Sort
-            properties.sort((a, b) => {
-                switch(sort) {
-                    case 'match_desc': return (b.matchScore || 0) - (a.matchScore || 0);
-                    case 'new_desc': return b.id - a.id; // IDで代用
-                    case 'price_asc': return a.price - b.price;
-                    case 'price_desc': return b.price - a.price;
-                    case 'distance_asc':
-                        if (state.userLocation) {
-                            const distanceA = calculateDistance(
-                                state.userLocation.lat,
-                                state.userLocation.lng,
-                                a.coordinates[0],
-                                a.coordinates[1]
-                            );
-                            const distanceB = calculateDistance(
-                                state.userLocation.lat,
-                                state.userLocation.lng,
-                                b.coordinates[0],
-                                b.coordinates[1]
-                            );
-                            return distanceA - distanceB;
-                        } else {
-                            // 現在地が取得できない場合はマッチ度順
-                            return (b.matchScore || 0) - (a.matchScore || 0);
-                        }
-                    default: return 0;
-                }
-            });
-
-            return properties;
-        };
+        const getFilteredProperties = () =>
+            propertyFilters.filterProperties(dummyProperties, state.filters, state.userLocation);
 
         const openFilterModal = () => {
             renderFilterTags();
@@ -3153,18 +2998,6 @@ imagesToShow = [...exteriorImages, ...interiorImages];
         // ========== 地図ロジック ==========
         // ========== 強化されたマップ機能 ==========
 
-        // 距離計算関数（ハヴァサイン公式）
-        const calculateDistance = (lat1, lon1, lat2, lon2) => {
-            const R = 6371; // 地球の半径（km）
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                    Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        };
-
         // ユーザーの現在地を取得
         const getUserLocation = () => {
             return new Promise((resolve, reject) => {
@@ -3395,7 +3228,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             // 既存のマーカーのポップアップを更新
             state.mapMarkers.eachLayer(marker => {
                 if (marker.getLatLng) {
-                    const distance = calculateDistance(
+                    const distance = propertyFilters.calculateDistance(
                         state.userLocation.lat,
                         state.userLocation.lng,
                         marker.getLatLng().lat,
@@ -3439,7 +3272,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             const properties = getFilteredProperties();
             const propertiesWithDistance = properties.map(property => ({
                 ...property,
-                distance: calculateDistance(
+                distance: propertyFilters.calculateDistance(
                     state.userLocation.lat,
                     state.userLocation.lng,
                     property.coordinates[0],
