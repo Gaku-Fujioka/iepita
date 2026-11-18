@@ -669,9 +669,7 @@
         // ========== データ保存の自動化 ==========
         const saveAllUserData = () => {
             console.log('💾 全ユーザーデータを保存中...');
-            saveFavorites();
-            saveStars();
-            saveDislikes();
+            savedRatings.saveAll(state);
         };
 
         // データの整合性チェック
@@ -715,15 +713,7 @@
                 state.stars = [];
                 state.dislikes = [];
 
-                // localStorageからも削除
-                localStorage.removeItem('iepita_favorites');
-                localStorage.removeItem('iepita_stars');
-                localStorage.removeItem('iepita_dislikes');
-
-                // セッションストレージのバックアップも削除
-                sessionStorage.removeItem('iepita_favorites_backup');
-                sessionStorage.removeItem('iepita_stars_backup');
-                sessionStorage.removeItem('iepita_dislikes_backup');
+                savedRatings.clearAll();
 
                 console.log('🗑️ 全ユーザーデータをリセットしました');
                 showToast('すべてのデータをリセットしました');
@@ -1393,9 +1383,7 @@
             initMenuSound();
 
             // ユーザーデータの読み込み
-            loadFavorites();
-            loadStars();
-            loadDislikes();
+            Object.assign(state, savedRatings.loadAll());
 
             // データ整合性チェック
             validateUserData();
@@ -1947,7 +1935,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             } else {
                 state.favorites.push(propertyId);
             }
-            saveFavorites();
+            savedRatings.save('favorites', state.favorites);
             updateFavoriteIcons(propertyId);
 
             // お気に入りページが開いている場合は再描画
@@ -1971,51 +1959,6 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             }
         };
 
-        // ========== localStorage管理（強化版） ==========
-        const saveFavorites = () => {
-            try {
-                localStorage.setItem('iepita_favorites', JSON.stringify(state.favorites));
-                console.log('✅ お気に入りを保存しました:', state.favorites);
-            } catch (error) {
-                console.error('❌ お気に入りの保存に失敗:', error);
-                // フォールバック: セッションストレージに保存
-                try {
-                    sessionStorage.setItem('iepita_favorites_backup', JSON.stringify(state.favorites));
-                    console.log('🔄 セッションストレージにバックアップ保存');
-                } catch (fallbackError) {
-                    console.error('❌ バックアップ保存も失敗:', fallbackError);
-                }
-            }
-        };
-
-        const loadFavorites = () => {
-            try {
-            const favs = localStorage.getItem('iepita_favorites');
-                if (favs) {
-                    state.favorites = JSON.parse(favs);
-                    console.log('✅ お気に入りを読み込みました:', state.favorites);
-                } else {
-                    state.favorites = [];
-                    console.log('📝 お気に入りは空です');
-                }
-            } catch (error) {
-                console.error('❌ お気に入りの読み込みに失敗:', error);
-                // フォールバック: セッションストレージから復元
-                try {
-                    const backup = sessionStorage.getItem('iepita_favorites_backup');
-                    if (backup) {
-                        state.favorites = JSON.parse(backup);
-                        console.log('🔄 セッションストレージから復元:', state.favorites);
-                    } else {
-                        state.favorites = [];
-                    }
-                } catch (fallbackError) {
-                    console.error('❌ バックアップ復元も失敗:', fallbackError);
-                    state.favorites = [];
-                }
-            }
-        };
-
         // ========== スターマークロジック ==========
         const toggleStar = (propertyId) => {
             const index = state.stars.indexOf(propertyId);
@@ -2024,7 +1967,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             } else {
                 state.stars.push(propertyId);
             }
-            saveStars();
+            savedRatings.save('stars', state.stars);
             updateStarIcons(propertyId);
 
             // スターマークページが開いている場合は再描画
@@ -2048,78 +1991,6 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             }
         };
 
-        const saveStars = () => {
-            try {
-                localStorage.setItem('iepita_stars', JSON.stringify(state.stars));
-                console.log('✅ スターマークを保存しました:', state.stars);
-            } catch (error) {
-                console.error('❌ スターマークの保存に失敗:', error);
-                // フォールバック: セッションストレージに保存
-                try {
-                    sessionStorage.setItem('iepita_stars_backup', JSON.stringify(state.stars));
-                    console.log('🔄 セッションストレージにバックアップ保存');
-                } catch (fallbackError) {
-                    console.error('❌ バックアップ保存も失敗:', fallbackError);
-                }
-            }
-        };
-
-        const loadStars = () => {
-            try {
-            const stars = localStorage.getItem('iepita_stars');
-                if (stars) {
-                    state.stars = JSON.parse(stars);
-                    console.log('✅ スターマークを読み込みました:', state.stars);
-                } else {
-                    state.stars = [];
-                    console.log('📝 スターマークは空です');
-                }
-            } catch (error) {
-                console.error('❌ スターマークの読み込みに失敗:', error);
-                // フォールバック: セッションストレージから復元
-                try {
-                    const backup = sessionStorage.getItem('iepita_stars_backup');
-                    if (backup) {
-                        state.stars = JSON.parse(backup);
-                        console.log('🔄 セッションストレージから復元:', state.stars);
-                    } else {
-                        state.stars = [];
-                    }
-                } catch (fallbackError) {
-                    console.error('❌ バックアップ復元も失敗:', fallbackError);
-                    state.stars = [];
-                }
-            }
-        };
-
-        const loadDislikes = () => {
-            try {
-            const dislikes = localStorage.getItem('iepita_dislikes');
-                if (dislikes) {
-                    state.dislikes = JSON.parse(dislikes);
-                    console.log('✅ 興味なしを読み込みました:', state.dislikes);
-                } else {
-                    state.dislikes = [];
-                    console.log('📝 興味なしは空です');
-                }
-            } catch (error) {
-                console.error('❌ 興味なしの読み込みに失敗:', error);
-                // フォールバック: セッションストレージから復元
-                try {
-                    const backup = sessionStorage.getItem('iepita_dislikes_backup');
-                    if (backup) {
-                        state.dislikes = JSON.parse(backup);
-                        console.log('🔄 セッションストレージから復元:', state.dislikes);
-                    } else {
-                        state.dislikes = [];
-                    }
-                } catch (fallbackError) {
-                    console.error('❌ バックアップ復元も失敗:', fallbackError);
-                    state.dislikes = [];
-                }
-            }
-        };
-
         // ========== 興味なしロジック ==========
         const toggleDislike = (propertyId) => {
             const index = state.dislikes.indexOf(propertyId);
@@ -2128,7 +1999,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             } else {
                 state.dislikes.push(propertyId);
             }
-            saveDislikes();
+            savedRatings.save('dislikes', state.dislikes);
             updateDislikeIcons(propertyId);
 
             // 興味なしページが開いている場合は再描画
@@ -2149,22 +2020,6 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             if (detailsBtn) {
                 detailsBtn.className = `toggle-dislike-btn-details flex flex-col items-center justify-center rounded-lg py-2 ${isDisliked ? 'bg-slate-200 text-slate-500' : 'bg-slate-100 text-slate-600'}`;
                 detailsBtn.querySelector('span').textContent = isDisliked ? '興味なし済' : '興味なし';
-            }
-        };
-
-        const saveDislikes = () => {
-            try {
-                localStorage.setItem('iepita_dislikes', JSON.stringify(state.dislikes));
-                console.log('✅ 興味なしを保存しました:', state.dislikes);
-            } catch (error) {
-                console.error('❌ 興味なしの保存に失敗:', error);
-                // フォールバック: セッションストレージに保存
-                try {
-                    sessionStorage.setItem('iepita_dislikes_backup', JSON.stringify(state.dislikes));
-                    console.log('🔄 セッションストレージにバックアップ保存');
-                } catch (fallbackError) {
-                    console.error('❌ バックアップ保存も失敗:', fallbackError);
-                }
             }
         };
 
