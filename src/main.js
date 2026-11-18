@@ -1028,10 +1028,14 @@
 
             initRegionFilters(); // 地域フィルターを初期化
             setupEventListeners();
-            navigateTo('start');
 
-            // === 段階4: オンボーディング自動起動 ===
-            checkOnboarding();
+            const action = new URLSearchParams(window.location.search).get('action');
+            if (action === 'quiz' || action === 'favorites') {
+                navigateTo(action);
+            } else {
+                navigateTo('start');
+                checkOnboarding();
+            }
 
             console.log('✅ アプリケーション初期化完了 - 物件数:', dummyProperties.length);
         };
@@ -2674,7 +2678,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
         // Service Workerの登録
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('./sw.js')
                     .then((registration) => {
                         console.log('Service Worker: 登録成功', registration.scope);
                     })

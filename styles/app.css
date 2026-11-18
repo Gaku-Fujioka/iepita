@@ -40,6 +40,8 @@
             transform: translateX(0);
             opacity: 1;
         }
+        /* CDN のスタイルが読み込めないときも、閉じた画面やモーダルを隠す。 */
+        .hidden,
         .page-hidden {
             display: none !important;
         }

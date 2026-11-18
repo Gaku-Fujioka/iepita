@@ -1,11 +1,34 @@
 // Service Worker for いえぴた！
-const CACHE_NAME = 'iepita-v1.5.0';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/properties.json',
-  '/quiz.json',
-  '/iepita.png',
+const appUrl = path => new URL(path, self.registration.scope).href;
+const CACHE_PREFIX = 'iepita:' + self.registration.scope + ':';
+const CACHE_VERSION = 'v2';
+const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
+
+const entryUrls = new Set([appUrl('./'), appUrl('./index.html')]);
+const appAssets = new Set([
+  'index.html',
+  'manifest.json',
+  'styles/app.css',
+  'src/main.js',
+  'src/property-filters.js',
+  'src/quiz-scoring.js',
+  'src/saved-ratings.js',
+  'src/property-map.js',
+  'src/matching.js',
+  'src/inquiry.js',
+  'properties.json',
+  'quiz.json',
+  'iepita.png',
+  'sounds/favorite.mp3',
+  'sounds/star.mp3',
+  'sounds/dislike.mp3',
+  'sounds/quiz.mp3',
+  'sounds/quizstart.mp3',
+  'sounds/chuto.mp3',
+  'sounds/menu.mp3'
+].map(appUrl));
+
+const cdnAssets = new Set([
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
@@ -15,66 +38,64 @@ const urlsToCache = [
   'https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css',
   'https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css',
   'https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js'
-];
+]);
 
-// インストール時の処理
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: インストール中...');
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Service Worker: キャッシュを開きました');
-        return cache.addAll(urlsToCache);
-      })
-      .catch((error) => {
-        console.error('Service Worker: キャッシュの追加に失敗しました', error);
-      })
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll([...appAssets].map(url => new Request(url, { cache: 'reload' })));
+
+    // CDN に接続できない場合でも、アプリ本体のキャッシュを使えるようにする。
+    await Promise.allSettled([...cdnAssets].map(async url => {
+      const response = await fetch(url, { signal: AbortSignal.timeout(3000), cache: 'reload' });
+      if (response.ok) await cache.put(url, response);
+    }));
+  })());
 });
 
-// アクティベート時の処理
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: アクティベート中...');
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Service Worker: 古いキャッシュを削除中...', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
+  event.waitUntil((async () => {
+    const cacheNames = await caches.keys();
+    await Promise.all(cacheNames
+      .filter(name => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)
+      .map(name => caches.delete(name)));
+    await self.clients.claim();
+  })());
 });
 
-// フェッチ時の処理
-self.addEventListener('fetch', (event) => {
-  // 画像ファイル（p001.png等）は404を返すことが多いので、キャッシュしない
-  if (event.request.url.includes('.png') && event.request.url.includes('p0')) {
-    return;
+const fromAppCache = async (url, request) => {
+  const cache = await caches.open(CACHE_NAME);
+  return (await cache.match(url)) || fetch(request);
+};
+
+const fromCdnCache = async (request) => {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(request);
+  if (cached && (request.mode === 'no-cors' || cached.type !== 'opaque')) return cached;
+
+  const response = await fetch(request);
+  if (response.ok || response.type === 'opaque') {
+    try {
+      await cache.put(request, response.clone());
+    } catch (error) {
+      console.warn('CDN リソースをキャッシュできませんでした:', request.url, error);
+    }
   }
+  return response;
+};
 
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // キャッシュに存在する場合はキャッシュを返す
-        if (response) {
-          console.log('Service Worker: キャッシュから取得', event.request.url);
-          return response;
-        }
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.method !== 'GET') return;
 
-        // キャッシュに存在しない場合はネットワークから取得
-        console.log('Service Worker: ネットワークから取得', event.request.url);
-        return fetch(event.request).catch(() => {
-          // ネットワークエラーの場合は、オフライン用のページを返す
-          if (event.request.destination === 'document') {
-            return caches.match('/index.html');
-          }
-        });
-      })
-  );
+  const url = new URL(request.url);
+  if (request.mode === 'navigate' && entryUrls.has(url.origin + url.pathname)) {
+    event.respondWith(fromAppCache(appUrl('./index.html'), request));
+  } else if (appAssets.has(url.href)) {
+    event.respondWith(fromAppCache(url.href, request));
+  } else if (cdnAssets.has(url.href)) {
+    event.respondWith(fromCdnCache(request));
+  }
 });
 
 // バックグラウンド同期
@@ -129,14 +150,14 @@ self.addEventListener('notificationclick', (event) => {
 
   if (event.action === 'explore') {
     event.waitUntil(
-      clients.openWindow('/?action=quiz')
+      clients.openWindow(appUrl('./?action=quiz'))
     );
   } else if (event.action === 'close') {
     // 何もしない
   } else {
     // デフォルトの動作
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow(appUrl('./'))
     );
   }
 });
