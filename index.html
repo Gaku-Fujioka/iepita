@@ -402,7 +402,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-slate-600">すべての物件をチェックしました！</h3>
                     <p class="text-slate-500 mt-2">お気に入りやスターマークページで結果を確認してください。</p>
-                    <button onclick="navigateTo('list')" class="mt-6 bg-brand-500 text-white font-bold py-3 px-8 rounded-full">
+                    <button data-go-list class="mt-6 bg-brand-500 text-white font-bold py-3 px-8 rounded-full">
                         物件リストに戻る
                     </button>
                 </div>
@@ -553,25 +553,25 @@
                                 <div id="photo-preview-container" class="grid grid-cols-2 gap-3 hidden">
                                     <div class="relative">
                                         <img class="w-full h-32 object-cover rounded-lg" src="" alt="写真1">
-                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" onclick="removePhoto(0)">
+                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" data-remove-photo="0">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
                                     <div class="relative">
                                         <img class="w-full h-32 object-cover rounded-lg" src="" alt="写真2">
-                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" onclick="removePhoto(1)">
+                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" data-remove-photo="1">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
                                     <div class="relative">
                                         <img class="w-full h-32 object-cover rounded-lg" src="" alt="写真3">
-                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" onclick="removePhoto(2)">
+                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" data-remove-photo="2">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
                                     <div class="relative">
                                         <img class="w-full h-32 object-cover rounded-lg" src="" alt="写真4">
-                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" onclick="removePhoto(3)">
+                                        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600" data-remove-photo="3">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
@@ -632,6 +632,9 @@
     <script src="./src/property-filters.js"></script>
     <script src="./src/quiz-scoring.js"></script>
     <script src="./src/saved-ratings.js"></script>
+    <script src="./src/inquiry.js"></script>
+    <script src="./src/matching.js"></script>
+    <script src="./src/property-map.js"></script>
     <script src="./src/main.js"></script>
 
     <!-- === チャットボットモーダル === -->

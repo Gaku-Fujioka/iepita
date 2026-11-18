@@ -72,16 +72,6 @@
                 lastError: null,
                 municipalities: [], // 自治体データ
                 lastFetchTime: null
-            },
-            currentMap: null,
-            detailMap: null,
-            mapMarkers: [],
-            userLocation: null,
-            mapMode: 'single', // 'single' or 'multiple'
-            matching: {
-                currentIndex: 0,
-                properties: [],
-                isAnimating: false
             }
         };
 
@@ -286,8 +276,6 @@
         const favoritesListContainer = document.getElementById('favorites-list-container');
         const starsListContainer = document.getElementById('stars-list-container');
         const dislikesListContainer = document.getElementById('dislikes-list-container');
-        const matchingContainer = document.getElementById('matching-container');
-        const matchingEmpty = document.getElementById('matching-empty');
         const filterModal = document.getElementById('filter-modal');
         const filterPanel = document.getElementById('filter-panel');
         const toast = document.getElementById('toast');
@@ -621,17 +609,22 @@
                     <div class="ml-3 flex-1">
                         <h3 class="text-sm font-medium text-red-800">データ読み込みエラー</h3>
                         <p class="text-sm text-red-700 mt-1">${message}</p>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove(); loadData();"
+                        <button data-retry-data
                                 class="mt-3 text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
                             <i class="fas fa-redo mr-1"></i>再試行
                         </button>
                     </div>
-                    <button onclick="this.parentElement.parentElement.remove();"
+                    <button data-dismiss-error
                             class="ml-3 text-red-400 hover:text-red-600">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
             `;
+            errorDiv.querySelector('[data-retry-data]').addEventListener('click', () => {
+                errorDiv.remove();
+                loadData();
+            });
+            errorDiv.querySelector('[data-dismiss-error]').addEventListener('click', () => errorDiv.remove());
             document.body.appendChild(errorDiv);
 
             // 5秒後に自動非表示
@@ -748,333 +741,6 @@
             });
         };
 
-
-        // ========== チャットボット機能 ==========
-
-        // === チャットボットの状態管理 ===
-        const chatbotState = {
-            propertyId: null,
-            inquiryType: null,
-            visitDate: null,
-            message: null,
-            userName: null,
-            userEmail: null,
-            userPhone: null
-        };
-        // === 段階1: モーダル開閉 ===
-        // グローバルスコープに公開（HTMLのonclickから呼び出せるように）
-        window.openChatbotModal = (propertyId) => {
-            const property = dummyProperties.find(p => p.id === propertyId);
-            chatbotState.propertyId = propertyId;
-
-            const modal = document.getElementById('chatbot-modal');
-            modal.classList.remove('hidden');
-
-            // 初期メッセージ表示
-            setTimeout(() => {
-                addIepitaMessage(`こんにちは！「${property.title}」について質問があるんだね！`);
-                setTimeout(() => {
-                    const typing = showTypingIndicator();
-                    setTimeout(() => {
-                        typing.remove();
-                        addIepitaMessage('どんなことが知りたい？');
-                        setTimeout(() => showInquiryTypeOptions(), 500);
-                    }, 1500);
-                }, 1000);
-            }, 300);
-        };
-
-        window.closeChatbotModal = () => {
-            const modal = document.getElementById('chatbot-modal');
-            modal.classList.add('hidden');
-            document.getElementById('chat-messages').innerHTML = '';
-            document.getElementById('chat-input-area').innerHTML = '';
-
-            // 状態をリセット
-            chatbotState.propertyId = null;
-            chatbotState.inquiryType = null;
-            chatbotState.visitDate = null;
-            chatbotState.message = null;
-            chatbotState.userName = null;
-            chatbotState.userEmail = null;
-            chatbotState.userPhone = null;
-        };
-
-        // === 段階2: メッセージ表示 ===
-
-        // いえっぴのメッセージを追加（内部関数なのでconstのまま）
-        const addIepitaMessage = (text) => {
-            const messagesContainer = document.getElementById('chat-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message iepita';
-            messageDiv.innerHTML = `
-                <img src="iepita.png" class="w-8 h-8 flex-shrink-0" alt="いえっぴ">
-                <div class="chat-bubble iepita">${text}</div>
-            `;
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        };
-
-        // ユーザーのメッセージを追加
-        const addUserMessage = (text) => {
-            const messagesContainer = document.getElementById('chat-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message user';
-            messageDiv.innerHTML = `
-                <div class="chat-bubble user">${text}</div>
-            `;
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        };
-
-        // タイピングインジケータ表示
-        const showTypingIndicator = () => {
-            const messagesContainer = document.getElementById('chat-messages');
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'chat-message iepita typing-message';
-            typingDiv.innerHTML = `
-                <img src="iepita.png" class="w-8 h-8 flex-shrink-0" alt="いえっぴ">
-                <div class="typing-indicator">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                </div>
-            `;
-            messagesContainer.appendChild(typingDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            return typingDiv;
-        };
-
-        // === 段階3: 選択肢機能 ===
-
-        // ステップ1: 問い合わせタイプ選択
-        window.showInquiryTypeOptions = () => {
-            const inputArea = document.getElementById('chat-input-area');
-            inputArea.innerHTML = `
-                <div class="space-y-2">
-                    <button onclick="selectInquiryType('details')" class="chat-option-btn w-full">
-                        📝 物件の詳細を聞きたい
-                    </button>
-                    <button onclick="selectInquiryType('visit')" class="chat-option-btn w-full">
-                        🏠 内見・見学をしたい
-                    </button>
-                    <button onclick="selectInquiryType('contract')" class="chat-option-btn w-full">
-                        📋 契約条件について相談したい
-                    </button>
-                    <button onclick="selectInquiryType('other')" class="chat-option-btn w-full">
-                        💬 その他の質問
-                    </button>
-                </div>
-            `;
-        };
-
-        window.selectInquiryType = (type) => {
-            const typeTexts = {
-                'details': '📝 物件の詳細を聞きたい',
-                'visit': '🏠 内見・見学をしたい',
-                'contract': '📋 契約条件について相談したい',
-                'other': '💬 その他の質問'
-            };
-
-            addUserMessage(typeTexts[type]);
-            chatbotState.inquiryType = type;
-
-            // 入力エリアをクリア
-            document.getElementById('chat-input-area').innerHTML = '';
-
-            // タイピング表示
-            const typing = showTypingIndicator();
-            setTimeout(() => {
-                typing.remove();
-                if (type === 'visit') {
-                    addIepitaMessage('いいね！いつ頃見学できそう？');
-                    setTimeout(() => showVisitDateOptions(), 500);
-                } else {
-                    addIepitaMessage('わかった！詳しく教えてもらえる？');
-                    setTimeout(() => showMessageInput(), 500);
-                }
-            }, 1000);
-        };
-
-        // ステップ2: 見学日時選択（内見の場合のみ）
-        window.showVisitDateOptions = () => {
-            const inputArea = document.getElementById('chat-input-area');
-            inputArea.innerHTML = `
-                <div class="space-y-2">
-                    <button onclick="selectVisitDate('this-week')" class="chat-option-btn w-full">
-                        📅 今週中
-                    </button>
-                    <button onclick="selectVisitDate('next-week')" class="chat-option-btn w-full">
-                        📅 来週
-                    </button>
-                    <button onclick="selectVisitDate('after-next')" class="chat-option-btn w-full">
-                        📅 再来週以降
-                    </button>
-                    <button onclick="selectVisitDate('flexible')" class="chat-option-btn w-full">
-                        🤔 調整したい
-                    </button>
-                </div>
-            `;
-        };
-
-        window.selectVisitDate = (date) => {
-            const dateTexts = {
-                'this-week': '📅 今週中',
-                'next-week': '📅 来週',
-                'after-next': '📅 再来週以降',
-                'flexible': '🤔 調整したい'
-            };
-
-            addUserMessage(dateTexts[date]);
-            chatbotState.visitDate = date;
-
-            document.getElementById('chat-input-area').innerHTML = '';
-
-            const typing = showTypingIndicator();
-            setTimeout(() => {
-                typing.remove();
-                addIepitaMessage('了解！何か特に伝えたいことはある？');
-                // 段階4で実装するshowMessageInput()を呼ぶ
-                setTimeout(() => {
-                    showMessageInput();
-                }, 500);
-            }, 1000);
-        };
-
-        // === 段階4: フォーム入力 ===
-
-        // ステップ3: メッセージ入力
-        window.showMessageInput = () => {
-            const inputArea = document.getElementById('chat-input-area');
-            inputArea.innerHTML = `
-                <div class="space-y-2">
-                    <textarea id="chat-message-input"
-                              class="chat-textarea"
-                              rows="3"
-                              placeholder="質問や要望があれば教えてね（スキップもOK）"></textarea>
-                    <button onclick="submitMessage()" class="chat-submit-btn w-full">
-                        次へ進む →
-                    </button>
-                </div>
-            `;
-            document.getElementById('chat-message-input').focus();
-        };
-
-        window.submitMessage = () => {
-            const input = document.getElementById('chat-message-input');
-            const message = input.value.trim();
-
-            if (message) {
-                addUserMessage(message);
-                chatbotState.message = message;
-            } else {
-                addUserMessage('（特になし）');
-            }
-
-            document.getElementById('chat-input-area').innerHTML = '';
-
-            const typing = showTypingIndicator();
-            setTimeout(() => {
-                typing.remove();
-                addIepitaMessage('ありがとう！最後に連絡先を教えてね！');
-                setTimeout(() => showContactForm(), 500);
-            }, 1000);
-        };
-
-        // ステップ4: 連絡先フォーム
-        window.showContactForm = () => {
-            const inputArea = document.getElementById('chat-input-area');
-            inputArea.innerHTML = `
-                <div class="space-y-3">
-                    <input type="text" id="chat-name"
-                           class="chat-input"
-                           placeholder="お名前 *" required>
-                    <input type="email" id="chat-email"
-                           class="chat-input"
-                           placeholder="メールアドレス *" required>
-                    <input type="tel" id="chat-phone"
-                           class="chat-input"
-                           placeholder="電話番号（任意）">
-                    <button onclick="submitInquiry()" class="chat-submit-btn w-full">
-                        📨 問い合わせを送信
-                    </button>
-                </div>
-            `;
-            document.getElementById('chat-name').focus();
-        };
-
-        window.submitInquiry = () => {
-            const name = document.getElementById('chat-name').value.trim();
-            const email = document.getElementById('chat-email').value.trim();
-            const phone = document.getElementById('chat-phone').value.trim();
-
-            if (!name || !email) {
-                alert('お名前とメールアドレスは必須です');
-                return;
-            }
-
-            // 簡易的なメールバリデーション
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert('正しいメールアドレスを入力してください');
-                return;
-            }
-
-            chatbotState.userName = name;
-            chatbotState.userEmail = email;
-            chatbotState.userPhone = phone;
-
-            // === 段階5: localStorageに保存 ===
-            const property = dummyProperties.find(p => p.id === chatbotState.propertyId);
-            const inquiry = {
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                property: {
-                    id: property.id,
-                    title: property.title,
-                    address: property.address,
-                    price: property.price
-                },
-                inquiryType: chatbotState.inquiryType,
-                visitDate: chatbotState.visitDate,
-                message: chatbotState.message,
-                userName: name,
-                userEmail: email,
-                userPhone: phone,
-                status: 'new' // new, contacted, completed
-            };
-
-            const inquiries = JSON.parse(localStorage.getItem('inquiries') || '[]');
-            inquiries.push(inquiry);
-            localStorage.setItem('inquiries', JSON.stringify(inquiries));
-
-            console.log('✅ 問い合わせ保存完了:', inquiry);
-            console.log('📊 保存された問い合わせ総数:', inquiries.length);
-
-            // ユーザーメッセージとして表示
-            addUserMessage(`${name} / ${email}${phone ? ' / ' + phone : ''}`);
-
-            document.getElementById('chat-input-area').innerHTML = '';
-
-            const typing = showTypingIndicator();
-            setTimeout(() => {
-                typing.remove();
-                addIepitaMessage('問い合わせを受け付けたよ！✨');
-                setTimeout(() => {
-                    addIepitaMessage('担当者から2営業日以内に連絡するから、楽しみに待っててね！');
-                    setTimeout(() => showCloseButton(), 500);
-                }, 1000);
-            }, 1000);
-        };
-
-        window.showCloseButton = () => {
-            const inputArea = document.getElementById('chat-input-area');
-            inputArea.innerHTML = `
-                <button onclick="closeChatbotModal()" class="w-full bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700 transition">
-                    閉じる
-                </button>
-            `;
-        };
 
         // ========== オンボーディング機能 ==========
 
@@ -1339,38 +1005,6 @@
             console.log('💡 ヒント: ページをリロードすると、チュートリアルが自動的に開始されます');
         };
 
-        // === チャットボット管理用関数 ===
-
-        // 問い合わせ一覧を表示（開発者ツールで使用）
-        window.showInquiries = () => {
-            const inquiries = JSON.parse(localStorage.getItem('inquiries') || '[]');
-            console.log('📋 問い合わせ一覧');
-            console.table(inquiries);
-            console.log(`総数: ${inquiries.length}件`);
-            return inquiries;
-        };
-
-        // 問い合わせをクリア（開発者ツールで使用）
-        window.clearInquiries = () => {
-            if (confirm('すべての問い合わせを削除しますか？')) {
-                localStorage.removeItem('inquiries');
-                console.log('✅ 問い合わせをクリアしました');
-            }
-        };
-
-        // 最新の問い合わせを表示（開発者ツールで使用）
-        window.showLatestInquiry = () => {
-            const inquiries = JSON.parse(localStorage.getItem('inquiries') || '[]');
-            if (inquiries.length > 0) {
-                const latest = inquiries[inquiries.length - 1];
-                console.log('📨 最新の問い合わせ:', latest);
-                return latest;
-            } else {
-                console.log('問い合わせがありません');
-                return null;
-            }
-        };
-
         // ========== 初期化処理 ==========
         const init = async () => {
             // loadData()内でエラーハンドリングされるため、try-catchで囲まない
@@ -1407,10 +1041,11 @@
             const newPage = pages[pageKey];
 
             if (oldPage && newPage && oldPage !== newPage) {
+                if (state.currentPage === 'matching') matching.stop();
                 // 詳細ページから遷移する際は地図をクリーンアップ
-                if (state.currentPage === 'details' && state.detailMap) {
-                    state.detailMap.remove();
-                    state.detailMap = null;
+                if (state.currentPage === 'details') {
+                    propertyMap.closeDetail();
+                    inquiry.close();
                 }
 
                 oldPage.classList.remove('page-active');
@@ -1462,7 +1097,7 @@
                     bottomNav.classList.remove('hidden');
                     break;
                 case 'matching':
-                    initMatchingMode();
+                    matching.start(dummyProperties, state.quiz.answers, quizQuestions);
                     bottomNav.classList.remove('hidden');
                     break;
                 case 'quiz':
@@ -1526,7 +1161,7 @@
                     <div class="text-center py-8 text-slate-500">
                         <i class="fas fa-home text-4xl mb-4"></i>
                         <p>データ読み込み中...</p>
-                        <button onclick="refreshData();" class="mt-4 text-sm bg-brand-500 text-white px-4 py-2 rounded hover:bg-brand-600">
+                        <button data-refresh-data class="mt-4 text-sm bg-brand-500 text-white px-4 py-2 rounded hover:bg-brand-600">
                             <i class="fas fa-redo mr-1"></i>再読み込み
                         </button>
                     </div>
@@ -1647,7 +1282,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
                             `).join('');
                         })()}
                     </div>
-                    <button onclick="navigateTo('list')" class="absolute top-4 left-4 bg-white/70 backdrop-blur-sm w-10 h-10 rounded-full flex items-center justify-center shadow-md">
+                    <button data-go-list class="absolute top-4 left-4 bg-white/70 backdrop-blur-sm w-10 h-10 rounded-full flex items-center justify-center shadow-md">
                         <i class="fas fa-arrow-left text-slate-700"></i>
                     </button>
                     <div class="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-2 py-1 rounded-md">
@@ -1714,7 +1349,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
                     <button class="toggle-dislike-btn-details flex flex-col items-center justify-center rounded-lg py-2 ${state.dislikes.includes(property.id) ? 'bg-slate-200 text-slate-500' : 'bg-slate-100 text-slate-600'}" data-id="${property.id}">
                         ${state.dislikes.includes(property.id) ? '<i class="fas fa-times text-xl"></i><span class="text-xs mt-1">興味なし済</span>' : '<i class="far fa-times text-xl"></i><span class="text-xs mt-1">興味なし</span>'}
                     </button>
-                    <button class="bg-slate-800 text-white font-bold rounded-lg col-span-2 hover:bg-slate-700 transition-colors" onclick="openChatbotModal(${property.id})">
+                    <button class="bg-slate-800 text-white font-bold rounded-lg col-span-2 hover:bg-slate-700 transition-colors" data-inquiry-id="${property.id}">
                         💬 問い合わせる
                     </button>
                     <!-- <button class="bg-blue-500 text-white rounded-lg flex items-center justify-center"><i class="fas fa-map-marked-alt mr-2"></i>地図を開く</button> -->
@@ -1733,7 +1368,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             requestAnimationFrame(() => {
                 // さらに次のフレームで地図を初期化（CSSレイアウト完了を確実にする）
                 requestAnimationFrame(() => {
-                    initDetailMap(property);
+                    if (state.currentPage === 'details') propertyMap.initDetailMap(property);
                 });
             });
 
@@ -1773,7 +1408,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
                 imageSrc = `https://placehold.co/800x600/e2e8f0/64748b?text=${encodeURIComponent(property.title || '物件画像')}`;
             }
             return `
-                <div class="property-card bg-white rounded-xl overflow-hidden shadow-md cursor-pointer" onclick="navigateTo('details', { id: ${property.id} })">
+                <div class="property-card bg-white rounded-xl overflow-hidden shadow-md cursor-pointer" data-property-id="${property.id}">
                     <div class="relative">
                         <img src="${imageSrc}"
                              alt="${property.title}" class="w-full h-48 object-cover">
@@ -2287,324 +1922,9 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             }
         };
 
-        // ========== マッチングモードロジック ==========
-        const initMatchingMode = () => {
-            // 効果音を初期化
-            initSwipeSounds();
-
-            // 診断結果に基づいて物件をフィルタリング
-            const answerTags = Object.entries(state.quiz.answers).flatMap(([key, value]) => {
-                const question = quizQuestions.find(q => q.key === key);
-                const option = question.options.find(o => o.value === value);
-                return option ? option.tags : [];
-            });
-
-            // マッチ度でソートして上位20件を取得
-            const sortedProperties = [...dummyProperties].sort((a, b) => {
-                const aScore = a.tags.filter(tag => answerTags.includes(tag)).length;
-                const bScore = b.tags.filter(tag => answerTags.includes(tag)).length;
-                return bScore - aScore;
-            }).slice(0, 20);
-
-            state.matching.properties = sortedProperties;
-            state.matching.currentIndex = 0;
-            state.matching.isAnimating = false;
-
-            renderMatchingCards();
-        };
-
-        const renderMatchingCards = () => {
-            if (state.matching.currentIndex >= state.matching.properties.length) {
-                matchingContainer.innerHTML = '';
-                matchingEmpty.classList.remove('hidden');
-                return;
-            }
-
-            matchingEmpty.classList.add('hidden');
-
-            // 現在のカードと次のカードを表示（重ね合わせ）
-            const currentProperty = state.matching.properties[state.matching.currentIndex];
-            const nextProperty = state.matching.properties[state.matching.currentIndex + 1];
-
-            let html = '';
-
-            // 次のカード（背景）
-            if (nextProperty) {
-                html += createSwipeCardHTML(nextProperty, 'next');
-            }
-
-            // 現在のカード（前面）
-            html += createSwipeCardHTML(currentProperty, 'current');
-
-            matchingContainer.innerHTML = html;
-
-            // スワイプイベントを設定
-            setupSwipeEvents();
-        };
-
-        const createSwipeCardHTML = (property, position) => {
-            // 外観の最初の画像を安全に取得
-            const imgFile = Array.isArray(property.exterior_images) && property.exterior_images.length > 0 ? property.exterior_images[0] : null;
-            const isRealPhoto = imgFile && (String(imgFile).startsWith('http') || String(imgFile).startsWith('data:'));
-            const imgSrc = isRealPhoto ? imgFile : `https://placehold.co/1200x800/e2e8f0/64748b?text=${encodeURIComponent(imgFile || property.title)}`;
-
-            return `
-                <div class="swipe-card ${position}" data-id="${property.id}">
-                    <div class="relative h-full">
-                        <img src="${imgSrc}"
-                             alt="${property.title}" class="w-full h-2/3 object-cover">
-                        <div class="absolute top-4 left-4 bg-slate-800/60 text-white text-sm font-bold px-3 py-1.5 rounded-full flex items-center">
-                            <i class="fas fa-bolt text-yellow-300 mr-2"></i> マッチ度 ${property.matchScore || '??'}%
-                        </div>
-                        <div class="p-4 h-1/3 flex flex-col justify-between">
-                            <div>
-                                <h3 class="font-bold text-xl mb-2">${property.title}</h3>
-                                <p class="text-sm text-slate-500 mb-2"><i class="fas fa-map-marker-alt fa-fw mr-1"></i>${property.address}</p>
-                                <div class="flex items-baseline justify-between mb-3">
-                                    <div>
-                                        <span class="text-2xl font-bold text-red-500">${(property.price/10000).toLocaleString()}</span>
-                                        <span class="text-sm font-medium">万円</span>
-                                    </div>
-                                    <div class="text-sm text-slate-600">
-                                        <span class="font-semibold">${property.layout}</span> / <span>${property.age}年</span>
-                                    </div>
-                                </div>
-                                <div class="flex flex-wrap gap-1.5">
-                                    ${property.tags.slice(0, 4).map(tag => `<span class="bg-brand-100 text-brand-600 text-xs px-2 py-1 rounded-full">${tag}</span>`).join('')}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="swipe-overlay like">
-                            <i class="fas fa-heart"></i>
-                        </div>
-                        <div class="swipe-overlay star">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <div class="swipe-overlay dislike">
-                            <i class="fas fa-times"></i>
-                        </div>
-                    </div>
-                </div>
-            `;
-        };
-
-        const setupSwipeEvents = () => {
-            const currentCard = matchingContainer.querySelector('.swipe-card.current');
-            if (!currentCard) return;
-
-            let startX = 0;
-            let startY = 0;
-            let currentX = 0;
-            let currentY = 0;
-            let isDragging = false;
-            let lastClickTime = 0;
-
-            const startDrag = (e) => {
-                if (state.matching.isAnimating) return;
-
-                isDragging = true;
-                currentCard.classList.add('swiping');
-
-                const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
-                const clientY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
-
-                startX = clientX;
-                startY = clientY;
-                currentX = 0;
-                currentY = 0;
-            };
-
-            const drag = (e) => {
-                if (!isDragging || state.matching.isAnimating) return;
-
-                e.preventDefault();
-
-                const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
-                const clientY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
-
-                currentX = clientX - startX;
-                currentY = clientY - startY;
-
-                const rotation = currentX * 0.1;
-                currentCard.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${rotation}deg)`;
-
-                // スワイプ方向に応じてオーバーレイを表示
-                const likeOverlay = currentCard.querySelector('.swipe-overlay.like');
-                const starOverlay = currentCard.querySelector('.swipe-overlay.star');
-                const dislikeOverlay = currentCard.querySelector('.swipe-overlay.dislike');
-
-                // 上スワイプを優先的にチェック（Y方向の移動が大きく、上向きの場合）
-                if (currentY < -50 && Math.abs(currentY) > Math.abs(currentX) * 1.5) {
-                    // 上スワイプ = 興味なし
-                    dislikeOverlay.classList.add('show');
-                    likeOverlay.classList.remove('show');
-                    starOverlay.classList.remove('show');
-                } else if (Math.abs(currentX) > 50) {
-                    // 横スワイプ
-                    if (currentX > 0) {
-                        // 右スワイプ = スター
-                        starOverlay.classList.add('show');
-                        likeOverlay.classList.remove('show');
-                        dislikeOverlay.classList.remove('show');
-                    } else {
-                        // 左スワイプ = ハート
-                        likeOverlay.classList.add('show');
-                        starOverlay.classList.remove('show');
-                        dislikeOverlay.classList.remove('show');
-                    }
-                } else {
-                    // スワイプが不十分
-                    likeOverlay.classList.remove('show');
-                    starOverlay.classList.remove('show');
-                    dislikeOverlay.classList.remove('show');
-                }
-            };
-
-            const endDrag = () => {
-                if (!isDragging || state.matching.isAnimating) return;
-
-                isDragging = false;
-                currentCard.classList.remove('swiping');
-
-                const threshold = 100;
-
-                // 上スワイプを優先的にチェック（Y方向の移動が大きく、上向きの場合）
-                if (currentY < -threshold && Math.abs(currentY) > Math.abs(currentX) * 1.2) {
-                    // 上スワイプ = 興味なし
-                    state.matching.isAnimating = true;
-                    currentCard.classList.add('swipe-up', 'swipe-success');
-                    playSwipeSound('dislike'); // 効果音再生
-                    toggleDislike(parseInt(currentCard.dataset.id));
-
-                    // アニメーション完了後に次のカードを表示
-                    setTimeout(() => {
-                        state.matching.currentIndex++;
-                        state.matching.isAnimating = false;
-                        renderMatchingCards();
-                    }, 300);
-                } else if (Math.abs(currentX) > threshold) {
-                    // 横スワイプが完了
-                    state.matching.isAnimating = true;
-
-                    if (currentX > 0) {
-                        // 右スワイプ = スター
-                        currentCard.classList.add('swipe-right', 'swipe-success');
-                        playSwipeSound('star'); // 効果音再生
-                        toggleStar(parseInt(currentCard.dataset.id));
-                    } else {
-                        // 左スワイプ = ハート
-                        currentCard.classList.add('swipe-left', 'swipe-success');
-                        playSwipeSound('favorite'); // 効果音再生
-                        toggleFavorite(parseInt(currentCard.dataset.id));
-                    }
-
-                    // アニメーション完了後に次のカードを表示
-                    setTimeout(() => {
-                        state.matching.currentIndex++;
-                        state.matching.isAnimating = false;
-                        renderMatchingCards();
-                    }, 300);
-                } else {
-                    // スワイプが不十分、元の位置に戻す
-                    currentCard.style.transform = '';
-                    currentCard.querySelectorAll('.swipe-overlay').forEach(overlay => {
-                        overlay.classList.remove('show');
-                    });
-                }
-            };
-
-            // ダブルクリックで興味なし
-            const handleDoubleClick = (e) => {
-                if (state.matching.isAnimating) return;
-
-                const currentTime = new Date().getTime();
-                if (currentTime - lastClickTime < 300) {
-                    // ダブルクリック検出
-                    state.matching.isAnimating = true;
-                    currentCard.classList.add('swipe-left', 'swipe-success');
-                    playSwipeSound('dislike'); // 効果音再生
-                    toggleDislike(parseInt(currentCard.dataset.id));
-
-                    setTimeout(() => {
-                        state.matching.currentIndex++;
-                        state.matching.isAnimating = false;
-                        renderMatchingCards();
-                    }, 300);
-                }
-                lastClickTime = currentTime;
-            };
-
-            // マウスイベント
-            currentCard.addEventListener('mousedown', startDrag);
-            currentCard.addEventListener('click', handleDoubleClick);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', endDrag);
-
-            // タッチイベント
-            currentCard.addEventListener('touchstart', startDrag, { passive: false });
-            document.addEventListener('touchmove', drag, { passive: false });
-            document.addEventListener('touchend', endDrag);
-        };
-
-        // プログラム的にスワイプを実行する関数
-        const programmaticSwipe = (direction) => {
-            // アニメーション中やカードがない場合はスキップ
-            if (state.matching.isAnimating) {
-                console.log('⏸️ スワイプアニメーション中です...');
-                return;
-            }
-
-            const currentCard = matchingContainer.querySelector('.swipe-card.current');
-            if (!currentCard) {
-                console.log('⚠️ スワイプするカードがありません');
-                return;
-            }
-
-            const propertyId = parseInt(currentCard.dataset.id);
-            state.matching.isAnimating = true;
-
-            console.log(`🎯 プログラム的スワイプを実行: ${direction}`);
-
-            switch (direction) {
-                case 'left':
-                    // 左スワイプ = お気に入り
-                    currentCard.classList.add('swipe-left', 'swipe-success');
-                    playSwipeSound('favorite');
-                    toggleFavorite(propertyId);
-                    break;
-
-                case 'right':
-                    // 右スワイプ = スター
-                    currentCard.classList.add('swipe-right', 'swipe-success');
-                    playSwipeSound('star');
-                    toggleStar(propertyId);
-                    break;
-
-                case 'up':
-                    // 上スワイプ = 興味なし
-                    currentCard.classList.add('swipe-up', 'swipe-success');
-                    playSwipeSound('dislike');
-                    toggleDislike(propertyId);
-                    break;
-
-                default:
-                    console.warn(`⚠️ 未知のスワイプ方向: ${direction}`);
-                    state.matching.isAnimating = false;
-                    return;
-            }
-
-            // アニメーション完了後に次のカードを表示
-            setTimeout(() => {
-                state.matching.currentIndex++;
-                state.matching.isAnimating = false;
-                renderMatchingCards();
-                console.log('✅ スワイプ完了、次のカードを表示');
-            }, 450); // アニメーション時間(0.4s)より少し長めに設定
-        };
-
         // ========== フィルター/ソートロジック ==========
         const getFilteredProperties = () =>
-            propertyFilters.filterProperties(dummyProperties, state.filters, state.userLocation);
+            propertyFilters.filterProperties(dummyProperties, state.filters, propertyMap.getLocation());
 
         const openFilterModal = () => {
             renderFilterTags();
@@ -2848,402 +2168,6 @@ imagesToShow = [...exteriorImages, ...interiorImages];
                     ${tag}
                 </button>
             `).join('');
-        };
-
-        // ========== 地図ロジック ==========
-        // ========== 強化されたマップ機能 ==========
-
-        // ユーザーの現在地を取得
-        const getUserLocation = () => {
-            return new Promise((resolve, reject) => {
-                if (!navigator.geolocation) {
-                    reject(new Error('Geolocation is not supported'));
-                    return;
-                }
-
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const location = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        state.userLocation = location;
-                        console.log('📍 現在地を取得しました:', location);
-                        resolve(location);
-                    },
-                    (error) => {
-                        console.error('❌ 現在地取得エラー:', error);
-                        reject(error);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 300000 // 5分間キャッシュ
-                    }
-                );
-            });
-        };
-
-        // 単一物件のマップ初期化
-        const initSingleMap = (property) => {
-            if (state.currentMap) {
-                state.currentMap.remove();
-                state.currentMap = null;
-            }
-
-            state.mapMode = 'single';
-            state.currentMap = L.map('map').setView(property.coordinates, 15);
-
-            // タイルレイヤー
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(state.currentMap);
-
-            // 物件マーカー
-            const marker = L.marker(property.coordinates).addTo(state.currentMap);
-            marker.bindPopup(`
-                <div class="p-2">
-                    <h3 class="font-bold text-lg">${property.title}</h3>
-                    <p class="text-sm text-gray-600">${property.address}</p>
-                    <p class="text-sm font-semibold text-brand-600">¥${property.price.toLocaleString()}/月</p>
-                    <button onclick="navigateTo('details', {id: ${property.id}})"
-                            class="mt-2 w-full bg-brand-500 text-white px-3 py-1 rounded text-sm hover:bg-brand-600">
-                        詳細を見る
-                    </button>
-                </div>
-            `).openPopup();
-
-            // 現在地ボタンを追加
-            L.control.locate({
-                position: 'topright',
-                strings: {
-                    title: '現在地を表示'
-                }
-            }).addTo(state.currentMap);
-        };
-
-        // 物件詳細ページ専用のマップ初期化
-        const initDetailMap = (property) => {
-            // 既存の詳細ページ地図を削除
-            if (state.detailMap) {
-                state.detailMap.remove();
-                state.detailMap = null;
-            }
-
-            // DOM要素の存在とサイズを確認
-            const mapContainer = document.getElementById('detail-map');
-            if (!mapContainer) {
-                console.warn('地図コンテナが見つかりません');
-                return;
-            }
-
-            // コンテナのサイズを強制的に再計算
-            mapContainer.style.height = '256px'; // h-64 = 16rem = 256px
-
-            // 詳細ページ地図を初期化
-            state.detailMap = L.map('detail-map').setView(property.coordinates, 15);
-
-            // タイルレイヤー
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(state.detailMap);
-
-            // 物件マーカー
-            const marker = L.marker(property.coordinates).addTo(state.detailMap);
-            marker.bindPopup(`
-                <div class="p-2">
-                    <h3 class="font-bold text-lg">${property.title}</h3>
-                    <p class="text-sm text-gray-600">${property.address}</p>
-                    <p class="text-sm font-semibold text-brand-600">¥${property.price.toLocaleString()}/月</p>
-                </div>
-            `);
-
-            // 地図のサイズを強制的に再計算（念のため）
-            setTimeout(() => {
-                if (state.detailMap) {
-                    state.detailMap.invalidateSize();
-                }
-            }, 100);
-        };
-
-        // 複数物件のマップ初期化
-        const initMultipleMap = (properties) => {
-            if (state.currentMap) {
-                state.currentMap.remove();
-                state.currentMap = null;
-            }
-
-            state.mapMode = 'multiple';
-
-            // 全物件の中心点を計算
-            const bounds = L.latLngBounds();
-            properties.forEach(property => {
-                bounds.extend(property.coordinates);
-            });
-
-            state.currentMap = L.map('map').fitBounds(bounds);
-
-            // タイルレイヤー
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(state.currentMap);
-
-            // マーカークラスター
-            const markers = L.markerClusterGroup({
-                chunkedLoading: true,
-                maxClusterRadius: 50
-            });
-
-            // 各物件にマーカーを追加
-            properties.forEach(property => {
-                const marker = L.marker(property.coordinates);
-
-                // カスタムアイコン（価格に応じて色分け）
-                const priceColor = property.price < 100000 ? 'green' :
-                                 property.price < 150000 ? 'orange' : 'red';
-
-                const customIcon = L.divIcon({
-                    className: 'custom-marker',
-                    html: `<div class="w-6 h-6 bg-${priceColor}-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold">¥</div>`,
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                });
-
-                marker.setIcon(customIcon);
-
-                marker.bindPopup(`
-                    <div class="p-2 min-w-48">
-                        <h3 class="font-bold text-lg">${property.title}</h3>
-                        <p class="text-sm text-gray-600">${property.address}</p>
-                        <p class="text-sm font-semibold text-brand-600">¥${property.price.toLocaleString()}/月</p>
-                        <div class="flex gap-1 mt-2">
-                            ${property.tags.slice(0, 3).map(tag =>
-                                `<span class="text-xs bg-gray-100 px-2 py-1 rounded">${tag}</span>`
-                            ).join('')}
-                        </div>
-                        <button onclick="navigateTo('details', {id: ${property.id}})"
-                                class="mt-2 w-full bg-brand-500 text-white px-3 py-1 rounded text-sm hover:bg-brand-600">
-                            詳細を見る
-                        </button>
-                    </div>
-                `);
-
-                markers.addLayer(marker);
-            });
-
-            state.currentMap.addLayer(markers);
-            state.mapMarkers = markers;
-
-            // 現在地ボタンを追加
-            L.control.locate({
-                position: 'topright',
-                strings: {
-                    title: '現在地を表示'
-                },
-                locateOptions: {
-                    enableHighAccuracy: true,
-                    maxZoom: 16, // 最大ズームレベル
-                    timeout: 10000,
-                    maximumAge: 300000 // 5分間キャッシュ
-                },
-                flyTo: true, // スムーズに現在地に移動
-                keepCurrentZoomLevel: false, // ズームレベルを変更
-                showPopup: false // ポップアップは手動で制御
-            }).addTo(state.currentMap);
-
-            // 現在地取得成功時の処理
-            state.currentMap.on('locationfound', (e) => {
-                state.userLocation = e.latlng;
-                console.log('📍 現在地を取得しました:', e.latlng);
-
-                // 現在地にズーム（ズームレベル15で詳細表示）
-                state.currentMap.setView(e.latlng, 15);
-
-                // 現在地マーカーを追加
-                const userMarker = L.marker(e.latlng, {
-                    icon: L.divIcon({
-                        className: 'user-location-marker',
-                        html: '<div class="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>',
-                        iconSize: [16, 16],
-                        iconAnchor: [8, 8]
-                    })
-                }).addTo(state.currentMap);
-
-                userMarker.bindPopup('<div class="text-center"><strong>あなたの現在地</strong></div>').openPopup();
-
-                // 物件の距離情報を更新（表示は変更しない）
-                updatePropertyDistances();
-            });
-        };
-
-        // 物件の距離情報を更新（表示は変更しない）
-        const updatePropertyDistances = () => {
-            if (!state.userLocation || !state.mapMarkers) return;
-
-            // 既存のマーカーのポップアップを更新
-            state.mapMarkers.eachLayer(marker => {
-                if (marker.getLatLng) {
-                    const distance = propertyFilters.calculateDistance(
-                        state.userLocation.lat,
-                        state.userLocation.lng,
-                        marker.getLatLng().lat,
-                        marker.getLatLng().lng
-                    );
-
-                    // ポップアップの内容を更新（距離情報を追加）
-                    const property = dummyProperties.find(p =>
-                        p.coordinates[0] === marker.getLatLng().lat &&
-                        p.coordinates[1] === marker.getLatLng().lng
-                    );
-
-                    if (property) {
-                        const distanceText = `<p class="text-xs text-gray-500 mt-1">📍 ${distance.toFixed(1)}km</p>`;
-                        marker.setPopupContent(`
-                            <div class="p-2 min-w-48">
-                                <h3 class="font-bold text-lg">${property.title}</h3>
-                                <p class="text-sm text-gray-600">${property.address}</p>
-                                <p class="text-sm font-semibold text-brand-600">¥${property.price.toLocaleString()}/月</p>
-                                ${distanceText}
-                                <div class="flex gap-1 mt-2">
-                                    ${property.tags.slice(0, 3).map(tag =>
-                                        `<span class="text-xs bg-gray-100 px-2 py-1 rounded">${tag}</span>`
-                                    ).join('')}
-                                </div>
-                                <button onclick="navigateTo('details', {id: ${property.id}})"
-                                        class="mt-2 w-full bg-brand-500 text-white px-3 py-1 rounded text-sm hover:bg-brand-600">
-                                    詳細を見る
-                                </button>
-                            </div>
-                        `);
-                    }
-                }
-            });
-        };
-
-        // 距離ソートでマップを更新
-        const updateMapWithDistanceSort = () => {
-            if (!state.userLocation) return;
-
-            const properties = getFilteredProperties();
-            const propertiesWithDistance = properties.map(property => ({
-                ...property,
-                distance: propertyFilters.calculateDistance(
-                    state.userLocation.lat,
-                    state.userLocation.lng,
-                    property.coordinates[0],
-                    property.coordinates[1]
-                )
-            })).sort((a, b) => a.distance - b.distance);
-
-            // 日本全国の物件を表示（距離フィルターは適用しない）
-            initMultipleMapWithUserLocation(propertiesWithDistance);
-        };
-
-        // 現在地を中心とした複数物件マップ初期化
-        const initMultipleMapWithUserLocation = (properties) => {
-            if (state.currentMap) {
-                state.currentMap.remove();
-                state.currentMap = null;
-            }
-
-            state.mapMode = 'multiple';
-
-            // 現在地を中心にズームレベル15で初期化
-            state.currentMap = L.map('map').setView(state.userLocation, 15);
-
-            // タイルレイヤー
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(state.currentMap);
-
-            // 現在地マーカーを追加
-            const userMarker = L.marker(state.userLocation, {
-                icon: L.divIcon({
-                    className: 'user-location-marker',
-                    html: '<div class="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>',
-                    iconSize: [16, 16],
-                    iconAnchor: [8, 8]
-                })
-            }).addTo(state.currentMap);
-
-            userMarker.bindPopup('<div class="text-center"><strong>あなたの現在地</strong></div>');
-
-            // マーカークラスター
-            const markers = L.markerClusterGroup({
-                chunkedLoading: true,
-                maxClusterRadius: 50
-            });
-
-            // 各物件にマーカーを追加
-            properties.forEach(property => {
-                const marker = L.marker(property.coordinates);
-
-                // カスタムアイコン（価格に応じて色分け）
-                const priceColor = property.price < 100000 ? 'green' :
-                                 property.price < 150000 ? 'orange' : 'red';
-
-                const customIcon = L.divIcon({
-                    className: 'custom-marker',
-                    html: `<div class="w-6 h-6 bg-${priceColor}-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold">¥</div>`,
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                });
-
-                marker.setIcon(customIcon);
-
-                // 距離情報をポップアップに追加
-                const distanceText = property.distance ?
-                    `<p class="text-xs text-gray-500 mt-1">📍 ${property.distance.toFixed(1)}km</p>` : '';
-
-                marker.bindPopup(`
-                    <div class="p-2 min-w-48">
-                        <h3 class="font-bold text-lg">${property.title}</h3>
-                        <p class="text-sm text-gray-600">${property.address}</p>
-                        <p class="text-sm font-semibold text-brand-600">¥${property.price.toLocaleString()}/月</p>
-                        ${distanceText}
-                        <div class="flex gap-1 mt-2">
-                            ${property.tags.slice(0, 3).map(tag =>
-                                `<span class="text-xs bg-gray-100 px-2 py-1 rounded">${tag}</span>`
-                            ).join('')}
-                        </div>
-                        <button onclick="navigateTo('details', {id: ${property.id}})"
-                                class="mt-2 w-full bg-brand-500 text-white px-3 py-1 rounded text-sm hover:bg-brand-600">
-                            詳細を見る
-                        </button>
-                    </div>
-                `);
-
-                markers.addLayer(marker);
-            });
-
-            state.currentMap.addLayer(markers);
-            state.mapMarkers = markers;
-
-            // 現在地ボタンを追加
-            L.control.locate({
-                position: 'topright',
-                strings: {
-                    title: '現在地を表示'
-                },
-                locateOptions: {
-                    enableHighAccuracy: true,
-                    maxZoom: 16,
-                    timeout: 10000,
-                    maximumAge: 300000
-                },
-                flyTo: true,
-                keepCurrentZoomLevel: false,
-                showPopup: false
-            }).addTo(state.currentMap);
-        };
-
-        // マップの初期化（用途に応じて自動選択）
-        const initMap = (propertyOrProperties) => {
-            if (Array.isArray(propertyOrProperties)) {
-                initMultipleMap(propertyOrProperties);
-            } else {
-                initSingleMap(propertyOrProperties);
-            }
         };
 
         // ========== UIヘルパー ==========
@@ -3540,6 +2464,19 @@ imagesToShow = [...exteriorImages, ...interiorImages];
 
         // ========== イベントリスナー設定 ==========
         const setupEventListeners = () => {
+            appContainer.addEventListener('click', event => {
+                if (event.target.closest('[data-go-list]')) navigateTo('list');
+                if (event.target.closest('[data-refresh-data]')) refreshData();
+
+                const removePhotoButton = event.target.closest('[data-remove-photo]');
+                if (removePhotoButton) removePhoto(Number(removePhotoButton.dataset.removePhoto));
+
+                const propertyCard = event.target.closest('[data-property-id]');
+                if (propertyCard && !event.target.closest('button')) {
+                    navigateTo('details', { id: Number(propertyCard.dataset.propertyId) });
+                }
+            });
+
             document.getElementById('start-quiz-btn').addEventListener('click', () => {
                 console.log('🎯 診断をはじめるボタンがクリックされました');
                 navigateTo('quiz');
@@ -3584,7 +2521,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
                     // マッチングページでは左スワイプとして処理
                     const pageMatching = document.getElementById('page-matching');
                     if (pageMatching && !pageMatching.classList.contains('page-hidden') && btn.classList.contains('toggle-favorite-btn')) {
-                        programmaticSwipe('left');
+                        matching.programmaticSwipe('left');
                         return;
                     }
                     toggleFavorite(parseInt(btn.dataset.id));
@@ -3600,7 +2537,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
                     // マッチングページでは右スワイプとして処理
                     const pageMatching = document.getElementById('page-matching');
                     if (pageMatching && !pageMatching.classList.contains('page-hidden') && btn.classList.contains('toggle-star-btn')) {
-                        programmaticSwipe('right');
+                        matching.programmaticSwipe('right');
                         return;
                     }
                     toggleStar(parseInt(btn.dataset.id));
@@ -3616,7 +2553,7 @@ imagesToShow = [...exteriorImages, ...interiorImages];
                     // マッチングページでは上スワイプとして処理
                     const pageMatching = document.getElementById('page-matching');
                     if (pageMatching && !pageMatching.classList.contains('page-hidden') && btn.classList.contains('toggle-dislike-btn')) {
-                        programmaticSwipe('up');
+                        matching.programmaticSwipe('up');
                         return;
                     }
                     toggleDislike(parseInt(btn.dataset.id));
@@ -3626,45 +2563,6 @@ imagesToShow = [...exteriorImages, ...interiorImages];
             // フィルター
             document.getElementById('open-filter-btn').addEventListener('click', openFilterModal);
             document.getElementById('close-filter-btn').addEventListener('click', closeFilterModal);
-
-            // マップ表示切り替え
-            document.getElementById('toggle-map-btn').addEventListener('click', () => {
-                const mapContainer = document.getElementById('map-container');
-                const isHidden = mapContainer.classList.contains('hidden');
-
-                if (isHidden) {
-                    // マップを表示
-                    mapContainer.classList.remove('hidden');
-                    const properties = getFilteredProperties();
-
-                    // マップを初期化（日本全国の物件を表示）
-                    initMap(properties);
-
-                    // 現在地を取得して距離情報を更新
-                    getUserLocation().then(location => {
-                        // 現在地が取得できた場合、距離情報を更新
-                        updatePropertyDistances();
-                    }).catch(error => {
-                        console.warn('現在地取得に失敗しました:', error);
-                    });
-                } else {
-                    // マップを非表示
-                    mapContainer.classList.add('hidden');
-                    if (state.currentMap) {
-                        state.currentMap.remove();
-                        state.currentMap = null;
-                    }
-                }
-            });
-
-            // マップを閉じる
-            document.getElementById('close-map-btn').addEventListener('click', () => {
-                document.getElementById('map-container').classList.add('hidden');
-                if (state.currentMap) {
-                    state.currentMap.remove();
-                    state.currentMap = null;
-                }
-            });
 
             filterModal.addEventListener('click', (e) => {
                  if (e.target === filterModal) closeFilterModal();
@@ -3720,29 +2618,6 @@ imagesToShow = [...exteriorImages, ...interiorImages];
                 }
             });
 
-            // === チャットボット：段階1 - イベントリスナー ===
-
-            // 閉じるボタン
-            document.getElementById('chatbot-close-btn').addEventListener('click', closeChatbotModal);
-
-            // モーダル背景クリックで閉じる
-            document.getElementById('chatbot-modal').addEventListener('click', (e) => {
-                if (e.target.id === 'chatbot-modal') {
-                    closeChatbotModal();
-                }
-            });
-
-            // === マッチングモード：スワイプヒントボタン ===
-
-            // スワイプヒントボタンのクリックイベント
-            document.querySelectorAll('.swipe-hint-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const swipeDirection = btn.dataset.swipe;
-                    console.log(`💡 スワイプヒントボタンがクリックされました: ${swipeDirection}`);
-                    programmaticSwipe(swipeDirection);
-                });
-            });
-
             // === オンボーディング：段階2 - イベントリスナー ===
 
             // スキップボタン
@@ -3796,10 +2671,6 @@ imagesToShow = [...exteriorImages, ...interiorImages];
 
         };
 
-        // window.navigateToをグローバルに公開して、インラインonclickから呼び出せるようにする
-        window.navigateTo = navigateTo;
-        window.removePhoto = removePhoto;
-
         // Service Workerの登録
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -3812,6 +2683,21 @@ imagesToShow = [...exteriorImages, ...interiorImages];
                     });
             });
         }
+
+        const inquiry = setupInquiry({
+            detailsPage: pages.details,
+            findProperty: propertyId => dummyProperties.find(property => property.id === propertyId)
+        });
+        const matching = createMatching({
+            page: pages.matching, initSwipeSounds, playSwipeSound,
+            toggleFavorite, toggleStar, toggleDislike
+        });
+
+        const propertyMap = createPropertyMap({
+            getFilteredProperties,
+            openProperty: id => navigateTo('details', { id }),
+            onUnavailable: () => showToast('地図を読み込めませんでした')
+        });
 
         // アプリケーション起動
         init();
